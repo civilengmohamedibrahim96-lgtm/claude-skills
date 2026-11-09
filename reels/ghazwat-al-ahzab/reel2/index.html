@@ -1,61 +1,41 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=1920, height=1080" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="assets/vendor/gsap.min.js"></script>
     <style>
-      /* Placeholders: replace all three with the film's own palette and display face. */
-      :root {
-        --ground: #000;
-        --ink: #ffffff;
-        --font-display: sans-serif;
-      }
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        margin: 0;
-        width: 1920px;
-        height: 1080px;
-        overflow: hidden;
-        background: var(--ground);
-      }
-      #root {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--font-display);
-      }
-      #title {
-        color: var(--ink);
-        font-size: 72px;
-        font-weight: 600;
-        letter-spacing: -0.03em;
-      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #0b0d12; }
+      #root { position: relative; width: 100%; height: 100%; background: #0b0d12; }
+      #root .shot { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+      #text { position: absolute; inset: 0; z-index: 5; }
     </style>
   </head>
   <body>
-    <div
-      id="root"
-      data-composition-id="main"
-      data-start="0"
-      data-duration="10"
-      data-width="1920"
-      data-height="1080"
-    >
-      <h1 id="title" class="clip" data-start="0" data-duration="10" data-track-index="0">Title</h1>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="47" data-width="1080" data-height="1920">
+      <video id="b01" class="clip shot" src="assets/shots/B01.mp4" muted playsinline data-start="0.0" data-duration="4.2" data-track-index="1"></video>
+      <video id="b02" class="clip shot" src="assets/shots/B02.mp4" muted playsinline data-start="4.2" data-duration="3.7" data-track-index="1"></video>
+      <video id="b03" class="clip shot" src="assets/shots/B03.mp4" muted playsinline data-start="7.9" data-duration="3.7" data-track-index="1"></video>
+      <video id="b04" class="clip shot" src="assets/shots/B04.mp4" muted playsinline data-start="11.6" data-duration="4.0" data-track-index="1"></video>
+      <video id="b05" class="clip shot" src="assets/shots/B05.mp4" muted playsinline data-start="15.6" data-duration="4.1" data-track-index="1"></video>
+      <video id="b06" class="clip shot" src="assets/shots/B06.mp4" muted playsinline data-start="19.7" data-duration="5.9" data-track-index="1"></video>
+      <video id="b07" class="clip shot" src="assets/shots/B07.mp4" muted playsinline data-start="25.6" data-duration="6.1" data-track-index="1"></video>
+      <video id="b08" class="clip shot" src="assets/shots/B08.mp4" muted playsinline data-start="31.7" data-duration="2.9" data-track-index="1"></video>
+      <video id="b09" class="clip shot" src="assets/shots/B09.mp4" muted playsinline data-start="34.6" data-duration="6.0" data-track-index="1"></video>
+      <video id="b10" class="clip shot" src="assets/shots/B10.mp4" muted playsinline data-start="40.6" data-duration="6.4" data-track-index="1"></video>
+      <div id="text" data-composition-id="text" data-composition-src="compositions/text.html" data-start="0" data-duration="47" data-track-index="2" data-track-kind="graphics" data-width="1080" data-height="1920"></div>
+      <audio id="rec11" src="assets/recitation/3544.mp3" data-start="0.1" data-duration="7.64" data-track-index="3" data-volume="1"></audio>
+      <audio id="rec22" src="assets/recitation/3555.mp3" data-start="19.8" data-duration="11.76" data-track-index="3" data-volume="1"></audio>
+      <audio id="rec25" src="assets/recitation/3558.mp3" data-start="34.7" data-duration="11.35" data-track-index="3" data-volume="1"></audio>
+      <audio id="n1" src="assets/voice/N1.mp3" data-start="8.0" data-duration="3.6" data-track-index="4" data-volume="1"></audio>
+      <audio id="n2" src="assets/voice/N2.mp3" data-start="11.7" data-duration="3.6" data-track-index="4" data-volume="1"></audio>
+      <audio id="n3" src="assets/voice/N3.mp3" data-start="15.7" data-duration="3.6" data-track-index="4" data-volume="1"></audio>
+      <audio id="n4" src="assets/voice/N4.mp3" data-start="31.8" data-duration="3.6" data-track-index="4" data-volume="1"></audio>
     </div>
     <script>
-      const tl = gsap.timeline({ paused: true });
-      // Example: tl.fromTo("#title", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 0);
-      window.__timelines["main"] = tl;
-      tl.seek(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
     </script>
   </body>
 </html>

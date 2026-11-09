@@ -1,0 +1,108 @@
+{
+ "portrait_prompt": "One standalone front reference portrait, chest up, of the same fictional anonymous poor labourer, an Arab man of 30 from the Hijaz: deep tan uneven skin with fine scars and chapped patches, sunken cheeks, thick unkempt dark beard, dark tired eyes with heavy lower lids, a small pale scar through the left eyebrow; mended rough undyed cotton tunic with a darker patch on the right shoulder, frayed off-white wool head cloth wrapped simply with a loose tail on the left, bare forearms, a worn coil of palm-fibre rope over the left shoulder. Front-facing, both eyes into the lens, shoulders square, neutral eye level. Expression: exhausted resilience, mouth closed, no smile. Background: softly drawn black basalt field and a few date palms under an overcast sky. Outskirts of Madinah, Hijaz, winter of 5 AH / 627 CE: black basalt ground, date palms, low mud-brick houses, squat stone towers; plain wool, cotton and leather only, no metal helmets, no gold, no domes, no minarets. Historically inspired cinematic hand-rendered pen-and-ink illustration with layered sepia and muted colour washes, visible directional pencil lines, fine crosshatching in the shadows, natural skin pores, creases, uneven pigmentation, flyaway beard hairs, woven-cloth fibres, plausible anatomy and human asymmetry. Not plastic, not glossy CGI, not anime, not cartoon. No text, no letters, no watermark, no border. Vertical 9:16.",
+ "narration_voice": "ar-SA-HamedNeural",
+ "narration": [
+  {
+   "id": "N1",
+   "start": 8.0,
+   "text": "قبلها بأيام… كان يحفر، في بردٍ قارس."
+  },
+  {
+   "id": "N2",
+   "start": 11.7,
+   "text": "ينقلُ الترابَ على كتفه… وعشرةُ آلافٍ قادمون."
+  },
+  {
+   "id": "N3",
+   "start": 15.7,
+   "text": "ثم جاءت الليلة… نيرانُهم في كلِّ اتجاه."
+  },
+  {
+   "id": "N4",
+   "start": 31.8,
+   "text": "وقبل الفجر… أرسل اللهُ الريح."
+  }
+ ],
+ "shots": [
+  {
+   "id": "B01",
+   "start": 0.0,
+   "dur": 4.2,
+   "kind": "char",
+   "frame_prompt": "Keep exactly the same fictional anonymous poor labourer, an Arab man of 30 from the Hijaz: deep tan uneven skin with fine scars and chapped patches, sunken cheeks, thick unkempt dark beard, dark tired eyes with heavy lower lids, a small pale scar through the left eyebrow; mended rough undyed cotton tunic with a darker patch on the right shoulder, frayed off-white wool head cloth wrapped simply with a loose tail on the left, bare forearms, a worn coil of palm-fibre rope over the left shoulder. Extreme close-up of his eyes and brow at night, filling the frame. Many distant orange campfires are reflected as small points of light in both pupils; cold blue moonlight on the skin, faint warm rim from the fires, breath steam drifting past. Outskirts of Madinah, Hijaz, winter of 5 AH / 627 CE: black basalt ground, date palms, low mud-brick houses, squat stone towers; plain wool, cotton and leather only, no metal helmets, no gold, no domes, no minarets. Historically inspired cinematic hand-rendered pen-and-ink illustration with layered sepia and muted colour washes, visible directional pencil lines, fine crosshatching in the shadows, natural skin pores, creases, uneven pigmentation, flyaway beard hairs, woven-cloth fibres, plausible anatomy and human asymmetry. Not plastic, not glossy CGI, not anime, not cartoon. No text, no letters, no watermark, no border. Vertical 9:16.",
+   "video_prompt": "His wide eyes dart slowly left, then right, following distant fires; one slow blink; steam from his breath drifts across the frame; imperceptible push-in toward the eyes. Subtle believable facial performance: slow natural breathing visible in the chest and nostrils, natural blinks, small eye movements, micro-tension in the jaw; cloth and beard hairs moving in the wind. Keep the face, scar, beard, head cloth and tunic exactly as in the first frame. No morphing, no flicker, no smile, no extra people, no text. Hand-drawn pen-and-ink illustration style kept throughout."
+  },
+  {
+   "id": "B02",
+   "start": 4.2,
+   "dur": 3.7,
+   "kind": "char",
+   "frame_prompt": "Keep exactly the same fictional anonymous poor labourer, an Arab man of 30 from the Hijaz: deep tan uneven skin with fine scars and chapped patches, sunken cheeks, thick unkempt dark beard, dark tired eyes with heavy lower lids, a small pale scar through the left eyebrow; mended rough undyed cotton tunic with a darker patch on the right shoulder, frayed off-white wool head cloth wrapped simply with a loose tail on the left, bare forearms, a worn coil of palm-fibre rope over the left shoulder. Close-up of his whole face at night, crouched at the edge of a freshly dug trench; behind him, out of focus across the trench, a plain full of campfires. Cold moonlight, orange fire rim light. Outskirts of Madinah, Hijaz, winter of 5 AH / 627 CE: black basalt ground, date palms, low mud-brick houses, squat stone towers; plain wool, cotton and leather only, no metal helmets, no gold, no domes, no minarets. Historically inspired cinematic hand-rendered pen-and-ink illustration with layered sepia and muted colour washes, visible directional pencil lines, fine crosshatching in the shadows, natural skin pores, creases, uneven pigmentation, flyaway beard hairs, woven-cloth fibres, plausible anatomy and human asymmetry. Not plastic, not glossy CGI, not anime, not cartoon. No text, no letters, no watermark, no border. Vertical 9:16.",
+   "video_prompt": "Fear without melodrama: shallow quick breaths, he swallows hard, his jaw tightens, his eyes flick toward the fires and back; head cloth tail stirs in the wind; camera locked. Subtle believable facial performance: slow natural breathing visible in the chest and nostrils, natural blinks, small eye movements, micro-tension in the jaw; cloth and beard hairs moving in the wind. Keep the face, scar, beard, head cloth and tunic exactly as in the first frame. No morphing, no flicker, no smile, no extra people, no text. Hand-drawn pen-and-ink illustration style kept throughout."
+  },
+  {
+   "id": "B03",
+   "start": 7.9,
+   "dur": 3.7,
+   "kind": "char",
+   "frame_prompt": "Keep exactly the same fictional anonymous poor labourer, an Arab man of 30 from the Hijaz: deep tan uneven skin with fine scars and chapped patches, sunken cheeks, thick unkempt dark beard, dark tired eyes with heavy lower lids, a small pale scar through the left eyebrow; mended rough undyed cotton tunic with a darker patch on the right shoulder, frayed off-white wool head cloth wrapped simply with a loose tail on the left, bare forearms, a worn coil of palm-fibre rope over the left shoulder. Grey overcast winter morning. Medium shot: he swings a simple wooden-handled iron digging tool into hard rocky earth at the bottom of a shallow trench, dust and small stones rising; sweat on his forehead, breath visible in the cold air. Outskirts of Madinah, Hijaz, winter of 5 AH / 627 CE: black basalt ground, date palms, low mud-brick houses, squat stone towers; plain wool, cotton and leather only, no metal helmets, no gold, no domes, no minarets. Historically inspired cinematic hand-rendered pen-and-ink illustration with layered sepia and muted colour washes, visible directional pencil lines, fine crosshatching in the shadows, natural skin pores, creases, uneven pigmentation, flyaway beard hairs, woven-cloth fibres, plausible anatomy and human asymmetry. Not plastic, not glossy CGI, not anime, not cartoon. No text, no letters, no watermark, no border. Vertical 9:16.",
+   "video_prompt": "He strikes the ground once, heavily, dust bursts up; he exhales a cloud of breath and wipes his brow with his forearm, exhausted; camera slowly drifts sideways. Subtle believable facial performance: slow natural breathing visible in the chest and nostrils, natural blinks, small eye movements, micro-tension in the jaw; cloth and beard hairs moving in the wind. Keep the face, scar, beard, head cloth and tunic exactly as in the first frame. No morphing, no flicker, no smile, no extra people, no text. Hand-drawn pen-and-ink illustration style kept throughout."
+  },
+  {
+   "id": "B04",
+   "start": 11.6,
+   "dur": 4.0,
+   "kind": "char",
+   "frame_prompt": "Keep exactly the same fictional anonymous poor labourer, an Arab man of 30 from the Hijaz: deep tan uneven skin with fine scars and chapped patches, sunken cheeks, thick unkempt dark beard, dark tired eyes with heavy lower lids, a small pale scar through the left eyebrow; mended rough undyed cotton tunic with a darker patch on the right shoulder, frayed off-white wool head cloth wrapped simply with a loose tail on the left, bare forearms, a worn coil of palm-fibre rope over the left shoulder. Late afternoon, overcast. Medium close-up: he carries a heavy woven palm basket of soil on his right shoulder beside a long trench, then has stopped and looks off toward the far horizon where tall columns of dust rise. Low cold sun from camera-left. Outskirts of Madinah, Hijaz, winter of 5 AH / 627 CE: black basalt ground, date palms, low mud-brick houses, squat stone towers; plain wool, cotton and leather only, no metal helmets, no gold, no domes, no minarets. Historically inspired cinematic hand-rendered pen-and-ink illustration with layered sepia and muted colour washes, visible directional pencil lines, fine crosshatching in the shadows, natural skin pores, creases, uneven pigmentation, flyaway beard hairs, woven-cloth fibres, plausible anatomy and human asymmetry. Not plastic, not glossy CGI, not anime, not cartoon. No text, no letters, no watermark, no border. Vertical 9:16.",
+   "video_prompt": "His tired face turns slowly toward the horizon; the brows draw together, the eyes narrow and stay fixed; soil trickles from the basket; dread settles in; slow push-in. Subtle believable facial performance: slow natural breathing visible in the chest and nostrils, natural blinks, small eye movements, micro-tension in the jaw; cloth and beard hairs moving in the wind. Keep the face, scar, beard, head cloth and tunic exactly as in the first frame. No morphing, no flicker, no smile, no extra people, no text. Hand-drawn pen-and-ink illustration style kept throughout."
+  },
+  {
+   "id": "B05",
+   "start": 15.6,
+   "dur": 4.1,
+   "kind": "char",
+   "frame_prompt": "Keep exactly the same fictional anonymous poor labourer, an Arab man of 30 from the Hijaz: deep tan uneven skin with fine scars and chapped patches, sunken cheeks, thick unkempt dark beard, dark tired eyes with heavy lower lids, a small pale scar through the left eyebrow; mended rough undyed cotton tunic with a darker patch on the right shoulder, frayed off-white wool head cloth wrapped simply with a loose tail on the left, bare forearms, a worn coil of palm-fibre rope over the left shoulder. Night. Medium shot from the side: he kneels low at the edge of a wide trench, one hand on the cold ground; across the trench a whole plain is covered with hundreds of campfires. Deep navy sky, firelight dots. Outskirts of Madinah, Hijaz, winter of 5 AH / 627 CE: black basalt ground, date palms, low mud-brick houses, squat stone towers; plain wool, cotton and leather only, no metal helmets, no gold, no domes, no minarets. Historically inspired cinematic hand-rendered pen-and-ink illustration with layered sepia and muted colour washes, visible directional pencil lines, fine crosshatching in the shadows, natural skin pores, creases, uneven pigmentation, flyaway beard hairs, woven-cloth fibres, plausible anatomy and human asymmetry. Not plastic, not glossy CGI, not anime, not cartoon. No text, no letters, no watermark, no border. Vertical 9:16.",
+   "video_prompt": "His eyes jump between clusters of fires, shoulders tense and raised, breath short and visible; the fires flicker; very slow pull-back revealing more fires. Subtle believable facial performance: slow natural breathing visible in the chest and nostrils, natural blinks, small eye movements, micro-tension in the jaw; cloth and beard hairs moving in the wind. Keep the face, scar, beard, head cloth and tunic exactly as in the first frame. No morphing, no flicker, no smile, no extra people, no text. Hand-drawn pen-and-ink illustration style kept throughout."
+  },
+  {
+   "id": "B06",
+   "start": 19.7,
+   "dur": 5.9,
+   "kind": "char",
+   "frame_prompt": "Keep exactly the same fictional anonymous poor labourer, an Arab man of 30 from the Hijaz: deep tan uneven skin with fine scars and chapped patches, sunken cheeks, thick unkempt dark beard, dark tired eyes with heavy lower lids, a small pale scar through the left eyebrow; mended rough undyed cotton tunic with a darker patch on the right shoulder, frayed off-white wool head cloth wrapped simply with a loose tail on the left, bare forearms, a worn coil of palm-fibre rope over the left shoulder. Night. Close-up of his face, eyes closed, head slightly lowered, moonlight on one side of the face and faint fire glow on the other. Outskirts of Madinah, Hijaz, winter of 5 AH / 627 CE: black basalt ground, date palms, low mud-brick houses, squat stone towers; plain wool, cotton and leather only, no metal helmets, no gold, no domes, no minarets. Historically inspired cinematic hand-rendered pen-and-ink illustration with layered sepia and muted colour washes, visible directional pencil lines, fine crosshatching in the shadows, natural skin pores, creases, uneven pigmentation, flyaway beard hairs, woven-cloth fibres, plausible anatomy and human asymmetry. Not plastic, not glossy CGI, not anime, not cartoon. No text, no letters, no watermark, no border. Vertical 9:16.",
+   "video_prompt": "Eyes closed, his lips move silently in prayer; his fast breathing gradually slows; the clenched jaw slowly relaxes; a slow deep breath; camera very slowly pushes in. Subtle believable facial performance: slow natural breathing visible in the chest and nostrils, natural blinks, small eye movements, micro-tension in the jaw; cloth and beard hairs moving in the wind. Keep the face, scar, beard, head cloth and tunic exactly as in the first frame. No morphing, no flicker, no smile, no extra people, no text. Hand-drawn pen-and-ink illustration style kept throughout."
+  },
+  {
+   "id": "B07",
+   "start": 25.6,
+   "dur": 6.1,
+   "kind": "char",
+   "frame_prompt": "Keep exactly the same fictional anonymous poor labourer, an Arab man of 30 from the Hijaz: deep tan uneven skin with fine scars and chapped patches, sunken cheeks, thick unkempt dark beard, dark tired eyes with heavy lower lids, a small pale scar through the left eyebrow; mended rough undyed cotton tunic with a darker patch on the right shoulder, frayed off-white wool head cloth wrapped simply with a loose tail on the left, bare forearms, a worn coil of palm-fibre rope over the left shoulder. Night. Close-up of his face, eyes now open, looking straight ahead past the camera with a steady calm gaze; wind beginning to pull at the tail of his head cloth. Outskirts of Madinah, Hijaz, winter of 5 AH / 627 CE: black basalt ground, date palms, low mud-brick houses, squat stone towers; plain wool, cotton and leather only, no metal helmets, no gold, no domes, no minarets. Historically inspired cinematic hand-rendered pen-and-ink illustration with layered sepia and muted colour washes, visible directional pencil lines, fine crosshatching in the shadows, natural skin pores, creases, uneven pigmentation, flyaway beard hairs, woven-cloth fibres, plausible anatomy and human asymmetry. Not plastic, not glossy CGI, not anime, not cartoon. No text, no letters, no watermark, no border. Vertical 9:16.",
+   "video_prompt": "He opens his eyes fully and holds a steady, calm gaze forward; one slow blink; the wind strengthens and whips the head cloth tail and beard hairs; his expression stays firm and still, no smile; camera locked. Subtle believable facial performance: slow natural breathing visible in the chest and nostrils, natural blinks, small eye movements, micro-tension in the jaw; cloth and beard hairs moving in the wind. Keep the face, scar, beard, head cloth and tunic exactly as in the first frame. No morphing, no flicker, no smile, no extra people, no text. Hand-drawn pen-and-ink illustration style kept throughout."
+  },
+  {
+   "id": "B08",
+   "start": 31.7,
+   "dur": 2.9,
+   "kind": "place",
+   "frame_prompt": "Night, a violent cold windstorm in a large desert army camp on an open plain: plain wool tents torn from their pegs, cooking pots overturned, campfires blown into streams of sparks, sand blowing hard from left to right. No people visible, no faces. Outskirts of Madinah, Hijaz, winter of 5 AH / 627 CE: black basalt ground, date palms, low mud-brick houses, squat stone towers; plain wool, cotton and leather only, no metal helmets, no gold, no domes, no minarets. Historically inspired cinematic hand-rendered pen-and-ink illustration with layered sepia and muted colour washes, visible directional pencil lines, fine crosshatching in the shadows, natural skin pores, creases, uneven pigmentation, flyaway beard hairs, woven-cloth fibres, plausible anatomy and human asymmetry. Not plastic, not glossy CGI, not anime, not cartoon. No text, no letters, no watermark, no border. Vertical 9:16.",
+   "video_prompt": "Tents rip loose and flap away, sparks and sand stream hard across the frame from left to right, fires are blown out one by one; camera shaken slightly by the wind. Strong wind motion, no people, no text, no morphing, no flicker. Hand-drawn pen-and-ink illustration style kept throughout."
+  },
+  {
+   "id": "B09",
+   "start": 34.6,
+   "dur": 6.0,
+   "kind": "char",
+   "frame_prompt": "Keep exactly the same fictional anonymous poor labourer, an Arab man of 30 from the Hijaz: deep tan uneven skin with fine scars and chapped patches, sunken cheeks, thick unkempt dark beard, dark tired eyes with heavy lower lids, a small pale scar through the left eyebrow; mended rough undyed cotton tunic with a darker patch on the right shoulder, frayed off-white wool head cloth wrapped simply with a loose tail on the left, bare forearms, a worn coil of palm-fibre rope over the left shoulder. Pale blue dawn. Medium close-up: he stands at the near edge of the trench looking across at the far plain, which is now empty: torn tent cloth, cold ash, hoof prints leading away. First light on his face. Outskirts of Madinah, Hijaz, winter of 5 AH / 627 CE: black basalt ground, date palms, low mud-brick houses, squat stone towers; plain wool, cotton and leather only, no metal helmets, no gold, no domes, no minarets. Historically inspired cinematic hand-rendered pen-and-ink illustration with layered sepia and muted colour washes, visible directional pencil lines, fine crosshatching in the shadows, natural skin pores, creases, uneven pigmentation, flyaway beard hairs, woven-cloth fibres, plausible anatomy and human asymmetry. Not plastic, not glossy CGI, not anime, not cartoon. No text, no letters, no watermark, no border. Vertical 9:16.",
+   "video_prompt": "His eyes search the empty plain, brows lift in disbelief, then his shoulders drop as he lets out a long slow breath of relief; his eyes glisten; gentle push-in; no smile. Subtle believable facial performance: slow natural breathing visible in the chest and nostrils, natural blinks, small eye movements, micro-tension in the jaw; cloth and beard hairs moving in the wind. Keep the face, scar, beard, head cloth and tunic exactly as in the first frame. No morphing, no flicker, no smile, no extra people, no text. Hand-drawn pen-and-ink illustration style kept throughout."
+  },
+  {
+   "id": "B10",
+   "start": 40.6,
+   "dur": 6.4,
+   "kind": "char",
+   "frame_prompt": "Keep exactly the same fictional anonymous poor labourer, an Arab man of 30 from the Hijaz: deep tan uneven skin with fine scars and chapped patches, sunken cheeks, thick unkempt dark beard, dark tired eyes with heavy lower lids, a small pale scar through the left eyebrow; mended rough undyed cotton tunic with a darker patch on the right shoulder, frayed off-white wool head cloth wrapped simply with a loose tail on the left, bare forearms, a worn coil of palm-fibre rope over the left shoulder. Extreme close-up of his eyes and brow at sunrise, same framing as the night close-up; warm golden dawn light is reflected in both pupils instead of fire; the skin is warm-lit for the first time. Outskirts of Madinah, Hijaz, winter of 5 AH / 627 CE: black basalt ground, date palms, low mud-brick houses, squat stone towers; plain wool, cotton and leather only, no metal helmets, no gold, no domes, no minarets. Historically inspired cinematic hand-rendered pen-and-ink illustration with layered sepia and muted colour washes, visible directional pencil lines, fine crosshatching in the shadows, natural skin pores, creases, uneven pigmentation, flyaway beard hairs, woven-cloth fibres, plausible anatomy and human asymmetry. Not plastic, not glossy CGI, not anime, not cartoon. No text, no letters, no watermark, no border. Vertical 9:16.",
+   "video_prompt": "Stillness: one slow blink, the eyes soften and shine with held-back tears that do not fall; a calm slow breath; imperceptible push-in. Subtle believable facial performance: slow natural breathing visible in the chest and nostrils, natural blinks, small eye movements, micro-tension in the jaw; cloth and beard hairs moving in the wind. Keep the face, scar, beard, head cloth and tunic exactly as in the first frame. No morphing, no flicker, no smile, no extra people, no text. Hand-drawn pen-and-ink illustration style kept throughout."
+  }
+ ]
+}

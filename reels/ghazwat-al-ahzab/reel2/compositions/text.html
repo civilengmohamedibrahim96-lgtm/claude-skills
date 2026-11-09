@@ -1,0 +1,46 @@
+<template>
+  <style>
+    @font-face{font-family:"AhzKufi";src:url("assets/fonts/kufi.woff2") format("woff2");font-weight:100 900;}
+    @font-face{font-family:"AhzQuran";src:url("assets/fonts/amiri-quran.woff2") format("woff2");font-weight:400;}
+    #root{position:absolute;inset:0;}
+    #root .hook{position:absolute;left:90px;right:90px;top:300px;text-align:center;}
+    #root .hookt{font-family:"AhzKufi";font-weight:800;font-size:76px;line-height:1.35;color:#f4e6c6;text-shadow:0 3px 18px #000c,0 0 2px #000;}
+    #root .verse{position:absolute;left:70px;right:70px;top:960px;}
+    #root .box{background:#120e0add;border:2px solid #b38b52;border-radius:14px;padding:20px 34px 22px;text-align:center;}
+    #root .ayah{font-family:"AhzQuran";font-size:52px;line-height:1.8;color:#f4e6c6;}
+    #root .ref{margin-top:6px;font-family:"AhzKufi";font-weight:700;font-size:30px;color:#c9a46a;}
+    #root .cap{position:absolute;left:90px;right:90px;top:1120px;text-align:center;}
+    #root .capt{display:inline-block;font-family:"AhzKufi";font-weight:700;font-size:54px;line-height:1.45;color:#fff;background:#0b0d12b8;padding:10px 28px 14px;border-radius:12px;}
+  </style>
+  <div id="root" data-composition-id="text" data-width="1080" data-height="1920">
+    <div id="hook" class="clip hook" dir="rtl" data-start="0" data-duration="4"><div id="hook-t" class="hookt">أصعب ليلة<br/>عاشها المسلمون</div></div>
+    <div id="end" class="clip hook" dir="rtl" data-start="41.2" data-duration="5.8"><div id="end-t" class="hookt">…وانتهت<br/>بلا معركة</div></div>
+    <div id="v11" class="clip verse" dir="rtl" data-start="0.2" data-duration="7.7">
+      <div id="v11-box" class="box"><div class="ayah">هُنَالِكَ ٱبْتُلِىَ ٱلْمُؤْمِنُونَ وَزُلْزِلُوا۟ زِلْزَالًۭا شَدِيدًۭا</div><div class="ref">الأحزاب: ١١</div></div>
+    </div>
+    <div id="v22" class="clip verse" dir="rtl" data-start="19.8" data-duration="11.8">
+      <div id="v22-box" class="box"><div class="ayah">وَلَمَّا رَءَا ٱلْمُؤْمِنُونَ ٱلْأَحْزَابَ قَالُوا۟ هَٰذَا مَا وَعَدَنَا ٱللَّهُ وَرَسُولُهُۥ وَصَدَقَ ٱللَّهُ وَرَسُولُهُۥ ۚ</div><div class="ref">الأحزاب: ٢٢</div></div>
+    </div>
+    <div id="v25" class="clip verse" dir="rtl" data-start="34.7" data-duration="11.4">
+      <div id="v25-box" class="box"><div class="ayah">وَرَدَّ ٱللَّهُ ٱلَّذِينَ كَفَرُوا۟ بِغَيْظِهِمْ لَمْ يَنَالُوا۟ خَيْرًۭا ۚ وَكَفَى ٱللَّهُ ٱلْمُؤْمِنِينَ ٱلْقِتَالَ ۚ</div><div class="ref">الأحزاب: ٢٥</div></div>
+    </div>
+    <div id="c1" class="clip cap" dir="rtl" data-start="8.0" data-duration="3.5"><div id="c1-t" class="capt">قبلها بأيام…<br/>كان يحفر، في بردٍ قارس.</div></div>
+    <div id="c2" class="clip cap" dir="rtl" data-start="11.7" data-duration="3.5"><div id="c2-t" class="capt">ينقلُ الترابَ على كتفه…<br/>وعشرةُ آلافٍ قادمون.</div></div>
+    <div id="c3" class="clip cap" dir="rtl" data-start="15.7" data-duration="3.5"><div id="c3-t" class="capt">ثم جاءت الليلة…<br/>نيرانُهم في كلِّ اتجاه.</div></div>
+    <div id="c4" class="clip cap" dir="rtl" data-start="31.8" data-duration="2.8"><div id="c4-t" class="capt">وقبل الفجر…<br/>أرسل اللهُ الريح.</div></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#hook-t",{opacity:0,scale:1.04},{opacity:1,scale:1,duration:0.35,ease:"power2.out"},0.0);
+    tl.to("#hook-t",{opacity:0,duration:0.3},3.6);
+    tl.fromTo("#end-t",{opacity:0,scale:1.04},{opacity:1,scale:1,duration:0.6,ease:"power2.out"},41.25);
+    tl.fromTo("#v11-box",{opacity:0,y:24},{opacity:1,y:0,duration:0.5,ease:"power2.out"},0.25);
+    tl.fromTo("#v22-box",{opacity:0,y:24},{opacity:1,y:0,duration:0.5,ease:"power2.out"},19.85);
+    tl.fromTo("#v25-box",{opacity:0,y:24},{opacity:1,y:0,duration:0.5,ease:"power2.out"},34.75);
+    tl.fromTo("#c1-t",{opacity:0,y:14},{opacity:1,y:0,duration:0.3,ease:"power2.out"},8.02);
+    tl.fromTo("#c2-t",{opacity:0,y:14},{opacity:1,y:0,duration:0.3,ease:"power2.out"},11.72);
+    tl.fromTo("#c3-t",{opacity:0,y:14},{opacity:1,y:0,duration:0.3,ease:"power2.out"},15.72);
+    tl.fromTo("#c4-t",{opacity:0,y:14},{opacity:1,y:0,duration:0.3,ease:"power2.out"},31.82);
+    window.__timelines["text"] = tl;
+  </script>
+</template>
