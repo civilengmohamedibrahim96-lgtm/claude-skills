@@ -1,0 +1,45 @@
+<template>
+  <style>
+    
+@font-face{font-family:"AhzKufi";src:url("assets/fonts/kufi.woff2") format("woff2");font-weight:100 900;}
+@font-face{font-family:"AhzAmiri";src:url("assets/fonts/amiri-400.woff2") format("woff2");font-weight:400;}
+@font-face{font-family:"AhzAmiri";src:url("assets/fonts/amiri-700.woff2") format("woff2");font-weight:700;}
+@font-face{font-family:"AhzQuran";src:url("assets/fonts/amiri-quran.woff2") format("woff2");font-weight:400;}
+    #root{position:absolute;inset:0;}
+    #root .clip{position:absolute;left:60px;right:60px;top:920px;}
+    #root .box{background:#14100bf0;border:2px solid #b38b52;border-radius:14px;padding:18px 34px 22px;text-align:center;}
+    #root .ayah{font-family:"AhzQuran";font-size:50px;line-height:1.75;color:#f4e6c6;}
+    #root .ref{margin-top:8px;font-family:"AhzKufi";font-weight:700;font-size:30px;color:#b38b52;}
+    #root .rec{font-family:"AhzKufi";font-size:28px;color:#e5d1ad99;margin-bottom:6px;}
+  </style>
+  <div id="root" data-composition-id="verses" data-width="1080" data-height="1920">
+    <div id="v10" class="clip" dir="rtl" data-start="0" data-duration="13">
+      <div id="v10-box" class="box">
+        <div class="rec">▶ تلاوة: مشاري العفاسي (تُضاف في المونتاج)</div>
+        <div class="ayah">إِذْ جَآءُوكُم مِّن فَوْقِكُمْ وَمِنْ أَسْفَلَ مِنكُمْ وَإِذْ زَاغَتِ ٱلْأَبْصَٰرُ وَبَلَغَتِ ٱلْقُلُوبُ ٱلْحَنَاجِرَ وَتَظُنُّونَ بِٱللَّهِ ٱلظُّنُونَا۠</div>
+        <div class="ref">الأحزاب: ١٠</div>
+      </div>
+    </div>
+    <div id="v11" class="clip" dir="rtl" data-start="13" data-duration="6">
+      <div id="v11-box" class="box">
+        <div class="rec">▶ تلاوة: مشاري العفاسي (تُضاف في المونتاج)</div>
+        <div class="ayah">هُنَالِكَ ٱبْتُلِىَ ٱلْمُؤْمِنُونَ وَزُلْزِلُوا۟ زِلْزَالًۭا شَدِيدًۭا</div>
+        <div class="ref">الأحزاب: ١١</div>
+      </div>
+    </div>
+    <div id="v25" class="clip" dir="rtl" data-start="25" data-duration="9">
+      <div id="v25-box" class="box">
+        <div class="rec">▶ تلاوة: مشاري العفاسي (تُضاف في المونتاج)</div>
+        <div class="ayah">وَرَدَّ ٱللَّهُ ٱلَّذِينَ كَفَرُوا۟ بِغَيْظِهِمْ لَمْ يَنَالُوا۟ خَيْرًۭا ۚ وَكَفَى ٱللَّهُ ٱلْمُؤْمِنِينَ ٱلْقِتَالَ</div>
+        <div class="ref">الأحزاب: ٢٥</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#v10-box",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},0.05);
+    tl.fromTo("#v11-box",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},13.05);
+    tl.fromTo("#v25-box",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},25.05);
+    window.__timelines["verses"] = tl;
+  </script>
+</template>

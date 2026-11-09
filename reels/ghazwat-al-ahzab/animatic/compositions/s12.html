@@ -1,0 +1,63 @@
+<template>
+  <style>
+    
+@font-face{font-family:"AhzKufi";src:url("assets/fonts/kufi.woff2") format("woff2");font-weight:100 900;}
+@font-face{font-family:"AhzAmiri";src:url("assets/fonts/amiri-400.woff2") format("woff2");font-weight:400;}
+@font-face{font-family:"AhzAmiri";src:url("assets/fonts/amiri-700.woff2") format("woff2");font-weight:700;}
+@font-face{font-family:"AhzQuran";src:url("assets/fonts/amiri-quran.woff2") format("woff2");font-weight:400;}
+    #root{position:absolute;inset:0;background:#0f1420;overflow:hidden;}
+    #root .clip{position:absolute;}
+    #root .label{position:absolute;top:184px;left:90px;right:90px;display:flex;justify-content:space-between;align-items:center;font-family:"AhzKufi";font-size:28px;color:#e5d1ad;opacity:.85;letter-spacing:.02em;}
+    #root .label b{font-weight:700;color:#9fb2d6;}
+    #root .tag{position:absolute;top:268px;right:108px;z-index:6;font-family:"AhzKufi";font-size:28px;color:#fff4dd;background:#32271ecc;padding:2px 16px 6px;border-radius:30px;}
+    #root .plate{position:absolute;left:90px;top:250px;width:900px;height:760px;overflow:hidden;border:2px solid #e5d1ad40;border-radius:8px;background:#e5d1ad;box-shadow:0 0 120px #303e5955;}
+    #root .plate img{width:100%;height:100%;object-fit:cover;display:block;}
+    #root .duo{display:flex;}
+    #root .plate.short{height:640px;}
+    #root .half{width:50%;height:100%;overflow:hidden;}
+    #root .card{z-index:5;left:60px;right:60px;top:1040px;text-align:center;}
+    #root .card span{display:inline-block;font-family:"AhzKufi";font-weight:900;font-size:64px;line-height:1.2;white-space:nowrap;color:#fff4dd;background:#32271ecc;padding:6px 34px 14px;border-radius:10px;}
+    #root .card2{left:60px;right:60px;top:880px;text-align:center;}
+    #root .card2 span{display:inline-block;font-family:"AhzKufi";font-weight:700;font-size:52px;color:#32271e;background:#e5d1ad;padding:4px 30px 10px;border-radius:40px;}
+    #root .sub{z-index:5;left:80px;right:80px;top:1170px;text-align:center;font-family:"AhzAmiri";font-weight:700;font-size:54px;line-height:1.45;color:#fff;text-shadow:0 3px 14px #000;}
+    #root .env{background:none;}
+    #root .dawnsky{background:linear-gradient(#5d6f88 0%,#a7a9a6 58%,#3b3429 58%,#2a241c 100%);}
+    #root .sunsky{transform-origin:50% 100%;background:linear-gradient(#d98c3f 0%,#f2c27a 55%,#4a3a25 55%,#2f2618 100%);}
+    #root .ground{position:absolute;left:0;right:0;top:58%;bottom:0;}
+    #root .tent{position:absolute;width:220px;height:120px;background:#e5d1ad;clip-path:polygon(0 100%,45% 0,62% 30%,100% 100%,70% 80%,40% 100%);opacity:.8;}
+    #root .pot{position:absolute;width:70px;height:46px;border-radius:0 0 40px 40px;background:#1b1610;transform:rotate(100deg);}
+    #root .print{position:absolute;width:12px;height:16px;border-radius:50%;background:#1b1610;opacity:.7;}
+    #root .scrap{position:absolute;width:40px;height:16px;background:#e5d1ad;opacity:.75;}
+    #root .sun{position:absolute;left:390px;top:300px;width:120px;height:120px;border-radius:50%;background:#fff1c9;box-shadow:0 0 120px 40px #ffd28a;}
+    #root .trench{position:absolute;left:-20px;right:-20px;top:66%;height:70px;background:#1b1610;border-top:6px solid #6b5536;transform:skewY(-3deg);}
+    #root .palm{position:absolute;bottom:44%;width:10px;background:#2f2618;}
+    #root .streak{position:absolute;z-index:4;left:0;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#e5d1adcc,transparent);opacity:0;}
+  </style>
+  <div id="root" data-composition-id="s12" data-width="1080" data-height="1920">
+    <div class="label"><span><b>S12</b> · CHR-003 · medium_shot · 0:50–0:56</span></div>
+    <div class="tag">صورة مؤقتة</div>
+    <div id="s12-plate" class="plate"><img id="s12-img" class="kb" src="assets/img/chr003.jpg" alt=""></div>
+    <div id="s12-wind0" class="streak" style="top:300px;width:160px"></div><div id="s12-wind1" class="streak" style="top:372px;width:213px"></div><div id="s12-wind2" class="streak" style="top:444px;width:266px"></div><div id="s12-wind3" class="streak" style="top:516px;width:319px"></div><div id="s12-wind4" class="streak" style="top:588px;width:372px"></div><div id="s12-wind5" class="streak" style="top:660px;width:205px"></div><div id="s12-wind6" class="streak" style="top:732px;width:258px"></div><div id="s12-wind7" class="streak" style="top:804px;width:311px"></div><div id="s12-wind8" class="streak" style="top:876px;width:364px"></div><div id="s12-wind9" class="streak" style="top:948px;width:197px"></div>
+    <div id="s12-card" class="clip card" dir="rtl" data-start="0" data-duration="6"><span id="s12-cardtxt">ثم… الريح</span></div>
+    
+    <p id="s12-sub0" class="clip sub" dir="rtl" data-start="0" data-duration="3">ثم في ليلةٍ باردة… أرسل اللهُ الريح.</p>
+    <p id="s12-sub1" class="clip sub" dir="rtl" data-start="3" data-duration="3">اقتلعت خيامَهم، وقلبت قدورَهم.</p>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#s12-img",{scaleX:1.02,scaleY:1.02},{scaleX:1.12,scaleY:1.12,duration:6,ease:"none"},0);
+tl.fromTo("#s12-wind0",{x:-400,opacity:0},{x:1300,opacity:0.7,duration:0.9,ease:"none",repeat:7},0.00);
+tl.fromTo("#s12-wind1",{x:-400,opacity:0},{x:1300,opacity:0.7,duration:1.15,ease:"none",repeat:7},0.17);
+tl.fromTo("#s12-wind2",{x:-400,opacity:0},{x:1300,opacity:0.7,duration:1.4,ease:"none",repeat:7},0.34);
+tl.fromTo("#s12-wind3",{x:-400,opacity:0},{x:1300,opacity:0.7,duration:1.65,ease:"none",repeat:7},0.51);
+tl.fromTo("#s12-wind4",{x:-400,opacity:0},{x:1300,opacity:0.7,duration:0.9,ease:"none",repeat:7},0.68);
+tl.fromTo("#s12-wind5",{x:-400,opacity:0},{x:1300,opacity:0.7,duration:1.15,ease:"none",repeat:7},0.85);
+tl.fromTo("#s12-wind6",{x:-400,opacity:0},{x:1300,opacity:0.7,duration:1.4,ease:"none",repeat:7},1.02);
+tl.fromTo("#s12-wind7",{x:-400,opacity:0},{x:1300,opacity:0.7,duration:1.65,ease:"none",repeat:7},1.19);
+tl.fromTo("#s12-wind8",{x:-400,opacity:0},{x:1300,opacity:0.7,duration:0.9,ease:"none",repeat:7},1.36);
+tl.fromTo("#s12-wind9",{x:-400,opacity:0},{x:1300,opacity:0.7,duration:1.15,ease:"none",repeat:7},1.53);
+tl.fromTo("#s12-cardtxt",{opacity:0,y:24},{opacity:1,y:0,duration:0.35,ease:"power3.out"},0.15);
+
+    window.__timelines["s12"] = tl;
+  </script>
+</template>

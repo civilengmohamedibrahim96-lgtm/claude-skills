@@ -1,0 +1,52 @@
+<template>
+  <style>
+    
+@font-face{font-family:"AhzKufi";src:url("assets/fonts/kufi.woff2") format("woff2");font-weight:100 900;}
+@font-face{font-family:"AhzAmiri";src:url("assets/fonts/amiri-400.woff2") format("woff2");font-weight:400;}
+@font-face{font-family:"AhzAmiri";src:url("assets/fonts/amiri-700.woff2") format("woff2");font-weight:700;}
+@font-face{font-family:"AhzQuran";src:url("assets/fonts/amiri-quran.woff2") format("woff2");font-weight:400;}
+    #root{position:absolute;inset:0;background:#24211d;overflow:hidden;}
+    #root .clip{position:absolute;}
+    #root .label{position:absolute;top:184px;left:90px;right:90px;display:flex;justify-content:space-between;align-items:center;font-family:"AhzKufi";font-size:28px;color:#e5d1ad;opacity:.85;letter-spacing:.02em;}
+    #root .label b{font-weight:700;color:#8a7f6c;}
+    #root .tag{position:absolute;top:268px;right:108px;z-index:6;font-family:"AhzKufi";font-size:28px;color:#fff4dd;background:#32271ecc;padding:2px 16px 6px;border-radius:30px;}
+    #root .plate{position:absolute;left:90px;top:250px;width:900px;height:760px;overflow:hidden;border:2px solid #e5d1ad40;border-radius:8px;background:#e5d1ad;box-shadow:0 0 120px #8a7f6c55;}
+    #root .plate img{width:100%;height:100%;object-fit:cover;display:block;}
+    #root .duo{display:flex;}
+    #root .plate.short{height:640px;}
+    #root .half{width:50%;height:100%;overflow:hidden;}
+    #root .card{z-index:5;left:60px;right:60px;top:1040px;text-align:center;}
+    #root .card span{display:inline-block;font-family:"AhzKufi";font-weight:900;font-size:64px;line-height:1.2;white-space:nowrap;color:#fff4dd;background:#32271ecc;padding:6px 34px 14px;border-radius:10px;}
+    #root .card2{left:60px;right:60px;top:880px;text-align:center;}
+    #root .card2 span{display:inline-block;font-family:"AhzKufi";font-weight:700;font-size:52px;color:#32271e;background:#e5d1ad;padding:4px 30px 10px;border-radius:40px;}
+    #root .sub{z-index:5;left:80px;right:80px;top:1170px;text-align:center;font-family:"AhzAmiri";font-weight:700;font-size:54px;line-height:1.45;color:#fff;text-shadow:0 3px 14px #000;}
+    #root .env{background:none;}
+    #root .dawnsky{background:linear-gradient(#5d6f88 0%,#a7a9a6 58%,#3b3429 58%,#2a241c 100%);}
+    #root .sunsky{transform-origin:50% 100%;background:linear-gradient(#d98c3f 0%,#f2c27a 55%,#4a3a25 55%,#2f2618 100%);}
+    #root .ground{position:absolute;left:0;right:0;top:58%;bottom:0;}
+    #root .tent{position:absolute;width:220px;height:120px;background:#e5d1ad;clip-path:polygon(0 100%,45% 0,62% 30%,100% 100%,70% 80%,40% 100%);opacity:.8;}
+    #root .pot{position:absolute;width:70px;height:46px;border-radius:0 0 40px 40px;background:#1b1610;transform:rotate(100deg);}
+    #root .print{position:absolute;width:12px;height:16px;border-radius:50%;background:#1b1610;opacity:.7;}
+    #root .scrap{position:absolute;width:40px;height:16px;background:#e5d1ad;opacity:.75;}
+    #root .sun{position:absolute;left:390px;top:300px;width:120px;height:120px;border-radius:50%;background:#fff1c9;box-shadow:0 0 120px 40px #ffd28a;}
+    #root .trench{position:absolute;left:-20px;right:-20px;top:66%;height:70px;background:#1b1610;border-top:6px solid #6b5536;transform:skewY(-3deg);}
+    #root .palm{position:absolute;bottom:44%;width:10px;background:#2f2618;}
+    #root .streak{position:absolute;z-index:4;left:0;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#e5d1adcc,transparent);opacity:0;}
+  </style>
+  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div class="label"><span><b>S03</b> · CHR-027 · extreme_closeup · 0:06–0:10</span></div>
+    <div class="tag">صورة مؤقتة</div>
+    <div id="s03-plate" class="plate"><img id="s03-img" class="kb" src="assets/img/poor.jpg" alt=""></div>
+    
+    <div id="s03-card" class="clip card" dir="rtl" data-start="0" data-duration="4"><span id="s03-cardtxt">٣٬٠٠٠ … وخندق</span></div>
+    
+    <p id="s03-sub0" class="clip sub" dir="rtl" data-start="0" data-duration="4">المسلمون ثلاثةُ آلاف… وسلاحُهم الأول: حُفرة.</p>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#s03-img",{scaleX:1.02,scaleY:1.02},{scaleX:1.12,scaleY:1.12,duration:4,ease:"none"},0);
+tl.fromTo("#s03-cardtxt",{opacity:0,y:24},{opacity:1,y:0,duration:0.35,ease:"power3.out"},0.15);
+
+    window.__timelines["s03"] = tl;
+  </script>
+</template>
