@@ -1,0 +1,78 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      background: var(--olive, #414734);
+      overflow: hidden;
+      font-family: "Lato", sans-serif;
+      color: #fff;
+    }
+    #n-num {
+      position: absolute;
+      left: 0;
+      top: 300px;
+      width: 1920px;
+      text-align: center;
+      font-size: 280px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    #n-label {
+      position: absolute;
+      left: 0;
+      top: 610px;
+      width: 1920px;
+      text-align: center;
+      font-size: 56px;
+      font-weight: 700;
+    }
+    #n-label span {
+      display: inline-block;
+    }
+    #n-sub {
+      position: absolute;
+      left: 0;
+      top: 700px;
+      width: 1920px;
+      text-align: center;
+      font-size: 40px;
+      color: #cfd4c4;
+    }
+    #n-flood {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      background: var(--sage, #e7e9e2);
+      transform-origin: 0 50%;
+    }
+  </style>
+  <div id="root" data-composition-id="number" data-width="1920" data-height="1080">
+    <div id="n-num">5,000+</div>
+    <div id="n-label"><span class="nw">landscapes</span> <span class="nw">designed</span></div>
+    <div id="n-sub">Across every state &amp; territory</div>
+    <div id="n-flood" data-layout-ignore></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const num = document.querySelector("#n-num");
+      const counter = { v: 0 };
+      const paint = () => {
+        const v = Math.round(counter.v / 10) * 10;
+        num.textContent = v.toLocaleString("en-AU") + (counter.v >= 5000 ? "+" : "");
+      };
+      gsap.set("#n-flood", { scaleX: 0 });
+      tl.fromTo("#n-num", { opacity: 0 }, { opacity: 1, duration: 0.12 }, 0.15);
+      tl.fromTo(counter, { v: 0 }, { v: 5000, duration: 1.4, ease: "expo.out", onUpdate: paint }, 0.2);
+      tl.fromTo(".nw", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.08 }, 0.6);
+      tl.fromTo("#n-sub", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18 }, 1.9);
+      tl.fromTo("#n-flood", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.inOut" }, 3.0);
+      window.__timelines["number"] = tl;
+    })();
+  </script>
+</template>

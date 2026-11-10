@@ -1,0 +1,71 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      background: var(--olive, #414734);
+      overflow: hidden;
+      font-family: "Lato", sans-serif;
+    }
+    .r-line {
+      position: absolute;
+      left: 0;
+      width: 1920px;
+      text-align: center;
+      color: #fff;
+      letter-spacing: -0.015em;
+    }
+    .r-line span {
+      display: inline-block;
+    }
+    #r-l1 {
+      top: 420px;
+      font-size: 120px;
+      font-weight: 700;
+    }
+    #r-l1b {
+      top: 580px;
+      font-size: 44px;
+      font-weight: 400;
+      color: #cfd4c4;
+      letter-spacing: 0;
+    }
+    #r-l2 .w2 {
+      opacity: 0;
+    }
+    #r-l2 {
+      top: 455px;
+      font-size: 150px;
+      font-weight: 700;
+      color: var(--gold, #c1b282);
+    }
+    #r-flood {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      background: var(--sage, #e7e9e2);
+      transform-origin: 50% 100%;
+    }
+  </style>
+  <div id="root" data-composition-id="reveal" data-width="1920" data-height="1080">
+    <h2 id="r-l1" class="r-line"><span class="w1">Online</span> <span class="w1">garden</span> <span class="w1">design</span></h2>
+    <p id="r-l1b" class="r-line"><span class="w1b">for</span> <span class="w1b">Australian</span> <span class="w1b">homes</span></p>
+    <h2 id="r-l2" class="r-line"><span class="w2">No</span> <span class="w2">site</span> <span class="w2">visit</span></h2>
+    <div id="r-flood" data-layout-ignore></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      gsap.set("#r-flood", { scaleY: 0 });
+      tl.fromTo(".w1", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.07 }, 0.15);
+      tl.fromTo(".w1b", { opacity: 0 }, { opacity: 1, duration: 0.2, stagger: 0.08 }, 0.55);
+      tl.to([".w1", ".w1b"], { opacity: 0, filter: "blur(8px)", duration: 0.16, stagger: 0.02, ease: "power3.in" }, 1.8);
+      tl.fromTo(".w2", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.16, stagger: 0.09 }, 2.0);
+      tl.to(".w2", { opacity: 0, filter: "blur(8px)", duration: 0.15, ease: "power3.in" }, 3.0);
+      tl.fromTo("#r-flood", { scaleY: 0 }, { scaleY: 1, duration: 0.45, ease: "power2.inOut" }, 3.0);
+      window.__timelines["reveal"] = tl;
+    })();
+  </script>
+</template>

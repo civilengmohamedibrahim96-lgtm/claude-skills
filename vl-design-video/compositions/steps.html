@@ -1,0 +1,223 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      background: var(--sage, #e7e9e2);
+      overflow: hidden;
+      font-family: "Lato", sans-serif;
+      color: var(--olive, #414734);
+    }
+    #s-label {
+      position: absolute;
+      left: 96px;
+      top: 330px;
+      font-size: 32px;
+      font-weight: 700;
+      color: #6b715d;
+    }
+    #s-verb-win {
+      position: absolute;
+      left: 96px;
+      top: 380px;
+      width: 660px;
+      height: 150px;
+      overflow: hidden;
+    }
+    #s-verb-stack {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    .s-verb {
+      height: 150px;
+      font-size: 120px;
+      font-weight: 700;
+      line-height: 150px;
+      letter-spacing: -0.015em;
+      white-space: nowrap;
+    }
+    .s-body {
+      position: absolute;
+      opacity: 0;
+      left: 96px;
+      top: 560px;
+      width: 620px;
+      font-size: 40px;
+      line-height: 1.3;
+      color: var(--ink2, #4d4d4d);
+    }
+    .s-card {
+      position: absolute;
+      opacity: 0;
+      background: #fff;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(65, 71, 52, 0.12);
+    }
+    #s-c1 {
+      left: 800px;
+      top: 204px;
+      width: 1024px;
+      height: 672px;
+    }
+    #s-c1 img {
+      display: block;
+      width: 1024px;
+      height: 576px;
+      object-fit: cover;
+    }
+    #s-c1 .foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 96px;
+      padding: 0 36px;
+      font-size: 36px;
+      font-weight: 700;
+    }
+    #s-c1 .foot small {
+      font-size: 30px;
+      font-weight: 400;
+      color: var(--ink2, #4d4d4d);
+    }
+    #s-c2 {
+      left: 963px;
+      top: 202px;
+      width: 698px;
+      height: 676px;
+    }
+    #s-c2 img {
+      display: block;
+      width: 698px;
+      height: 676px;
+    }
+    #s-c3 {
+      left: 800px;
+      top: 252px;
+      width: 1024px;
+      height: 576px;
+    }
+    #s-c3 img {
+      display: block;
+      width: 1024px;
+      height: 576px;
+      object-fit: cover;
+    }
+    #s-c4 {
+      left: 932px;
+      top: 270px;
+      width: 760px;
+      height: 540px;
+      padding: 64px 72px;
+    }
+    #s-c4 h3 {
+      font-size: 44px;
+      font-weight: 700;
+      margin-bottom: 36px;
+    }
+    .s-row {
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      height: 76px;
+      font-size: 36px;
+    }
+    .s-tick {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--olive, #414734);
+      flex: none;
+      position: relative;
+    }
+    .s-tick::after {
+      content: "";
+      position: absolute;
+      left: 15px;
+      top: 9px;
+      width: 11px;
+      height: 20px;
+      border: solid #fff;
+      border-width: 0 4px 4px 0;
+      transform: rotate(45deg);
+    }
+    #s-dip {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      opacity: 0;
+    }
+  </style>
+  <div id="root" data-composition-id="steps" data-width="1920" data-height="1080">
+    <div id="s-label">How it works</div>
+    <div id="s-verb-win" data-layout-allow-overflow>
+      <div id="s-verb-stack">
+        <div class="s-verb">Choose</div>
+        <div class="s-verb">Tell us</div>
+        <div class="s-verb">Review</div>
+        <div class="s-verb">Download</div>
+      </div>
+    </div>
+    <p id="s-b1" class="s-body">Pick the package for your space</p>
+    <p id="s-b2" class="s-body">Your style, colours and space</p>
+    <p id="s-b3" class="s-body">Preview it. Ask for any changes</p>
+    <p id="s-b4" class="s-body">Plan, plants, shopping list</p>
+
+    <div id="s-c1" class="s-card" data-layout-allow-overflow>
+      <img src="assets/front-yard.jpg" alt="Front Yard package render" />
+      <div class="foot"><span>Front Yard</span><small>From $1800</small></div>
+    </div>
+    <div id="s-c2" class="s-card" data-layout-allow-overflow>
+      <img src="assets/questionnaire.png" alt="What should your new yard include? questionnaire" />
+    </div>
+    <div id="s-c3" class="s-card" data-layout-allow-overflow>
+      <img src="assets/whole-yard.jpg" alt="Whole yard 3D design render" />
+    </div>
+    <div id="s-c4" class="s-card" data-layout-allow-overflow>
+      <h3>Your final handover</h3>
+      <div class="s-row"><span class="s-tick"></span><span>Final plan</span></div>
+      <div class="s-row"><span class="s-tick"></span><span>Step-by-step instructions</span></div>
+      <div class="s-row"><span class="s-tick"></span><span>The plants to use</span></div>
+      <div class="s-row"><span class="s-tick"></span><span>Shopping list</span></div>
+    </div>
+    <div id="s-dip" data-layout-ignore></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const STEP = 2.4;
+      const cards = ["#s-c1", "#s-c2", "#s-c3", "#s-c4"];
+      const bodies = ["#s-b1", "#s-b2", "#s-b3", "#s-b4"];
+      gsap.set(cards, { y: 1000, opacity: 0 });
+      gsap.set("#s-verb-stack", { y: 0, filter: "blur(0px)" });
+      tl.fromTo("#s-label", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2 }, 0.05);
+      tl.fromTo("#s-verb-win", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2 }, 0.1);
+
+      cards.forEach((c, i) => {
+        const T = i * STEP + (i === 0 ? 0.1 : 0);
+        // card whips in from below
+        tl.fromTo(c, { y: 1000, opacity: 1, filter: "blur(14px)" }, { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.55, ease: "expo.out", immediateRender: false }, T);
+        // body copy blur-swap
+        tl.fromTo(bodies[i], { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15 }, T + 0.15);
+        if (i > 0) {
+          // verb rolls like a slot machine
+          tl.to("#s-verb-stack", { y: -150 * i, duration: 0.35, ease: "power3.inOut" }, T - 0.05);
+          tl.to("#s-verb-stack", { filter: "blur(5px)", duration: 0.12, yoyo: true, repeat: 1 }, T - 0.02);
+        }
+        if (i < cards.length - 1) {
+          const tOut = T + STEP - 0.3 - (i === 0 ? 0.1 : 0);
+          tl.to(c, { y: -1000, filter: "blur(14px)", duration: 0.3, ease: "power3.in" }, tOut);
+          tl.set(c, { opacity: 0 }, tOut + 0.3);
+          tl.to(bodies[i], { opacity: 0, filter: "blur(6px)", duration: 0.13 }, T + STEP - 0.2 - (i === 0 ? 0.1 : 0));
+        }
+      });
+      // checklist ticks in on the last step
+      tl.fromTo(".s-row", { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.25, ease: "expo.out" }, 3 * STEP + 0.45);
+      // dip cut into the makeover
+      tl.to("#s-dip", { opacity: 0.4, duration: 0.1 }, 9.38);
+      window.__timelines["steps"] = tl;
+    })();
+  </script>
+</template>

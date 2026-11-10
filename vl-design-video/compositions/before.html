@@ -1,0 +1,88 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      background: var(--sage, #e7e9e2);
+      overflow: hidden;
+      font-family: "Lato", sans-serif;
+    }
+    #b-panel {
+      position: absolute;
+      left: 560px;
+      top: 0;
+      width: 1360px;
+      height: 1080px;
+      overflow: hidden;
+    }
+    #b-photo {
+      position: absolute;
+      inset: 0;
+      width: 1360px;
+      height: 1080px;
+      object-fit: cover;
+    }
+    #b-pill {
+      position: absolute;
+      left: 48px;
+      top: 48px;
+      padding: 12px 28px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--olive, #414734);
+      font-size: 30px;
+      font-weight: 700;
+    }
+    #b-title {
+      position: absolute;
+      left: 96px;
+      top: 390px;
+      width: 470px;
+      color: var(--olive, #414734);
+      font-size: 80px;
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.015em;
+    }
+    #b-title span {
+      display: inline-block;
+    }
+    #b-flood {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      background: var(--olive, #414734);
+      transform-origin: 0 50%;
+    }
+  </style>
+  <div id="root" data-composition-id="before" data-width="1920" data-height="1080">
+    <div id="b-panel">
+      <img id="b-photo" data-layout-allow-overflow src="assets/before.jpg" alt="The house before: bare gravel yard" />
+      <div id="b-pill">Before</div>
+    </div>
+    <h1 id="b-title">
+      <span class="w">This</span> <span class="w">yard</span><br />
+      <span class="w">needs</span> <span class="w">a</span> <span class="w">plan</span>
+    </h1>
+    <div id="b-flood" data-layout-ignore></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      gsap.set("#b-flood", { scaleX: 0 });
+      tl.fromTo("#b-photo", { scale: 1 }, { scale: 1.05, duration: 3.4, ease: "sine.inOut" }, 0);
+      tl.fromTo(
+        "#b-title .w",
+        { opacity: 0, filter: "blur(6px)" },
+        { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.07, ease: "power2.out" },
+        0,
+      );
+      tl.fromTo("#b-pill", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 0.5);
+      tl.to("#b-title .w", { opacity: 0, filter: "blur(8px)", duration: 0.18, stagger: 0.03, ease: "power3.in" }, 3.15);
+      tl.fromTo("#b-flood", { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: "power2.inOut" }, 3.4);
+      window.__timelines["before"] = tl;
+    })();
+  </script>
+</template>

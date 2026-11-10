@@ -1,15 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"cta","type":"string","label":"Call to action","default":"Start a project"},
+    {"id":"url","type":"string","label":"Website","default":"vldesignaustralia.com.au"},
+    {"id":"olive","type":"color","label":"Brand olive","default":"#414734"},
+    {"id":"sage","type":"color","label":"Ground sage","default":"#E7E9E2"},
+    {"id":"gold","type":"color","label":"Accent gold","default":"#C1B282"}
+  ]'
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1920, height=1080" />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
     <style>
-      /* Placeholders: replace all three with the film's own palette and display face. */
       :root {
-        --ground: #000;
-        --ink: #ffffff;
-        --font-display: sans-serif;
+        --olive: #414734;
+        --sage: #e7e9e2;
+        --gold: #c1b282;
+        --ink2: #4d4d4d;
       }
       * {
         margin: 0;
@@ -18,25 +27,16 @@
       }
       html,
       body {
-        margin: 0;
         width: 1920px;
         height: 1080px;
         overflow: hidden;
-        background: var(--ground);
+        background: var(--sage);
+        font-family: "Lato", sans-serif;
       }
       #root {
+        position: relative;
         width: 100%;
         height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--font-display);
-      }
-      #title {
-        color: var(--ink);
-        font-size: 72px;
-        font-weight: 600;
-        letter-spacing: -0.03em;
       }
     </style>
   </head>
@@ -45,17 +45,32 @@
       id="root"
       data-composition-id="main"
       data-start="0"
-      data-duration="10"
+      data-duration="31"
       data-width="1920"
       data-height="1080"
     >
-      <h1 id="title" class="clip" data-start="0" data-duration="10" data-track-index="0">Title</h1>
+      <div id="before" data-composition-id="before" data-composition-src="compositions/before.html"
+        class="clip" data-start="0" data-duration="4" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="reveal" data-composition-id="reveal" data-composition-src="compositions/reveal.html"
+        class="clip" data-start="4" data-duration="3.5" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="steps" data-composition-id="steps" data-composition-src="compositions/steps.html"
+        class="clip" data-start="7.5" data-duration="9.5" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="makeover" data-composition-id="makeover" data-composition-src="compositions/makeover.html"
+        class="clip" data-start="17" data-duration="6" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="number" data-composition-id="number" data-composition-src="compositions/number.html"
+        class="clip" data-start="23" data-duration="3.5" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="endcard" data-composition-id="endcard" data-composition-src="compositions/endcard.html"
+        class="clip" data-start="26.5" data-duration="4.5" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
     </div>
     <script>
-      const tl = gsap.timeline({ paused: true });
-      // Example: tl.fromTo("#title", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 0);
-      window.__timelines["main"] = tl;
-      tl.seek(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
     </script>
   </body>
 </html>

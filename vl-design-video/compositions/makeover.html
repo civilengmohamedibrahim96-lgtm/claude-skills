@@ -1,0 +1,151 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      background: var(--sage, #e7e9e2);
+      overflow: hidden;
+      font-family: "Lato", sans-serif;
+      color: var(--olive, #414734);
+    }
+    #m-panel {
+      position: absolute;
+      left: 560px;
+      top: 0;
+      width: 1360px;
+      height: 1080px;
+      overflow: hidden;
+    }
+    #m-before {
+      position: absolute;
+      inset: 0;
+      width: 1360px;
+      height: 1080px;
+      transform: scale(1.05);
+    }
+    .m-pill {
+      position: absolute;
+      top: 48px;
+      padding: 12px 28px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--olive, #414734);
+      font-size: 30px;
+      font-weight: 700;
+    }
+    #m-pill-before {
+      left: 48px;
+    }
+    #m-after {
+      position: absolute;
+      left: 401px;
+      top: 0;
+      width: 1919px;
+      height: 1080px;
+      clip-path: inset(0px 0px 0px 1519px);
+    }
+    #m-after img {
+      display: block;
+      width: 1919px;
+      height: 1080px;
+    }
+    #m-pill-after {
+      opacity: 0;
+      left: 1331px;
+    }
+    #m-line {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 1080px;
+      margin-left: -2px;
+      background: #fff;
+    }
+    #m-handle {
+      position: absolute;
+      left: -28px;
+      top: 512px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    }
+    #m-label {
+      position: absolute;
+      left: 96px;
+      top: 400px;
+      font-size: 32px;
+      font-weight: 700;
+      color: #6b715d;
+    }
+    #m-word-win {
+      position: absolute;
+      left: 96px;
+      top: 450px;
+      width: 440px;
+      height: 130px;
+      overflow: hidden;
+    }
+    .m-word {
+      height: 130px;
+      font-size: 104px;
+      font-weight: 700;
+      line-height: 130px;
+      letter-spacing: -0.015em;
+    }
+    #m-flood {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      background: var(--olive, #414734);
+      transform-origin: 50% 100%;
+    }
+  </style>
+  <div id="root" data-composition-id="makeover" data-width="1920" data-height="1080">
+    <div id="m-label">Real makeover</div>
+    <div id="m-word-win" data-layout-allow-overflow>
+      <div id="m-word-stack">
+        <div class="m-word">Before</div>
+        <div class="m-word">After</div>
+      </div>
+    </div>
+    <div id="m-panel">
+      <img id="m-before" data-layout-allow-overflow src="assets/before.jpg" alt="The house before" />
+      <div id="m-pill-before" class="m-pill">Before</div>
+    </div>
+    <div id="m-after" data-layout-allow-overflow>
+      <img src="assets/after-full.jpg" alt="The same house after the VL Design plan" />
+      <div id="m-pill-after" class="m-pill">After</div>
+    </div>
+    <div id="m-line" data-layout-ignore><div id="m-handle"></div></div>
+    <div id="m-flood" data-layout-ignore data-layout-allow-occlusion></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      gsap.set("#m-flood", { scaleY: 0 });
+      gsap.set("#m-line", { x: 1920 });
+      tl.fromTo(["#m-label", "#m-word-win"], { opacity: 0, filter: "blur(6px)" },
+        { opacity: 1, filter: "blur(0px)", duration: 0.16, stagger: 0.07 }, 0.05);
+      // the slider line enters and wipes right to left
+      tl.to("#m-line", { x: 560, duration: 1.8, ease: "power2.inOut" }, 0.4);
+      tl.to("#m-after", { clipPath: "inset(0px 0px 0px 159px)", duration: 1.8, ease: "power2.inOut" }, 0.4);
+      tl.to("#m-pill-after", { opacity: 1, duration: 0.2 }, 0.75);
+      tl.to("#m-pill-before", { opacity: 0, duration: 0.15 }, 1.75);
+      // the word rolls Before -> After as the line passes the middle
+      tl.to("#m-word-stack", { y: -130, duration: 0.35, ease: "power3.inOut" }, 1.15);
+      tl.to("#m-line", { opacity: 0, duration: 0.2 }, 2.3);
+      // the after render widens to full bleed
+      tl.to(["#m-label", "#m-word-win"], { opacity: 0, filter: "blur(8px)", duration: 0.18, ease: "power3.in" }, 3.25);
+      tl.to("#m-pill-after", { opacity: 0, duration: 0.15 }, 3.3);
+      tl.to("#m-after", { x: -401, clipPath: "inset(0px 0px 0px 0px)", duration: 0.8, ease: "power2.inOut" }, 3.4);
+      // olive rises into the number
+      tl.fromTo("#m-flood", { scaleY: 0 }, { scaleY: 1, duration: 0.5, ease: "power2.inOut" }, 5.45);
+      window.__timelines["makeover"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,72 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      background: var(--sage, #e7e9e2);
+      overflow: hidden;
+      font-family: "Lato", sans-serif;
+      color: var(--olive, #414734);
+    }
+    #e-logo {
+      position: absolute;
+      left: 700px;
+      top: 150px;
+      width: 520px;
+      height: 462px;
+      clip-path: circle(0% at 50% 50%);
+    }
+    #e-cta {
+      position: absolute;
+      left: 0;
+      top: 680px;
+      width: 1920px;
+      text-align: center;
+    }
+    #e-btn {
+      display: inline-block;
+      padding: 24px 56px;
+      border-radius: 999px;
+      background: var(--olive, #414734);
+      color: #fff;
+      font-size: 40px;
+      font-weight: 700;
+    }
+    #e-url {
+      position: absolute;
+      left: 0;
+      top: 830px;
+      width: 1920px;
+      text-align: center;
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    #e-rule {
+      position: absolute;
+      left: 810px;
+      top: 892px;
+      width: 300px;
+      height: 4px;
+      background: var(--gold, #c1b282);
+      transform-origin: 50% 50%;
+    }
+  </style>
+  <div id="root" data-composition-id="endcard" data-width="1920" data-height="1080">
+    <img id="e-logo" src="assets/logo.png" alt="Virtual Landscape Design Australia" />
+    <div id="e-cta"><span id="e-btn" data-var-text="cta">Start a project</span></div>
+    <div id="e-url" data-var-text="url">vldesignaustralia.com.au</div>
+    <div id="e-rule"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#e-logo", { clipPath: "circle(0% at 50% 50%)", scale: 0.94 },
+        { clipPath: "circle(75% at 50% 50%)", scale: 1, duration: 0.7, ease: "expo.out" }, 0.15);
+      tl.fromTo("#e-btn", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.6)" }, 0.9);
+      tl.fromTo("#e-url", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18 }, 1.15);
+      tl.fromTo("#e-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "expo.out" }, 1.25);
+      window.__timelines["endcard"] = tl;
+    })();
+  </script>
+</template>
