@@ -1,0 +1,66 @@
+# Asset Descriptions
+
+⚠️  No vision credentials — descriptions below are catalog-derived (alt text, headings, section context, filename) instead of Vision-generated. To get richer Vision descriptions on the next capture, set GEMINI_API_KEY (or GOOGLE_API_KEY), or HYPERFRAMES_VERTEX_PROJECT_ID plus HYPERFRAMES_VERTEX_SERVICE_ACCOUNT for Vertex service-account auth, and re-run.
+
+The `logo-<hash>.svg` filename prefix is a structural hint (DOM said this SVG was inside a `<header>`, home-link `<a>`, or had an aria-label matching the page brand). To pick the actual brand logo without Vision, open the `logo-*` candidates in a previewer or rasterize them with `sharp` before referencing — composing a fake logo ships off-brand in the final video.
+
+- after-aa845991.jpg — 8702KB, after aa845991
+- afterpaybg-69eb3292.png — 2234KB, afterpaybg 69eb3292
+- australia-map.png — 498KB, australia map
+- back-yard.png — 281KB, back yard
+- before-3d82d72f.jpg — 122KB, before 3d82d72f
+- builderbrokers-9a1d52d4.jpg — 191KB, builderbrokers 9a1d52d4
+- certificartion-logo.png — 15KB, certificartion logo
+- favicon.png — 111KB, favicon
+- front-yard.png — 288KB, front yard
+- how-it-works-image.png — 12KB, "Landing page background", above fold
+- icon-icon-2085x1851.png — 111KB, icon icon 2085x1851
+- image-7.jpg — 1146KB, "Landing page background", above fold
+- image-8.jpg — 878KB, "Landing page background", above fold
+- image.jpg — 1467KB, "Landing page background", above fold
+- inspiration-image.jpg — 1103KB, "Landing page background", above fold
+- landing-page-background.jpg — 730KB, landing page background
+- logo.png — 106KB, logo
+- partner-2.png — 12KB, partner 2
+- projectplantbg-8108e891.jpg — 141KB, projectplantbg 8108e891
+- whole-yard.png — 349KB, whole yard
+- svgs/logo-b9cd4502.svg — logo b9cd4502
+- svgs/svg-013bb20f.svg — svg 013bb20f
+- svgs/svg-11b4c46a.svg — svg 11b4c46a
+- svgs/svg-137be418.svg — svg 137be418
+- svgs/svg-39647d56.svg — svg 39647d56
+- svgs/svg-40c6f4b3.svg — svg 40c6f4b3
+- svgs/svg-41346a42.svg — svg 41346a42
+- svgs/svg-43ea8276.svg — svg 43ea8276
+- svgs/svg-7768fa3f.svg — svg 7768fa3f
+- svgs/svg-bc4ebe9e-2.svg — svg bc4ebe9e 2
+- svgs/svg-bc4ebe9e.svg — svg bc4ebe9e
+- svgs/svg-bd2c8f08.svg — svg bd2c8f08
+- svgs/svg-c1058efd.svg — svg c1058efd
+- svgs/svg-e0a25db7.svg — svg e0a25db7
+- svgs/svg-e70611a7-10.svg — svg e70611a7 10
+- svgs/svg-e70611a7-11.svg — svg e70611a7 11
+- svgs/svg-e70611a7-12.svg — svg e70611a7 12
+- svgs/svg-e70611a7-13.svg — svg e70611a7 13
+- svgs/svg-e70611a7-14.svg — svg e70611a7 14
+- svgs/svg-e70611a7-15.svg — svg e70611a7 15
+- svgs/svg-e70611a7-16.svg — svg e70611a7 16
+- svgs/svg-e70611a7-2.svg — svg e70611a7 2
+- svgs/svg-e70611a7-3.svg — svg e70611a7 3
+- svgs/svg-e70611a7-4.svg — svg e70611a7 4
+- svgs/svg-e70611a7-5.svg — svg e70611a7 5
+- svgs/svg-e70611a7-6.svg — svg e70611a7 6
+- svgs/svg-e70611a7-7.svg — svg e70611a7 7
+- svgs/svg-e70611a7-8.svg — svg e70611a7 8
+- svgs/svg-e70611a7-9.svg — svg e70611a7 9
+- svgs/svg-e70611a7.svg — svg e70611a7
+- fonts/20f1c48c725d3555-s.06aaffe1.woff2 — font file
+- fonts/2e17945c0aac2d7c-s.p.935794d8.woff2 — font file
+- fonts/5c285b27cdda1fe8-s.p.a62025f2.woff2 — font file
+- fonts/7d256325d16c464a-s.6b5b353b.woff2 — font file
+- fonts/80dbc432bf467303-s.p.5d34db31.woff2 — font file
+- fonts/8e451580e5e95631-s.p.0e564e6e.woff2 — font file
+- fonts/ad840250c1099da8-s.672ade91.woff2 — font file
+- fonts/b529365fa126a3f2-s.38647399.woff2 — font file
+- fonts/c3cb240f9c892514-s.d8e4bce2.woff2 — font file
+- fonts/f30fd2e485acf1bc-s.p.3d1b066d.woff2 — font file

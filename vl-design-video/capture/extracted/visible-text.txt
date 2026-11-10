@@ -1,0 +1,136 @@
+[button] Home
+[button] Packages
+[button] Inspirations
+[button] How It Works
+[span] Start A Project
+[h1] Online Garden & Landscape Design for Australian Homes
+[h2] We turn your ideas into a clear garden plan that fits your space, budget, and climate. You’ll get the right plants, where to put them, and simple steps to build and care for your garden.
+[p] 4.5
+[p] 500 Reviews
+[button] Homeowners Packages
+[button] B2B Packages
+[h6] Contact us now for free, we will do the rest
+[p] Full Name
+[p] Phone Number
+[p] Email Address
+[button] Submit
+[p] Certified Landscape
+[p] Design Experts
+[p] We’re proud members of the Landscape Design Institute, Australia’s leading authority in professional landscape design standards. Our certification reflects years of proven expertise, a commitment to sustainability, and a passion for turning outdoor spaces into timeless landscapes.
+[p] Partnering with Project Plant to elevate outdoor spaces.
+[p] Supplying premium plants and materials to support stunning landscape designs across Australia.
+[button] Learn More
+[p] We’re proud to partner
+[p] with Builder Brokers
+[p] To help clients design and build beautiful
+[p] outdoor spaces nationwide.
+[button] Learn More
+[p] New! Pay in Installments
+[span] with
+[p] Now you can purchase landscaping materials and services in flexible monthly installments — powered by Afterpay. Enjoy more freedom and smoother transactions.
+[p] Why Choose Us?
+[p] Our Promise: Expertise,
+[p] Innovation & Peace of Mind
+[p] Experience You Can Trust
+[p] With decades of proven experience, we combine practical know-how with design excellence — ensuring your landscape is both beautiful and a smart investment.
+[p] Advanced Design Tools
+[p] From AutoCAD to Lumion, we use advanced 3D visualisation tools so you can preview your dream garden before construction starts — no guesswork, just clarity.
+[p] Effortless, Stress-Free Process
+[p] We handle every detail — from concept to final plan — giving you complete confidence and peace of mind throughout the process.
+[p] How It Works
+[p] Simple, straightforward,
+[p] no site visit.
+[p] Choose a Design Package
+[p] Pick the package that matches your space (small balcony, patio, or garden).
+[p] Craft Your Bespoke Design
+[p] Tell us your style, colors, and how you use the space. Our designers and plant experts turn this into a custom plan for you.
+[p] Review the First Draft
+[p] We’ll show you an easy-to-read preview. Ask for any changes—big or small. We adjust until it feels right.
+[p] Final Handover
+[p] Download your final plan. You’ll get step-by-step instructions, the plants to use, and a shopping list.
+[p] Testimonial
+[p] Real Stories, Stunning.
+[p] Transformations.
+[p] VLD made the whole process so easy! They really took the time to understand what I wanted and turned my ideas into a stunning, build-ready desi...
+[p] Jesse Jenkins
+[p] Lovely team to work with. Always kept me up to date with the process and it was great that I could deal with the them virtually.
+Highly recomme...
+[p] Angelique Marais
+[p] I would highly recommend @virtual_landscape_design 👌
+Thorough. Detailed.
+Our Design was Perfection.
+Very pleased with the service they provide...
+[p] April Sawicki
+[p] This service is amazing!  With full 3d plans, materials and planting schedule provided, it gave us everything we needed to be confident to star...
+[p] Melissa Daly
+[p] These guys are truly talented! Pricing is great and the quality of work you receive is incredible. They had so many beautiful creative ideas I ...
+[p] Tash
+[p] We recently used virtual landscape design to help bring our backyard dreams to life and the entire process was seamless, professional and so ea...
+[p] Jenna Marshall
+[p] The team at VLD were legends from start to finish! They took my ideas and turned them into a stunning landscape design, ready for construction....
+[p] Claire Martin
+[p] I can’t recommend VL highly enough! From start to finish, they were an absolute pleasure to deal with—professional, knowledgeable, and incredib...
+[p] Kiera Marshall
+[button] See All Reviews
+[p] Our Story
+[p] How We Started—and
+[p] Why We Care
+[p] Katherine and Nigel have spent over twenty years designing and building welcoming gardens for real families. Katherine brings calm, comfortable layouts and low-maintenance plants; Nigel adds practical know-how and clear, step-by-step planning. Together, they blend care and craftsmanship to create outdoor spaces that feel right and work well. Today, they offer the same quality online, so Australians anywhere can get a simple plan, a helpful plant list, and easy instructions—designed with you, at your pace.
+[button] Learn More
+[p] 5,000
+[p] Landscapes Designed
+[p] Customer Satisfaction Rate
+[p] Years of Experience
+[p] Increase in Property Value
+[p] Our Portfolio
+[p] Our Work: Simple Plans,
+[p] Lasting Results
+[div] Deluxe
+[p] Gunnedah
+[div] Backyard
+[p] Adelaide
+[div] Front Yard
+[p] Melbourne
+[div] Whole Yard
+[p] Middle Ridge
+[button] View our Portfolio
+[p] Our Packages
+[button] See All Packages
+[p] The Right Plan for Your Yard
+[p] Front Yard
+[p] From
+[span] $1800
+[p] Create stunning front yard designs.
+[p] Whole Yard
+[p] From
+[span] $1800
+[p] Comprehensive front and backyard design.
+[p] Back Yard
+[p] From
+[span] $1800
+[p] Bring your backyard to life with custom designs.
+[button] See All Packages
+[p] Before & After
+[p] Real Makeovers, Side-by-Side
+[div] Before
+[div] After
+[button] View Our Packages
+[p] Serving All of Australia
+[p] Across Every State & Territory
+[p] in 2025
+[h6] Crafting Outdoor Perfection, One Yard at a Time.
+[a] How It Works
+[a] Inspirations
+[a] Packages
+[a] Contact Us
+[a] Real Estate Company
+[a] Suppliers
+[a] Contractors
+[a] Our Story
+[a] Client Stories
+[a] Gift Card
+[p] © Copyright
+[p] VL Designs. All rights reserved
+[a] 0483 969 922
+[a] Terms of Service
+[a] Privacy Policy

@@ -1,0 +1,14 @@
+{
+  "summary": {
+    "webAnimations": 0,
+    "cssDeclarations": 140,
+    "scrollTargets": 59,
+    "cdpAnimations": 159,
+    "canvases": 0
+  },
+  "namedAnimations": [
+    "mui-auto-fill-cancel"
+  ],
+  "scrollTriggeredElements": 59,
+  "representativeAnimations": []
+}
