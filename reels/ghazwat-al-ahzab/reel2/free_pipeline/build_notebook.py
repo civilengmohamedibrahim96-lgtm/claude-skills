@@ -17,7 +17,7 @@ Makes everything the reel needs from **free, open models**:
 **Settings before you run** (right-hand panel): Accelerator **GPU T4 x2** (two GPUs are needed), Internet **On** (needs a phone-verified Kaggle account).
 **Secret:** Add-ons → Secrets → `HF_TOKEN` = a Hugging Face read token, after you click *Agree* on https://huggingface.co/black-forest-labs/FLUX.1-Kontext-dev.
 
-Run the cells top to bottom. The notebook **stops twice on purpose**: after the portraits (pick one) and after the first frames (check the face matches). Every stage skips files it already made, so re-running is safe.
+Run the cells top to bottom. The notebook **stops three times on purpose**: pick a face, approve the re-dressed portrait, and check the first frames. Every stage skips files it already made, so re-running is safe.
 When done, *Save Version → Save & Run All* is not needed: just download `ahzab_out.zip` from the Output panel and upload it to the repo at `reels/ghazwat-al-ahzab/reel2/incoming/`.""")
 code("""!pip -q install -U "diffusers>=0.34" "transformers>=4.51" accelerate bitsandbytes sentencepiece protobuf edge-tts imageio imageio-ffmpeg""")
 code("""import os
@@ -52,7 +52,7 @@ STEPS, W, H = 20, 576, 1024          # 20 steps at 576x1024: about twice as fast
 enc = FluxKontextPipeline.from_pretrained(KONTEXT, transformer=None, vae=None, torch_dtype=DT).to(ENC)
 EMB = {}
 with torch.no_grad():
-    for k, p in [('portrait', SHOTS['portrait_prompt'])] + [(s['id'], s['frame_prompt']) for s in SHOTS['shots']]:
+    for k, p in [('portrait', SHOTS['portrait_prompt']), ('edit', SHOTS['edit_prompt'])] + [(s['id'], s['frame_prompt']) for s in SHOTS['shots']]:
         pe, pooled, _ = enc.encode_prompt(prompt=p, prompt_2=None, device=ENC, max_sequence_length=512)
         EMB[k] = (pe.cpu(), pooled.cpu())
 del enc; gc.collect(); torch.cuda.empty_cache()
@@ -84,12 +84,24 @@ run_on_both([(f, (lambda gpu, i=i: kgen(gpu, 'portrait', guidance_scale=3.5,
              generator=torch.Generator('cpu').manual_seed(27100+i)))) for i, f in enumerate(paths)])
 print('minutes:', round((time.time()-t)/60, 1))
 sheet(paths, OUT/'portraits'/'contact_sheet_v2.png', cols=3)""")
-md("""## STOP 1: approve the portrait
-Look at the three candidates above (numbered 0, 1, 2 from the left) (also in `ahzab_out/portraits/`). Put the number of the one you approve below, then run on.
-The face, scar, beard, head cloth and tunic of this picture become the lock for every shot.""")
-code("""CHOSEN = None   # e.g. 2
-assert CHOSEN is not None, 'Pick a portrait number first'
-PORTRAIT = Image.open(OUT/'portraits'/f'CHR-027_v2_{CHOSEN}.png').convert('RGB').resize((W, H), Image.LANCZOS)
+md("""## STOP 1: pick the face
+Look at the three ink portraits above (numbered 0, 1, 2 from the left). Put the number of the **face** you like in `FACE` below and run on.
+The next cell keeps that face and only changes his hair and clothes to 7th-century Hijaz (wool waist-wrap, patched camel-hair shawl, thin cloth tied around the forehead, rope coil). It makes three versions.""")
+code("""FACE = None   # e.g. 1 for the middle one
+assert FACE is not None, 'Pick a face number first'
+base = Image.open(OUT/'portraits'/f'CHR-027_v2_{FACE}.png').convert('RGB').resize((W, H), Image.LANCZOS)
+t = time.time()
+paths = [OUT/'portraits'/f'CHR-027_v3_{i}.png' for i in range(3)]
+run_on_both([(f, (lambda gpu, i=i: kgen(gpu, 'edit', image=base, _auto_resize=False, guidance_scale=2.5,
+             generator=torch.Generator('cpu').manual_seed(27300+i)))) for i, f in enumerate(paths)])
+print('minutes:', round((time.time()-t)/60, 1))
+sheet([OUT/'portraits'/f'CHR-027_v2_{FACE}.png'] + paths, OUT/'portraits'/'contact_sheet_v3.png', cols=4)""")
+md("""## STOP 2: approve the final portrait
+The sheet above shows the original face first, then the three re-dressed versions (numbered 0, 1, 2 after the original).
+Put the number of the one you approve in `CHOSEN`. Its face and clothes become the lock for every shot.""")
+code("""CHOSEN = None   # e.g. 0
+assert CHOSEN is not None, 'Pick the final portrait number first'
+PORTRAIT = Image.open(OUT/'portraits'/f'CHR-027_v3_{CHOSEN}.png').convert('RGB').resize((W, H), Image.LANCZOS)
 PORTRAIT.save(OUT/'portraits'/'CHR-027_APPROVED.png')""")
 md("## Stage B: first frame of every shot")
 code("""t = time.time()
@@ -103,7 +115,7 @@ paths = [OUT/'frames'/f"{s['id']}.png" for s in SHOTS['shots']]
 run_on_both([(f, frame_job(s)) for f, s in zip(paths, SHOTS['shots'])])
 print('minutes:', round((time.time()-t)/60, 1))
 sheet(paths, OUT/'frames'/'contact_sheet.png', cols=5)""")
-md("""## STOP 2: check the frames
+md("""## STOP 3: check the frames
 Every character frame must show **the same man** as the approved portrait (scar through the left eyebrow, patch on the right shoulder, head-cloth tail on the left).
 To redo one frame: delete its file in `ahzab_out/frames/`, change its seed or prompt in `SHOTS`, and re-run the cell above. Then run on.""")
 code("""del KP; gc.collect(); torch.cuda.empty_cache()""")
