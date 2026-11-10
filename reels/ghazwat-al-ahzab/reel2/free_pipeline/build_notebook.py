@@ -9,7 +9,7 @@ Makes everything the reel needs from **free, open models**:
 
 | Stage | Model | Licence |
 |---|---|---|
-| A. Portrait of CHR-027 (4 candidates) | FLUX.1 Kontext [dev], 4-bit | FLUX.1 [dev] **non-commercial** licence |
+| A. Portrait of CHR-027 (3 candidates, ink style) | FLUX.1 Kontext [dev], 4-bit | FLUX.1 [dev] **non-commercial** licence |
 | B. First frame of every shot, from the approved portrait | FLUX.1 Kontext [dev] | same |
 | C. Image-to-video shots (breath, blinks, eye darts, expression) | LTX-Video 0.9.7 distilled | LTX-Video open weights licence |
 | D. Arabic narration | Microsoft Edge neural voice `ar-SA-HamedNeural` via `edge-tts` | free, unofficial route |
@@ -45,8 +45,10 @@ def sheet(paths, out, cols=4, w=270):
 def is_blank(img): return np.asarray(img).mean() < 4""" % shots)
 md("## Stage A: portrait candidates")
 code("""from diffusers import FluxKontextPipeline, FluxTransformer2DModel, BitsAndBytesConfig as DBnb
+from concurrent.futures import ThreadPoolExecutor
 KONTEXT = 'black-forest-labs/FLUX.1-Kontext-dev'
-# 1) read every prompt once with the big T5 text reader on GPU 2, keep the results, then free it
+STEPS, W, H = 20, 576, 1024          # 20 steps at 576x1024: about twice as fast as before
+# 1) read every prompt once with the big T5 text reader, keep the results, then free it
 enc = FluxKontextPipeline.from_pretrained(KONTEXT, transformer=None, vae=None, torch_dtype=DT).to(ENC)
 EMB = {}
 with torch.no_grad():
@@ -54,51 +56,57 @@ with torch.no_grad():
         pe, pooled, _ = enc.encode_prompt(prompt=p, prompt_2=None, device=ENC, max_sequence_length=512)
         EMB[k] = (pe.cpu(), pooled.cpu())
 del enc; gc.collect(); torch.cuda.empty_cache()
-# 2) the image model alone on GPU 1 (4-bit), no T5
-tr = FluxTransformer2DModel.from_pretrained(KONTEXT, subfolder='transformer', torch_dtype=DT,
-        quantization_config=DBnb(load_in_4bit=True, bnb_4bit_quant_type='nf4', bnb_4bit_compute_dtype=DT))
-kpipe = FluxKontextPipeline.from_pretrained(KONTEXT, transformer=tr, text_encoder_2=None, tokenizer_2=None, torch_dtype=DT).to(RUN)
-kpipe.vae.enable_tiling()
-def kgen(key, **kw):
-    pe, pooled = EMB[key]
-    return kpipe(prompt_embeds=pe.to(RUN), pooled_prompt_embeds=pooled.to(RUN), **kw).images[0]
-print('GPU 1 memory in use:', round(torch.cuda.memory_allocated(0)/1e9,1), 'GB')
-paths=[]
-for i in range(4):
-    f = OUT/'portraits'/f'CHR-027_front_{i}.png'
-    if not f.exists():
-        img = kgen('portrait', height=1392, width=752, guidance_scale=3.5, num_inference_steps=28,
-                   generator=torch.Generator('cpu').manual_seed(27000+i))
-        if is_blank(img): print('candidate', i, 'came out blank')
-        img.save(f)
-    paths.append(f)
-sheet(paths, OUT/'portraits'/'contact_sheet.png')""")
+# 2) one 4-bit image model on EACH GPU, so two pictures are made at the same time
+def make_kpipe(dev):
+    with torch.cuda.device(dev):
+        tr = FluxTransformer2DModel.from_pretrained(KONTEXT, subfolder='transformer', torch_dtype=DT,
+                quantization_config=DBnb(load_in_4bit=True, bnb_4bit_quant_type='nf4', bnb_4bit_compute_dtype=DT))
+    p = FluxKontextPipeline.from_pretrained(KONTEXT, transformer=tr, text_encoder_2=None, tokenizer_2=None, torch_dtype=DT).to(dev)
+    p.vae.enable_tiling(); p.set_progress_bar_config(disable=True)
+    return p, dev
+KP = [make_kpipe(RUN), make_kpipe(ENC)]
+def kgen(gpu, key, **kw):
+    p, dev = KP[gpu]; pe, pooled = EMB[key]
+    return p(prompt_embeds=pe.to(dev), pooled_prompt_embeds=pooled.to(dev), height=H, width=W, max_area=W*H,
+             num_inference_steps=STEPS, **kw).images[0]
+def run_on_both(jobs):
+    # jobs: list of (output_path, function(gpu) -> image); GPU 1 takes the even ones, GPU 2 the odd ones
+    todo = [j for j in jobs if not j[0].exists()]
+    def worker(gpu):
+        for path, fn in todo[gpu::2]:
+            img = fn(gpu)
+            if is_blank(img): print(path.name, 'came out blank')
+            img.save(path); print('made', path.name, flush=True)
+    with ThreadPoolExecutor(2) as ex: list(ex.map(worker, [0, 1]))
+import time; t = time.time()
+paths = [OUT/'portraits'/f'CHR-027_v2_{i}.png' for i in range(3)]
+run_on_both([(f, (lambda gpu, i=i: kgen(gpu, 'portrait', guidance_scale=3.5,
+             generator=torch.Generator('cpu').manual_seed(27100+i)))) for i, f in enumerate(paths)])
+print('minutes:', round((time.time()-t)/60, 1))
+sheet(paths, OUT/'portraits'/'contact_sheet_v2.png', cols=3)""")
 md("""## STOP 1: approve the portrait
-Look at the four candidates above (also in `ahzab_out/portraits/`). Put the number of the one you approve below, then run on.
+Look at the three candidates above (numbered 0, 1, 2 from the left) (also in `ahzab_out/portraits/`). Put the number of the one you approve below, then run on.
 The face, scar, beard, head cloth and tunic of this picture become the lock for every shot.""")
 code("""CHOSEN = None   # e.g. 2
 assert CHOSEN is not None, 'Pick a portrait number first'
-PORTRAIT = Image.open(OUT/'portraits'/f'CHR-027_front_{CHOSEN}.png').convert('RGB')
+PORTRAIT = Image.open(OUT/'portraits'/f'CHR-027_v2_{CHOSEN}.png').convert('RGB').resize((W, H), Image.LANCZOS)
 PORTRAIT.save(OUT/'portraits'/'CHR-027_APPROVED.png')""")
 md("## Stage B: first frame of every shot")
-code("""paths=[]
-for s in SHOTS['shots']:
-    f = OUT/'frames'/f"{s['id']}.png"
-    if not f.exists():
-        kw = dict(guidance_scale=2.5, num_inference_steps=28,
-                  generator=torch.Generator('cpu').manual_seed(int(s['id'][1:])*101))
-        if s['kind']=='char':
-            img = kgen(s['id'], image=PORTRAIT, **kw)
-        else:
-            img = kgen(s['id'], height=1392, width=752, **kw)
-        if is_blank(img): print(s['id'], 'came out blank')
-        img.save(f)
-    paths.append(f)
+code("""t = time.time()
+def frame_job(s):
+    seed = int(s['id'][1:]) * 101
+    if s['kind'] == 'char':   # edit the approved portrait into the shot, so the face stays the same
+        return lambda gpu: kgen(gpu, s['id'], image=PORTRAIT, _auto_resize=False, guidance_scale=2.5,
+                                generator=torch.Generator('cpu').manual_seed(seed))
+    return lambda gpu: kgen(gpu, s['id'], guidance_scale=3.5, generator=torch.Generator('cpu').manual_seed(seed))
+paths = [OUT/'frames'/f"{s['id']}.png" for s in SHOTS['shots']]
+run_on_both([(f, frame_job(s)) for f, s in zip(paths, SHOTS['shots'])])
+print('minutes:', round((time.time()-t)/60, 1))
 sheet(paths, OUT/'frames'/'contact_sheet.png', cols=5)""")
 md("""## STOP 2: check the frames
 Every character frame must show **the same man** as the approved portrait (scar through the left eyebrow, patch on the right shoulder, head-cloth tail on the left).
 To redo one frame: delete its file in `ahzab_out/frames/`, change its seed or prompt in `SHOTS`, and re-run the cell above. Then run on.""")
-code("""del kpipe, tr; gc.collect(); torch.cuda.empty_cache()""")
+code("""del KP; gc.collect(); torch.cuda.empty_cache()""")
 md("## Stage C: image-to-video shots")
 code("""from diffusers import LTXConditionPipeline
 from diffusers.pipelines.ltx.pipeline_ltx_condition import LTXVideoCondition
