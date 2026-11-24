@@ -1,149 +1,145 @@
 # Redcon Tender Planning – build plan
 
-Goal: turn the HTML prototype (`index.html`) into a real, shared web app for the planning team, on a setup that costs **$0 a month** for a team of this size.
+Goal: turn the HTML prototype (`index.html`) into a real, shared web app for the **4 planning engineers**, built on the company's **Microsoft 365**, on a setup that costs **$0 a month**.
 
-Figures checked November 2026 against the providers' pricing pages.
+With 4 users nothing comes close to any free limit, so the setup is kept as small as possible: one database service, one free web host, and the company's own Outlook mailbox and OneDrive / SharePoint.
+
+Free limits checked November 2026 against the providers' pricing pages.
 
 ---
 
-## 1. The setup in one picture
+## 1. The setup
 
 ```
- Mailbox (Gmail or Outlook)                     Google Drive or OneDrive
-        │ hourly: read "ورد الينا", تأجيل, استفسارات      ▲ project folders + uploads
-        ▼                                               │
- Mail reader ──────────────► Supabase (free) ◄───────── Web app (static, free hosting)
- (Apps Script or             • Postgres database          • the board you approved
-  Edge Function)             • logins + invitations       • opens in any browser,
-                             • live updates between users   installs like an app (PWA)
-                             • scheduled jobs (reminders)
-                                    │
-                                    ├── desktop / browser notifications (Web Push, free)
-                                    └── reminder & invitation emails (Resend, free)
+ Microsoft 365 (already paid for)
+ ┌───────────────────────────────────────────┐
+ │ Outlook – tenders mailbox                 │      every hour: read "ورد الينا", تأجيل, استفسارات
+ │ OneDrive / SharePoint – tenders folder    │◄──┐  and send reminder emails
+ │ Microsoft sign-in for the 4 users         │   │  (Microsoft Graph)
+ └───────────────────────────────────────────┘   │
+                                                 │
+ Web app (Cloudflare Pages, free) ◄──────► Supabase (free)
+ • the board you approved                    • database
+ • sign in with Microsoft                    • sign-in check (only the 4 users)
+ • upload files straight to SharePoint       • live updates between users
+ • installs like an app → notifications      • hourly mail job + 5-minute reminder job
 ```
 
-| Piece | Service | Cost | Free limit that matters |
+| Piece | Service | Cost | Why it is enough for 4 people |
 |---|---|---|---|
-| Database, logins, live updates, scheduled jobs | **Supabase** Free | $0 | 500 MB database (years of tender data), 50,000 users; pauses after 7 idle days (the hourly mail sync keeps it awake) |
-| Web app hosting | **Cloudflare Pages** | $0 | Unlimited visits; deploys automatically from GitHub |
-| Reading the mailbox every hour | **Google Apps Script** (Gmail) or a **Supabase Edge Function** (Outlook) | $0 | Well inside quotas at a few dozen emails a day |
-| Project folders and file uploads | **Google Drive** or **OneDrive** (your existing accounts) | $0 | Files never touch Supabase, so the 1 GB storage limit is not used |
-| Desktop / browser notifications | **Web Push** (built into browsers) | $0 | No limit |
-| Reminder and invitation emails | **Resend** Free | $0 | 100 emails a day, 3,000 a month |
-| Code and backups | **GitHub** (this repository) | $0 | Weekly database backup to a private repository |
-| Own web address (optional) | e.g. `planning.redcon.com` | ~$10–15 a year, or $0 using `*.pages.dev` | – |
+| Sign-in | **Microsoft account** (your work login) through Supabase | $0 | Only your company's 4 listed users can enter |
+| Database, live updates, scheduled jobs | **Supabase** Free | $0 | 500 MB database = many years of tenders |
+| Reading the tenders mailbox every hour | Small Supabase function using **Microsoft Graph** | $0 | A few dozen emails a day |
+| Reminder emails | Sent **from the tenders mailbox** through Microsoft Graph | $0 | A handful a day; no extra email service |
+| Folders and uploads | **SharePoint / OneDrive** tenders folder | $0 (in your M365) | Files stay in your Microsoft storage, not in the database |
+| Desktop / browser notifications | Web Push, built into browsers | $0 | No limit |
+| Web app hosting | **Cloudflare Pages** | $0 | Updates automatically from GitHub |
+| Backups | Weekly copy to a private **GitHub** repository | $0 | The free Supabase plan has no backups of its own |
+| Own web address (optional) | e.g. `planning.redcon.com` | ~$10–15 a year, or $0 with `….pages.dev` | – |
+| Optional extra | Reminders also posted in a **Teams** chat or channel | $0 | Uses Teams' built-in Workflows |
 
-**When you would pay:** only if the team outgrows the free limits or you want Supabase's daily backups and no pausing – Supabase Pro is $25 a month. Nothing else in this plan needs a paid tier.
+**Only possible cost:** Supabase Pro at $25 a month, and only if you later want its built-in daily backups. Not needed for 4 people.
 
----
-
-## 2. The one decision needed before starting
-
-**Which email and file system does the company use?** The mail reader and the drive connection are built for one of them first.
-
-| | **A. Google (Gmail / Google Workspace + Google Drive)** – simplest | **B. Microsoft (Outlook / Microsoft 365 + OneDrive / SharePoint)** |
-|---|---|---|
-| Reading mail hourly | Apps Script inside the tenders mailbox, hourly trigger, no server | Supabase Edge Function on an hourly schedule, calling Microsoft Graph |
-| Setup needed from IT | None beyond the mailbox owner approving the script once | Register a free "app" in Microsoft Entra (Azure) and an admin approves mail + files access |
-| Folders and uploads | Drive API with each user's Google sign-in | Graph API with each user's Microsoft sign-in |
-| Sign-in to the app | "Sign in with Google" or email link | "Sign in with Microsoft" or email link |
-
-Both are free. Option A has fewer moving parts. The choice between Google Drive and OneDrive stays in the app's settings, as in the prototype, but only the chosen one is built in phase 4; the other can be added later.
-
-Also needed: **5–10 real "ورد الينا", postponement and query-answer emails** (personal details can be blanked out). The email parser is tuned on these.
+**The one free-plan rule to know:** a free Supabase project pauses after 7 days with no activity. The hourly mail check counts as activity, so in normal use it never pauses. If it ever does, restoring is one click and no data is lost.
 
 ---
 
-## 3. Data (what the database stores)
+## 2. What I need from you
+
+1. **The tenders mailbox address** – the one that receives the "ورد الينا" emails (a shared mailbox or a person's mailbox).
+2. **Where the tenders folder lives** – a SharePoint site's document library (best for a team) or someone's OneDrive – and its link.
+3. **The 4 users' names and work emails**, and who is admin.
+4. **5–10 real emails** ("ورد الينا", postponements, query answers), personal details blanked out, to tune the email reader.
+5. **Who your Microsoft 365 admin is** – they need to do the steps in section 3 once (about 20 minutes).
+
+---
+
+## 3. One-time setup by your Microsoft 365 admin (free)
+
+Done in the Microsoft Entra admin centre and Exchange; I will provide exact click-by-click steps.
+
+1. **Register an app** called "Redcon Tender Planning" (free, no licence needed).
+2. **Sign-in for users:** allow the app to sign users in with their work accounts (redirect address: the app's web address).
+3. **Permissions, approved by the admin:**
+   - read mail and send mail – **limited to the tenders mailbox only** (an Exchange access policy, so the app can never read anyone else's email);
+   - read and write files – for the tenders SharePoint site / folder.
+4. **Create a client secret** and paste it into Supabase's secret settings (never into the web page). Secrets expire – the admin picks 12 or 24 months, and the app shows a warning a month before expiry.
+
+Until this is done, the board works and projects can be added by hand; email reading and file uploads switch on once it is approved.
+
+---
+
+## 4. What is simplified for 4 users
+
+| In the prototype | In the real app |
+|---|---|
+| Invite engineers by email, invitation status, resend | **Admin adds the 4 people** by name + work email; they sign in with their Microsoft account. No invitation emails. |
+| Choice of Google Drive or OneDrive | **SharePoint / OneDrive only** |
+| Separate email-sending service | Reminders sent **from the tenders mailbox** |
+| "Preview as engineer", Reset demo | Removed |
+
+Everything else stays as approved: board, columns per engineer in your order, Unassigned, drag to assign, sorting, search bar with filters, cards with submission date and update log, project page and tabs, tender team, reminders.
+
+---
+
+## 5. Data
 
 | Table | Holds |
 |---|---|
-| `profiles` | Planning engineers: name, email (optional), role (admin / engineer), colour, **board order**, has a column |
+| `people` | The 4 planning engineers: name, email, admin or not, colour, board order |
 | `tender_team` | Tender engineers: name, Arabic first name (for reading emails), public / private |
-| `projects` | Title, client, type, tender engineer, supervisor first name (from email), assigned planning engineer, position, status text, received date, **submission date**, folder link, source, last update time and by whom |
+| `projects` | Title, client, type, tender engineer, supervisor first name, assigned engineer, position, status, received date, **submission date**, SharePoint folder, last update time and by whom |
 | `date_changes` | Every submission-date change: old → new, from email or by whom, when |
-| `mail_events` | The card's email-update log: type (new / update / postponed / queries answers), summary, subject, links found, the email's unique id (so no email is processed twice) |
-| `tags`, `project_tags` | Tags, many per project |
-| `subtasks` | Text, done, notes, date, order |
-| `links`, `comments`, `files` | Links tab, comments (including the automatic history), files saved to Drive / OneDrive |
-| `reminders` | Message, project (optional), time, repeat, who gets it, by email or not, sent |
-| `push_subscriptions` | Each person's browsers that accepted desktop notifications |
-| `settings` | Mail subject keyword, drive provider, main tenders folder, sync interval |
+| `mail_events` | The card's update log; each email's Outlook id so it is never processed twice |
+| `tags`, `project_tags`, `subtasks`, `links`, `comments`, `files` | As in the prototype |
+| `reminders`, `push_subscriptions` | Reminders and each person's browsers that accept notifications |
+| `settings` | Mail keyword, tenders mailbox, main tenders folder, secret expiry date |
 
-Access rules (Supabase row-level security): every signed-in team member can see and edit projects; only admins manage the team, the tender team and settings. Secret keys stay on the server side, never in the web page.
+Access: only the 4 listed work emails can sign in. Microsoft keys stay on the server side, never in the web page.
 
 ---
 
-## 4. Phases
+## 6. Phases
 
-Each phase ends with something the team can use. Estimated for one developer working part-time.
+Estimated for one developer, part-time. Usable after phase 1.
 
-### Phase 0 – Decide and collect (1–2 days)
-- Choose option A or B (section 2).
-- Collect the sample emails.
-- Create the free accounts: Supabase, Cloudflare, Resend; confirm access to the tenders mailbox and the main tenders folder.
+**Phase 0 – Collect and set up (1–2 days, mostly waiting for IT)**
+Answers to section 2; admin does section 3; create the free Supabase and Cloudflare accounts.
 
-### Phase 1 – The board, shared and live (1–2 weeks)
-- Move the prototype into a small project (Vite, plain JavaScript – no framework to learn), reusing its design and code.
-- Create the database tables and access rules.
-- Sign-in by email link (plus Google or Microsoft sign-in).
-- Board with real data: columns per planning engineer in the chosen order, Unassigned, drag to assign, sorting per column, search bar with filters, cards with submission date, tags, status, update log button.
-- Project page: details, submission date with history, tender team, tags, sub-tasks, links, comments.
-- Live updates: a change by one person appears on everyone's screen within a second.
+**Phase 1 – The shared board (1–1.5 weeks)**
+- Move the prototype into a small project (Vite + plain JavaScript), keeping its design and code.
+- Database tables; "Sign in with Microsoft" for the 4 users.
+- Board, cards, sorting, search and filters, project page, tags, sub-tasks, links, comments, submission date with history – all on real data, updating live on everyone's screen.
+- Team panel: add / order / edit the 4 people; tender team editor.
 - Publish on Cloudflare Pages.
-- **Result:** the team stops using the prototype and works on the real board.
 
-### Phase 2 – Team and admin (3–4 days)
-- Team panel: add planning engineers (name only, or with email to invite), reorder, edit profiles, remove.
-- Invitation emails through Resend; invited people set up their profile on first sign-in.
-- Tender team editor (names, Arabic names, public / private).
+**Phase 2 – Hourly email reading from Outlook (1 week)**
+- Runs every hour and on the "Sync email" button; reads only new emails in the tenders mailbox.
+- Rules tuned on your real emails: "ورد الينا" → new project or update; تأجيل → postponed + new date; استفسارات → queries answers; "والمشرف علي الدراسه :" → supervisor's first name; links → Links tab; every change → the card's update log.
+- Each email is processed once and given an Outlook category ("Tender Planning") so you can see what was read; anything it cannot match goes to a "Needs review" list.
 
-### Phase 3 – Hourly email reading (1 week)
-- The mail reader runs every hour and also on the "Sync email" button.
-- Rules from the prototype, tuned on the real emails:
-  - "ورد الينا" → new project in Unassigned, or "New updates" if the project already exists (matched by project name)
-  - تأجيل → Postponed, new submission date
-  - استفسارات → Queries answers
-  - "والمشرف علي الدراسه :" → supervisor's first name; unknown names join the tender team automatically
-  - every link in the body → Links tab; every change → the card's update log and date history
-- Each email is processed once (its unique id is stored); processed emails get a label / category in the mailbox.
-- Emails the reader cannot match go to a **"Needs review"** list instead of being lost.
+**Phase 3 – SharePoint folders and files (3–4 days)**
+Create or link a project folder inside the tenders folder; upload from the Uploads tab straight to SharePoint (large drawings included); the Files tab lists the folder's contents with links to open them.
 
-### Phase 4 – Folders and files (1 week)
-- Create a project folder inside the main tenders folder, or link an existing one.
-- Upload files from the Uploads tab straight to that folder; the Files tab lists what is in it.
-- Each person signs in to Google or Microsoft once to allow this.
+**Phase 4 – Reminders (3–4 days)**
+- Checked every 5 minutes: desktop / browser notification, plus an email from the tenders mailbox when chosen (optionally a Teams message).
+- Automatic reminders 3 days and 1 day before each submission date.
+- "Install app" so notifications arrive when it is closed (works in Edge and Chrome; on iPhone: Add to Home Screen, iOS 16.4+).
 
-### Phase 5 – Reminders and notifications (1 week)
-- A scheduled job every 5 minutes sends due reminders: desktop / browser notification (Web Push) and, when chosen, an email.
-- Reminders for everyone, the assigned engineer, or chosen people; repeat hourly, daily or weekly.
-- Automatic reminders: submission date in 3 days and tomorrow; new project in Unassigned for more than a day.
-- Optional daily summary email at 08:00.
-- The app can be installed from the browser ("Install app") so notifications arrive even when it is closed. On iPhone this needs "Add to Home Screen" (iOS 16.4 or later).
+**Phase 5 – Launch (2–3 days)**
+Import current tenders, weekly GitHub backup, short walkthrough with the 4 users, then two weeks of fixes from real use.
 
-### Phase 6 – Launch and care (3–4 days)
-- Import the current live tenders.
-- Weekly automatic database backup to a private GitHub repository (GitHub Actions, free) – the free Supabase plan has no backups of its own.
-- A short "how to use" page; a 30-minute walkthrough with the team.
-- Two weeks of fixes from real use.
-
-**Total: about 5–7 weeks part-time**, usable after phase 1.
+**Total: about 3–4 weeks part-time**, plus however long the IT approval takes.
 
 ---
 
-## 5. Risks and how they are handled
+## 7. Risks
 
 | Risk | Handling |
 |---|---|
-| Supabase free project pauses after 7 days with no activity | The hourly mail sync is activity, so it stays awake; if it ever pauses, restoring is one click and no data is lost; Pro ($25/month) removes pausing |
-| No automatic backups on the free plan | Weekly backup via GitHub Actions (phase 6) |
-| Email wording changes over time | Parser rules kept in one place and tested against saved sample emails; unmatched emails go to "Needs review" |
-| Microsoft option needs IT approval | Ask IT in phase 0; until approved, the board works and projects can be added by hand |
-| iPhone notifications | Need the app added to the home screen; email reminders cover anyone who does not |
-| Email sending limit (100 a day) | Plenty for a small team; reminders are grouped into one email per person when several are due together |
-
----
-
-## 6. What carries over from the prototype
-
-Everything already agreed in the prototype is the specification: layout, colours, REDCON logo, card design, submission-date row, update-log drop-down, sorting, search bar with filters, project page and tabs, team panel, reminders panel, email rules. The prototype's code is reused as the starting point for the real app, so the look does not change – the data simply becomes shared and real.
+| IT approval takes time | The board is usable with manual entry meanwhile; email and files switch on after approval |
+| App secret expires (12–24 months) | Expiry date stored; the app warns the admin a month ahead; renewing takes 5 minutes |
+| Free project pauses after 7 idle days | Hourly mail check keeps it active; one-click restore, no data lost |
+| No built-in backups on the free plan | Weekly automatic backup to GitHub |
+| Email wording changes | Rules in one place, tested on saved sample emails; "Needs review" list |
+| iPhone notifications | Need the app on the home screen; email (or Teams) reminders as backup |
