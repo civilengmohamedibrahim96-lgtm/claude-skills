@@ -447,6 +447,51 @@ textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
 .filters::-webkit-scrollbar{display:none}
 .fchip{flex:none}
 .fsep{flex:none}
+
+/* ---------- v4 refinement: compact date row, lighter card ---------- */
+body{background:#E7E7E3}
+.board{background-image:radial-gradient(rgba(17,17,17,.07) 1px,transparent 1.2px);background-size:18px 18px;background-position:-2px -2px}
+.col{background:rgba(244,244,241,.92);border-color:#DCDCD7;box-shadow:0 1px 0 rgba(255,255,255,.6) inset;backdrop-filter:blur(2px)}
+.col.unassigned{background:repeating-linear-gradient(135deg,rgba(236,236,232,.95) 0 10px,rgba(230,230,226,.95) 10px 20px)}
+.col-head{padding:14px 12px 12px 14px}
+.col-title small{flex-wrap:wrap;row-gap:0}
+.wl{color:var(--ink-2);font-weight:500}
+.wl.late{color:var(--danger);font-weight:600}
+.col-list{gap:10px}
+.card{padding:14px 14px 12px;border-radius:12px;border-color:#E1E1DC;box-shadow:0 1px 2px rgba(17,17,17,.05),0 1px 0 rgba(17,17,17,.02)}
+.card:hover{box-shadow:0 10px 24px -8px rgba(17,17,17,.18),0 2px 6px rgba(17,17,17,.06)}
+.card.is-late::before{transform:none;width:3px}
+.c-top{margin-bottom:8px;gap:6px}
+.ttype{font-size:10.5px;padding:1px 8px}
+.c-upd{font-size:11px}
+.card h3{font-size:14.5px;line-height:1.4}
+.c-client{margin-top:2px;font-size:12px}
+.c-due{display:flex;align-items:center;gap:7px;margin-top:10px;padding:5px 4px 5px 10px;height:auto;min-height:34px;border-radius:8px;background:var(--surface-2);border:1px solid #E6E6E1;color:var(--ink-2)}
+.c-due>svg.i{width:14px;height:14px;color:var(--muted)}
+.c-due b{display:inline;font-size:13.5px;font-weight:600;margin:0;line-height:1.2;white-space:nowrap;color:var(--ink);letter-spacing:0}
+.c-rel{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.c-due.soon{background:#FEF1E8;border-color:#F8CDB0}
+.c-due.soon>svg.i{color:var(--accent-2)}
+.c-due.soon .c-rel{background:var(--accent);border-color:var(--accent);color:#fff}
+.c-due.late{background:#FCEDEA;border-color:#F2C2B8}
+.c-due.late>svg.i,.c-due.late b{color:var(--danger)}
+.c-due.late .c-rel{background:var(--danger);border-color:var(--danger);color:#fff}
+.c-due.none b{color:var(--muted);font-weight:500}
+.c-due-src{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;color:var(--muted);margin-left:auto}
+.c-due-src.em{color:var(--accent-2);background:#fff}
+.c-due-src svg.i{width:12px;height:12px}
+.c-due-edit{width:26px;height:26px;border-radius:6px;margin-left:auto;opacity:.55}
+.c-due-src+.c-due-edit{margin-left:0}
+.card:hover .c-due-edit,.c-due-edit:focus-visible{opacity:1}
+.c-due-edit svg.i{width:13px;height:13px}
+.c-status{margin-top:10px;padding:0 0 0 10px;background:none;border-left:2px solid var(--accent-line);border-radius:0;font-size:12.5px;line-height:1.5;color:var(--ink-2);-webkit-line-clamp:2}
+.card-tags{margin-top:10px;gap:5px}
+.tag{font-size:11px;padding:2px 9px 2px 7px;background:#fff}
+.c-foot{margin-top:12px;padding-top:10px;gap:12px}
+.c-team .lead{padding:1px 7px 1px 1px}
+.c-team .lead b{font-size:10px}
+.c-due.done .c-rel{background:var(--ok);border-color:var(--ok);color:#fff}
+@media (max-width:860px){.filters{flex:1 1 100%;order:3;margin-left:0}.search{flex:1}}
 </style>
 </head>
 <body>
@@ -640,7 +685,7 @@ function cardHTML(p){
   const done=p.subtasks.filter(s=>s.done).length, tot=p.subtasks.length;
   const rem=p.notifications.filter(n=>!n.fired).length;
   const com=p.comments.filter(c=>!c.sys).length, fil=p.files.length+p.uploads.length;
-  const du=dueInfo(p.due), team=teamOf(p), lead=userById(p.leader);
+  const du=p.tags.includes('sub')&&p.due?{cls:'done',rel:'Submitted'}:dueInfo(p.due), team=teamOf(p), lead=userById(p.leader);
   const last=(p.dueHistory||[])[0];
   const fresh=p.updatedAt&&Date.now()-p.updatedAt<24*HOUR;
   return `<article class="card ${du.cls==='late'?'is-late':''}" data-id="${p.id}" tabindex="0" aria-label="${esc(p.title)}">
@@ -648,24 +693,30 @@ function cardHTML(p){
       <span class="c-upd ${fresh?'fresh':''}" title="Last updated ${p.updatedAt?fmtDT(p.updatedAt):''}${p.updatedBy?' by '+esc(p.updatedBy==='email'?'email':p.updatedBy):''}"><i></i>${p.updatedBy==='email'?icon('mail'):''}Updated ${ago(p.updatedAt)}</span></div>
     <h3 dir="auto">${esc(p.title)}</h3>
     ${p.client?`<div class="c-client" dir="auto">${esc(p.client)}</div>`:''}
-    <div class="c-due ${du.cls}">
-      <div class="c-due-r1"><small>Submission date</small><span class="c-rel">${du.rel}</span></div>
-      <div class="c-due-r2"><b>${p.due?fmtDate(p.due):'Not set'}</b><button class="c-due-edit" data-nodrag data-due="${p.id}" aria-label="Change submission date" title="Change submission date">${icon('edit')}</button></div>
-      ${last&&Date.now()-last.at<7*24*HOUR?`<div class="c-due-note ${last.by==='email'?'em':''}">${icon(last.by==='email'?'mail':'user')}${last.by==='email'?'Updated from email':'Changed by '+esc(last.by.replace(/^Eng\.\s*/,''))} · ${ago(last.at)}</div>`:''}
+    <div class="c-due ${du.cls}" title="Submission date">
+      ${icon('cal')}<b>${p.due?fmtDate(p.due):'No submission date'}</b>
+      ${p.due?`<span class="c-rel">${du.rel}</span>`:''}
+      ${last&&Date.now()-last.at<7*24*HOUR?`<span class="c-due-src ${last.by==='email'?'em':''}" title="${last.by==='email'?'Date updated from email':'Date changed by '+esc(last.by)} · ${ago(last.at)}${last.from?' (was '+fmtDate(last.from)+')':''}">${icon(last.by==='email'?'mail':'user')}</span>`:''}
+      <button class="c-due-edit" data-nodrag data-due="${p.id}" aria-label="Change submission date" title="Change submission date">${icon('edit')}</button>
       <input type="date" class="due-in" data-duein="${p.id}" value="${p.due||''}" tabindex="-1" aria-hidden="true">
     </div>
     ${p.status?`<div class="c-status" dir="auto">${esc(p.status)}</div>`:''}
     ${p.tags.length?`<div class="card-tags">${p.tags.map(id=>{const t=tagById(id);return t?`<span class="tag"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</span>`:''}).join('')}</div>`:''}
-    <div class="c-foot">
+    ${tot||p.links.length||com||fil||rem||team.length?`<div class="c-foot">
       ${tot?`<span class="c-tasks" title="${done} of ${tot} sub-tasks done"><span class="c-bar"><i style="width:${done/tot*100}%"></i></span>${done}/${tot}</span>`:''}
       ${p.links.length?`<span title="Links">${icon('link')}${p.links.length}</span>`:''}
       ${com?`<span title="Comments">${icon('msg')}${com}</span>`:''}
       ${fil?`<span title="Files">${icon('file')}${fil}</span>`:''}
       ${rem?`<span class="bell" title="Reminders set">${icon('bell')}${rem}</span>`:''}
       <span class="grow"></span>
-      ${team.length?`<span class="c-team" title="Team leader: ${esc(lead?lead.name:'not set')}${team.length>1?' · Team: '+esc(team.map(u=>u.name).join(', ')):''}">${lead?`<span class="lead">${avatar(lead,'sm')}<b>Lead</b></span>`:''}<span class="stack">${team.filter(u=>u!==lead).slice(0,3).map(u=>avatar(u,'sm')).join('')}</span></span>`:'<span class="na">No team yet</span>'}
-    </div>
+      ${team.length?`<span class="c-team" title="Team leader: ${esc(lead?lead.name:'not set')}${team.length>1?' · Team: '+esc(team.map(u=>u.name).join(', ')):''}">${lead?`<span class="lead">${avatar(lead,'sm')}<b>Lead</b></span>`:''}<span class="stack">${team.filter(u=>u!==lead).slice(0,3).map(u=>avatar(u,'sm')).join('')}</span></span>`:''}
+    </div>`:''}
   </article>`;
+}
+function workload(items){
+  const t=new Date(new Date().toDateString());const d=x=>(new Date(x.due)-t)/864e5;
+  const late=items.filter(x=>x.due&&d(x)<0&&!x.tags.includes('sub')).length, wk=items.filter(x=>x.due&&d(x)>=0&&d(x)<=7).length;
+  return (late?`<span class="wl late">· ${late} overdue</span>`:'')+(wk?`<span class="wl">· ${wk} due this week</span>`:'');
 }
 function colHTML(col,unassigned){
   const items=S.projects.filter(p=>(p.columnId||null)===(col?col.id:null)).sort((a,b)=>a.pos-b.pos);
@@ -674,8 +725,8 @@ function colHTML(col,unassigned){
   const canEdit=!unassigned&&(isAdmin()||u.id===S.me);
   return `<section class="col ${unassigned?'unassigned':''}" data-col="${col?col.id:''}">
     <div class="col-head">
-      ${unassigned?`<div class="col-who"><div class="avatar">${icon('mail')}</div><div class="col-title"><span>Unassigned projects</span><small>New jobs land here</small></div></div>`
-      :`<${canEdit?'button':'div'} class="col-who" ${canEdit?`data-profile="${u.id}" title="Edit ${esc(u.name)}'s profile"`:''}>${avatar(u)}<div class="col-title"><span dir="auto">${esc(u.name)}</span><small>${esc(u.discipline||'Engineer')}${u.status==='invited'?' <span class="pill inv">invited</span>':''}${canEdit?`<span class="edit-hint">${icon('edit')}</span>`:''}</small></div></${canEdit?'button':'div'}>`}
+      ${unassigned?`<div class="col-who"><div class="avatar">${icon('mail')}</div><div class="col-title"><span>Unassigned projects</span><small>New jobs land here${workload(items)}</small></div></div>`
+      :`<${canEdit?'button':'div'} class="col-who" ${canEdit?`data-profile="${u.id}" title="Edit ${esc(u.name)}'s profile"`:''}>${avatar(u)}<div class="col-title"><span dir="auto">${esc(u.name)}</span><small>${esc(u.discipline||'Engineer')}${workload(items)}${u.status==='invited'?' <span class="pill inv">invited</span>':''}${canEdit?`<span class="edit-hint">${icon('edit')}</span>`:''}</small></div></${canEdit?'button':'div'}>`}
       <span class="col-count">${shown.length}</span>
       ${unassigned||!isAdmin()?'':`<button class="btn ghost icon sm" data-colmenu="${col.id}" aria-label="Column options">${icon('dots')}</button>`}
     </div>
