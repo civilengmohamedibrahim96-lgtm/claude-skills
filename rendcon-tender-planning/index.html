@@ -569,6 +569,19 @@ body{background:#E7E7E3}
 .team-sec .members{margin-top:8px}
 .team-sec.second{margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
 .team-sec.second h3{font-size:14px}
+
+.member{gap:10px}
+.member .grip{color:var(--line-2);cursor:grab;display:grid;place-items:center;width:16px}
+.member .grip svg.i{width:16px;height:16px;fill:currentColor;stroke:none}
+.member:hover .grip{color:var(--muted)}
+.member .mv{display:flex;flex-direction:column;gap:0}
+.member .mv .btn{width:26px;height:20px;padding:0}
+.member .mv .btn svg.i{width:13px;height:13px}
+.member .mv .btn[disabled]{opacity:.25;pointer-events:none}
+.member.dragging{opacity:.45}
+.member.drop-a{box-shadow:inset 0 2px 0 var(--accent)}
+.member.drop-b{box-shadow:inset 0 -2px 0 var(--accent)}
+.qi b{font-size:13.5px}
 </style>
 </head>
 <body>
@@ -597,6 +610,8 @@ body{background:#E7E7E3}
   <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 10 14"/><path d="m21 3-7 18-4-7-7-4z"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
   <symbol id="i-sort" viewBox="0 0 24 24"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/></symbol>
+  <symbol id="i-up1" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
   <symbol id="i-onedrive" viewBox="0 0 32 20"><path d="M12.6 6.2A8 8 0 0 1 26.4 9a5.6 5.6 0 0 1 1.4 10.9H13z" fill="#0364B8" stroke="none"/><path d="M12.6 6.2 13 19.9H6.5a5.4 5.4 0 0 1-1-10.7 7.6 7.6 0 0 1 7.1-3z" fill="#0078D4" stroke="none"/><path d="M26.4 9a5.6 5.6 0 0 1 4.3 8.2l-4.2-1.9-9.1 4.6H13l4.2-10.5z" fill="#1490DF" stroke="none"/><path d="M5.5 9.2 13 12.6l4.2-2.2-4.2 9.5H6.5a5.4 5.4 0 0 1-1-10.7z" fill="#28A8EA" stroke="none"/></symbol>
   <symbol id="i-gdrive" viewBox="0 0 87.3 78"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da" stroke="none"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47" stroke="none"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335" stroke="none"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d" stroke="none"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc" stroke="none"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00" stroke="none"/></symbol>
@@ -740,7 +755,7 @@ function toast(html,ico='check',ms=3200){
 /* ---------------- Board ---------------- */
 function matches(p){
   if(filterTags.size&&![...filterTags].every(t=>t.startsWith('type:')?projType(p)===t.slice(5):t.startsWith('tm:')?p.tender===t.slice(3):p.tags.includes(t)))return false;
-  if(query){const h=(p.title+' '+p.client+' '+p.status+' '+((tenderById(p.tender)||{}).name||'')+' '+colName(p.columnId)).toLowerCase();if(!h.includes(query))return false}
+  if(query&&!norm(p.title).includes(norm(query)))return false;
   return true;
 }
 function ago(ms){
@@ -768,6 +783,8 @@ const tenderById=id=>(S.tenderTeam||[]).find(t=>t.id===id);
 const projType=p=>{const t=tenderById(p.tender);return t?t.type:(p.type||'public')};
 const KIND={new:'New project',upd:'New update',pp:'Postponed',qa:'Queries answers'};
 let openLogs=new Set();
+function firstName(v){return String(v||'').replace(/^\s*(و?المهندس[ةه]?|مهندس[ةه]?|م\s*[\/\.]|eng\.?)\s*/i,'').trim().split(/\s+/)[0]||''}
+const tenderLabel=p=>p.supervisor||firstName(((tenderById(p.tender)||{}).name||'').replace(/^Eng\.?\s*/i,''));
 function findTender(txt){return (S.tenderTeam||[]).find(t=>(t.ar&&txt.includes(norm(t.ar)))||txt.includes(norm(t.name.replace(/^Eng\.?\s*/i,''))))}
 const typeBadge=t=>`<span class="ttype ${t==='private'?'priv':'pub'}">${t==='private'?'Private':'Public'}</span>`;
 function cardHTML(p){
@@ -779,7 +796,7 @@ function cardHTML(p){
   const last=(p.dueHistory||[])[0];
   const fresh=p.updatedAt&&Date.now()-p.updatedAt<24*HOUR;
   return `<article class="card ${du.cls==='late'?'is-late':''}" data-id="${p.id}" tabindex="0" aria-label="${esc(p.title)}">
-    <div class="c-top">${typeBadge(projType(p))}${tnd?`<span class="c-tender" title="Tender team">${esc(tnd.name)}</span>`:''}
+    <div class="c-top">${typeBadge(projType(p))}${tenderLabel(p)?`<span class="c-tender" dir="auto" title="Study supervisor (المشرف على الدراسة)${tnd?' · '+esc(tnd.name):''}">${esc(tenderLabel(p))}</span>`:''}
       ${ml.length?`<button class="c-upd-btn ${unread?'new':''} ${open?'open':''}" data-nodrag data-log="${p.id}" aria-expanded="${open}" title="Updates from email · last change ${p.updatedAt?fmtDT(p.updatedAt):''}">${unread?`<i></i><b>${unread} new</b>`:icon('mail')+ml.length} · ${ago(p.updatedAt)}${icon('chev','chev')}</button>`
       :`<span class="c-upd ${fresh?'fresh':''}" title="Last updated ${p.updatedAt?fmtDT(p.updatedAt):''}${p.updatedBy?' by '+esc(p.updatedBy):''}"><i></i>Updated ${ago(p.updatedAt)}</span>`}</div>
     ${ml.length?`<div class="c-log ${open?'open':''}" data-logbox="${p.id}"><div><div class="c-log-in"><div class="c-log-h">${icon('mail')}Updates from email</div>${ml.slice(0,6).map(e=>`<div class="c-log-it"><div class="r"><span class="k k-${e.kind}">${KIND[e.kind]||'Update'}</span>${e.at>(p.mailSeen||0)?'<span class="nw">new</span>':''}<time title="${fmtDT(e.at)}">${ago(e.at)}</time></div><p>${esc(e.summary)}${e.links?` <span class="ln">${icon('link')}${e.links}</span>`:''}</p><small dir="rtl" title="${esc(e.subject)}">${esc(e.subject)}</small></div>`).join('')}${ml.length>6?`<div class="c-log-more">+ ${ml.length-6} older in the project</div>`:''}</div></div></div>`:''}
@@ -847,7 +864,7 @@ function colHTML(col,unassigned){
 }
 function renderBoard(){
   const b=$('#board'), sl=b.scrollLeft;
-  b.innerHTML=colHTML(null,true)+S.columns.filter(c=>colUser(c)).map(c=>colHTML(c,false)).join('')+(isAdmin()?`<button class="add-col" id="addCol">${icon('plus')}Add engineer</button>`:'');
+  b.innerHTML=colHTML(null,true)+S.columns.filter(c=>colUser(c)).sort((a,b)=>S.users.indexOf(colUser(a))-S.users.indexOf(colUser(b))).map(c=>colHTML(c,false)).join('')+(isAdmin()?`<button class="add-col" id="addCol">${icon('plus')}Add engineer</button>`:'');
   b.scrollLeft=sl;
   renderFilters(); renderHeader();
 }
@@ -955,12 +972,12 @@ function toggleLog(id){
 function editDue(id){const p=proj(id);modal(`<h3>Submission date</h3><div class="row"><label for="eD">Latest submission date</label><input class="in" type="date" id="eD" value="${p.due||''}"></div><div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="eOk">Save date</button></div>`,()=>{$('#eOk').onclick=()=>{if(setDue(p,$('#eD').value,me().name)){save();renderBoard()}closeModal()}})}
 $('#filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;const id=b.dataset.filter;filterTags.has(id)?filterTags.delete(id):filterTags.add(id);renderBoard()});
 let qSel=0;
-function qMatches(v){const n=norm(v);return S.projects.filter(p=>norm(p.title).includes(n)||norm(p.client||'').includes(n)).slice(0,8)}
+function qMatches(v){const n=norm(v);return S.projects.filter(p=>norm(p.title).includes(n)).slice(0,8)}
 function renderQList(){
   const v=$('#q').value.trim(),L=$('#qList');
   if(!v){L.classList.remove('show');$('#q').setAttribute('aria-expanded','false');return}
   const ms=qMatches(v);qSel=Math.min(qSel,Math.max(ms.length-1,0));
-  L.innerHTML=ms.length?ms.map((p,i)=>{const t=tenderById(p.tender),du=dueInfo(p.due);return `<button class="qi ${i===qSel?'on':''}" role="option" data-qo="${p.id}"><b dir="auto">${esc(p.title)}</b><small>${typeBadge(projType(p))}<b style="display:inline;font-size:12px;color:var(--ink-2)">${p.columnId?esc(colName(p.columnId)):'Unassigned'}</b>${t?' · '+esc(t.name):''}${p.due?' · <span class="'+du.cls+'">'+fmtDate(p.due)+'</span>':''}</small></button>`}).join(''):'<div class="qe">No project with that name</div>';
+  L.innerHTML=ms.length?ms.map((p,i)=>`<button class="qi ${i===qSel?'on':''}" role="option" data-qo="${p.id}"><b dir="auto">${esc(p.title)}</b></button>`).join(''):'<div class="qe">No project with that name</div>';
   L.classList.add('show');$('#q').setAttribute('aria-expanded','true');
 }
 $('#q').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();qSel=0;renderBoard();renderQList()});
@@ -1258,7 +1275,7 @@ function uploadFiles(p,files){
    ------------------------------------------------ */
 const MAILBOX=[
   {id:'m1',from:'procurement@nca.example',subject:'ورد الينا – مناقصة عامة: إنشاء مبنى إداري بالمنطقة الصناعية',received:-50,
-   body:'السادة / إدارة المناقصات\nورد الينا طلب تسعير للمشروع التالي:\nاسم المشروع: إنشاء مبنى إداري بالمنطقة الصناعية\nنوع المناقصة: عامة\nمهندس المناقصات: م/ شيرين\nالجهة المالكة: هيئة المجتمعات العمرانية\nآخر موعد للتقديم: ٢٠٢٦-١٢-٢٠\nرابط كراسة الشروط: https://tenders.example/admin-building/specs.pdf\nوتفضلوا بقبول فائق الاحترام'},
+   body:'السادة / إدارة المناقصات\nورد الينا طلب تسعير للمشروع التالي:\nاسم المشروع: إنشاء مبنى إداري بالمنطقة الصناعية\nنوع المناقصة: عامة\nوالمشرف علي الدراسه : م/ شيرين محمود\nالجهة المالكة: هيئة المجتمعات العمرانية\nآخر موعد للتقديم: ٢٠٢٦-١٢-٢٠\nرابط كراسة الشروط: https://tenders.example/admin-building/specs.pdf\nوتفضلوا بقبول فائق الاحترام'},
   {id:'m2',from:'tenders@moh.example',subject:'تأجيل موعد تقديم العطاءات – توريد وتركيب أعمال الكهرباء – مبنى الإدارة',received:-44,
    body:'نحيطكم علماً بأنه تم تأجيل موعد تقديم العطاءات لمشروع: توريد وتركيب أعمال الكهرباء – مبنى الإدارة ليصبح 2027-01-10 بدلاً من الموعد السابق.\nالإخطار الرسمي: https://tenders.example/electrical-admin/postponement'},
   {id:'m3',from:'wa-procurement@water.example',subject:'الرد على الاستفسارات – إنشاء خزان مياه أرضي سعة 5000 م³',received:-31,
@@ -1266,7 +1283,7 @@ const MAILBOX=[
   {id:'m4',from:'newsletter@supplier.example',subject:'النشرة الشهرية – عروض نوفمبر',received:-20,
    body:'تعرف على أحدث عروضنا لمواد البناء لهذا الشهر.'},
   {id:'m5',from:'procurement@city.example',subject:'ورد إلينا – ممارسة محدودة: تطوير شبكة الطرق الداخلية',received:-12,
-   body:'ورد إلينا من الجهة التالية دعوة لتقديم عطاء:\nاسم المشروع: تطوير شبكة الطرق الداخلية – المرحلة الثالثة\nنوع المناقصة: محدودة\nمهندس المناقصات: م/ مينا\nالجهة المالكة: محافظة المدينة\nآخر موعد للتقديم: 28/12/2026\nالمستندات: https://tenders.example/roads-phase-3/docs'},
+   body:'ورد إلينا من الجهة التالية دعوة لتقديم عطاء:\nاسم المشروع: تطوير شبكة الطرق الداخلية – المرحلة الثالثة\nنوع المناقصة: محدودة\nوالمشرف علي الدراسه : م/ مينا عادل\nالجهة المالكة: محافظة المدينة\nآخر موعد للتقديم: 28/12/2026\nالمستندات: https://tenders.example/roads-phase-3/docs'},
   {id:'m6',from:'procurement@nca.example',subject:'ورد الينا – ملحق: إنشاء مبنى إداري بالمنطقة الصناعية',received:-5,
    body:'ورد الينا ملحق جديد لمشروع إنشاء مبنى إداري بالمنطقة الصناعية يتضمن جداول كميات معدلة، وتم تعديل آخر موعد للتقديم ليصبح 2026-12-27.\nالملحق: https://tenders.example/admin-building/boq-rev1.xlsx'},
 ];
@@ -1298,6 +1315,7 @@ function parseMail(m){
   const type=/محدود|خاص|ممارس/.test(typeTxt)?'private':/عام/.test(typeTxt)?'public':'';
   const dueField=field(digits(m.body),['[اأإآ]خر موعد للتقديم','موعد التقديم']);
   return {kind,urls,txt,type,
+    supervisor:firstName(field(digits(m.body),['و?المشرف\\s+عل[يى]\\s+الدراس[ةه]'])),
     title:field(digits(m.body),['اسم المشروع']),client:field(digits(m.body),['الجهة المالكة','الجهة']),
     due:findDate(dueField||digits(m.subject+'\n'+m.body))};
 }
@@ -1327,7 +1345,12 @@ function applyMail(m){
     else res={kind:'ignore',label:'Queries answers for a project not on the board – review manually',pid:null};
   }
   if(res.pid){const pj=proj(res.pid);
-    const te=findTender(r.txt);if(te&&!pj.tender){pj.tender=te.id;pj.type=te.type}
+    if(r.supervisor){
+      pj.supervisor=r.supervisor;
+      let te=(S.tenderTeam||[]).find(t=>firstName(t.ar)===r.supervisor||norm(firstName(t.ar))===norm(r.supervisor));
+      if(!te){te={id:uid(),name:r.supervisor,ar:r.supervisor,type:r.type||projType(pj)};(S.tenderTeam=S.tenderTeam||[]).push(te)}
+      pj.tender=te.id;pj.type=te.type;
+    }else{const te=findTender(r.txt);if(te&&!pj.tender){pj.tender=te.id;pj.type=te.type}}
     const h=(pj.dueHistory||[])[0];const dch=h&&h.by==='email'&&Date.now()-h.at<2000;
     const sum={new:`New tender received${pj.due?' · submission '+fmtDate(pj.due):''}`,upd:'Update / annex received',pp:'Submission postponed',qa:'Answers to queries received'}[res.kind]
       +(dch&&res.kind!=='new'?` · ${h.from?fmtDate(h.from)+' → ':''}${fmtDate(h.to)}`:'');
@@ -1529,18 +1552,18 @@ function memberStats(u){
 }
 function renderTeamSheet(){
   const sh=$('#teamSheet');if(!sh.classList.contains('show'))return;
-  const order=[...S.users].sort((a,b)=>(a.role==='admin'?-1:0)-(b.role==='admin'?-1:0)||(a.status==='invited')-(b.status==='invited'));
+  const order=S.users;
   sh.innerHTML=`<div class="sheet-head"><span style="color:var(--accent)">${icon('users')}</span><h2>Team</h2><button class="btn icon" data-x aria-label="Close">${icon('x')}</button></div>
   <div class="sheet-body">
     <div class="team-sec">
-      <div class="sec-h"><div><h3>Planning team</h3><small>${S.users.length} engineer${S.users.length!==1?'s':''} · each gets a column on the board</small></div></div>
+      <div class="sec-h"><div><h3>Planning team</h3><small>${S.users.length} engineer${S.users.length!==1?'s':''} · drag or use the arrows to reorder – the board columns follow this order</small></div></div>
       <div class="invite-box">
         <div style="font-weight:600;margin-bottom:12px">Add a planning engineer</div>
         ${inviteFormHTML('t')}
         <button class="btn primary" id="tSend" style="width:100%;justify-content:center">${icon('plus')}Add engineer</button>
       </div>
       <div class="members">
-    ${order.map(u=>{const st=memberStats(u);return `<div class="member">${avatar(u)}
+    ${order.map((u,ix)=>{const st=memberStats(u);return `<div class="member" draggable="true" data-mid="${u.id}"><span class="grip" title="Drag to reorder" aria-hidden="true">${icon('grip')}</span><span class="mv"><button class="btn ghost icon sm" data-up="${u.id}" ${ix===0?'disabled':''} aria-label="Move ${esc(u.name)} up" title="Move up">${icon('up1')}</button><button class="btn ghost icon sm" data-down="${u.id}" ${ix===order.length-1?'disabled':''} aria-label="Move ${esc(u.name)} down" title="Move down">${icon('chev')}</button></span>${avatar(u)}
       <div class="b"><b dir="auto">${esc(u.name)} ${u.role==='admin'?'<span class="pill o">admin</span>':''}${u.status==='invited'?'<span class="pill inv">invited</span>':''}${u.id===S.adminId?'<span class="pill">you</span>':''}</b>
         <small>${u.email?esc(u.email):'No email – not signed in'}</small>
         <small>${u.status==='invited'?'Invited '+fmtDT(u.invitedAt):`${st.active} project${st.active!==1?'s':''}${st.late?` · <span style="color:var(--danger)">${st.late} overdue</span>`:''}${colOfUser(u.id)?'':' · no board column'}`}</small></div>
@@ -1569,8 +1592,18 @@ function renderTeamSheet(){
   $('#ttList').onchange=e=>{const el=e.target.closest('[data-tt]');if(!el)return;const t=tenderById(el.dataset.tt);t[el.dataset.f]=el.value.trim();
     if(el.dataset.f==='type')S.projects.filter(x=>x.tender===t.id).forEach(x=>x.type=t.type);save();renderBoard()};
   $('#ttAdd').onclick=()=>{S.tenderTeam.push({id:uid(),name:'Eng. ',ar:'',type:'public'});save();renderTeamSheet();renderBoard();const ins=$$('#ttList [data-f="name"]');ins[ins.length-1].focus()};
+  // drag rows to reorder
+  let dragId=null;
+  $$('.member[data-mid]',sh).forEach(row=>{
+    row.addEventListener('dragstart',e=>{dragId=row.dataset.mid;row.classList.add('dragging');e.dataTransfer.effectAllowed='move'});
+    row.addEventListener('dragend',()=>{row.classList.remove('dragging');$$('.member.drop-a,.member.drop-b',sh).forEach(x=>x.classList.remove('drop-a','drop-b'))});
+    row.addEventListener('dragover',e=>{e.preventDefault();const r=row.getBoundingClientRect(),after=e.clientY>r.top+r.height/2;$$('.member.drop-a,.member.drop-b',sh).forEach(x=>x.classList.remove('drop-a','drop-b'));row.classList.add(after?'drop-b':'drop-a')});
+    row.addEventListener('drop',e=>{e.preventDefault();if(!dragId||dragId===row.dataset.mid)return;const r=row.getBoundingClientRect(),after=e.clientY>r.top+r.height/2;
+      const u=userById(dragId);S.users=S.users.filter(x=>x!==u);let i=S.users.findIndex(x=>x.id===row.dataset.mid);S.users.splice(after?i+1:i,0,u);save();renderBoard();renderTeamSheet()});
+  });
   sh.onclick=async e=>{
     const t=e.target.closest('button');if(!t)return;const d=t.dataset;
+    if(d.up||d.down){const id=d.up||d.down,i=S.users.findIndex(x=>x.id===id),j=i+(d.up?-1:1);if(j<0||j>=S.users.length)return;[S.users[i],S.users[j]]=[S.users[j],S.users[i]];save();renderBoard();renderTeamSheet();return}
     if(d.resend){const u=userById(d.resend);inviteEmail(u);save();renderTeamSheet();toast(`Invitation sent again to <b>${esc(u.email)}</b>`,'send')}
     if(d.copy){const l=inviteLink(userById(d.copy));save();try{await navigator.clipboard.writeText(l);toast('Invite link copied','copy')}catch(_){prompt('Copy this invite link',l)}}
     if(d.accept){const u=userById(d.accept);u.status='active';u.joinedAt=Date.now();save();renderBoard();renderTeamSheet();toast(`<b>${esc(u.name)}</b> joined the team`,'user')}
