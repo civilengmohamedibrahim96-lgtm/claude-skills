@@ -492,6 +492,44 @@ body{background:#E7E7E3}
 .c-team .lead b{font-size:10px}
 .c-due.done .c-rel{background:var(--ok);border-color:var(--ok);color:#fff}
 @media (max-width:860px){.filters{flex:1 1 100%;order:3;margin-left:0}.search{flex:1}}
+
+/* ---------- v5: tender team, email update log ---------- */
+.c-tender{font-size:11.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.c-upd-btn{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 6px 0 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:11px;color:var(--muted);cursor:pointer;transition:all .18s var(--ease)}
+.c-upd-btn:hover{border-color:var(--line-2);color:var(--ink);background:var(--surface-2)}
+.c-upd-btn svg.i{width:12px;height:12px}
+.c-upd-btn .chev{transition:transform .3s var(--ease)}
+.c-upd-btn.open .chev{transform:rotate(180deg)}
+.c-upd-btn.new{border-color:var(--accent-line);background:#FFF5EE;color:var(--accent-2)}
+.c-upd-btn.new i{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.8s ease-in-out infinite}
+.c-upd-btn b{font-weight:600}
+@keyframes pulse{50%{box-shadow:0 0 0 4px rgba(238,106,31,.18)}}
+.c-log{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s var(--ease)}
+.c-log.open{grid-template-rows:1fr}
+.c-log>div{overflow:hidden;min-height:0}
+.c-log-in{margin:2px 0 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);padding:8px 10px 4px;cursor:default}
+.c-log-h{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line)}
+.c-log-h svg.i{width:12px;height:12px}
+.c-log-it{padding:8px 0;border-bottom:1px dashed var(--line);opacity:0;transform:translateY(-4px);transition:opacity .25s,transform .25s var(--ease)}
+.c-log.open .c-log-it{opacity:1;transform:none}
+.c-log.open .c-log-it:nth-child(3){transition-delay:.04s}.c-log.open .c-log-it:nth-child(4){transition-delay:.08s}.c-log.open .c-log-it:nth-child(5){transition-delay:.12s}
+.c-log-it:last-child{border-bottom:0}
+.c-log-it .r{display:flex;align-items:center;gap:6px}
+.c-log-it time{margin-left:auto;font-size:11px;color:var(--muted)}
+.c-log-it p{margin:4px 0 2px;font-size:12.5px;line-height:1.4;color:var(--ink)}
+.c-log-it small{display:block;font-family:"IBM Plex Sans Arabic",sans-serif;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-log-it .ln{display:inline-flex;align-items:center;gap:3px;color:var(--muted);font-size:11.5px}
+.c-log-it .ln svg.i{width:11px;height:11px}
+.c-log-more{font-size:11.5px;color:var(--muted);padding:6px 0}
+.k{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;border-radius:4px;background:var(--surface-3);color:var(--ink-2)}
+.k-new,.k-upd{background:var(--accent-soft);color:var(--accent-2)}
+.k-qa{background:#DCEEED;color:#2A6F6C}
+.k-pp{background:#E6E6E2;color:#4A4A47}
+.nw{font-size:9.5px;font-weight:700;color:#fff;background:var(--accent);padding:1px 5px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+.c-eng{display:inline-flex!important;align-items:center;gap:6px!important;font-size:11.5px;font-weight:500;color:var(--ink-2)}
+.tt-row{display:grid;grid-template-columns:1.2fr 1fr 110px 32px;gap:6px;align-items:center;margin-bottom:6px}
+.tt-row .in{height:32px;font-size:13px}
+@media (max-width:520px){.tt-row{grid-template-columns:1fr 1fr;}.tt-row select{grid-column:1}}
 </style>
 </head>
 <body>
@@ -566,7 +604,7 @@ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelect
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,9);
 const icon=(n,c='')=>`<svg class="i ${c}"><use href="#i-${n}"/></svg>`;
-const KEY='rendcon-tp-v3';
+const KEY='rendcon-tp-v4';
 const HOUR=3600000;
 const fmtDate=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';
 const fmtShort=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'';
@@ -592,38 +630,44 @@ function seed(){
   return {
     me:u0, adminId:u0,
     users:[
-      {id:u0,name:'Mohamed Ibrahim',email:'mohamed@rendcon.example',role:'admin',discipline:'Tender manager',color:'#EE6A1F',status:'active',prefs:{browser:true,email:true,digest:true}},
-      {id:u1,name:'Eng. Ahmed Hassan',email:'ahmed@rendcon.example',role:'engineer',discipline:'Civil & structure',color:'#111111',status:'active',prefs:{browser:true,email:true,digest:false}},
-      {id:u2,name:'Eng. Sara Mostafa',email:'sara@rendcon.example',role:'engineer',discipline:'MEP',color:'#2F7D7A',status:'active',prefs:{browser:true,email:true,digest:true}},
-      {id:u3,name:'Eng. Omar Khaled',email:'omar@rendcon.example',role:'engineer',discipline:'Infrastructure',color:'#9C4A12',status:'invited',invitedAt:Date.now()-2*24*HOUR,prefs:{browser:true,email:true,digest:false}},
+      {id:u0,name:'Mohamed Ibrahim',email:'mohamed@rendcon.example',role:'admin',color:'#EE6A1F',status:'active',prefs:{browser:true,email:true,digest:true}},
+      {id:u1,name:'Eng. Ahmed Hassan',email:'ahmed@rendcon.example',role:'engineer',color:'#111111',status:'active',prefs:{browser:true,email:true,digest:false}},
+      {id:u2,name:'Eng. Sara Mostafa',email:'sara@rendcon.example',role:'engineer',color:'#2F7D7A',status:'active',prefs:{browser:true,email:true,digest:true}},
+      {id:u3,name:'Eng. Omar Khaled',email:'omar@rendcon.example',role:'engineer',color:'#9C4A12',status:'invited',invitedAt:Date.now()-2*24*HOUR,prefs:{browser:true,email:true,digest:false}},
     ],
     columns:[{id:c1,userId:u1},{id:c2,userId:u2},{id:c3,userId:u3}],
+    tenderTeam:[
+      {id:'tm1',name:'Eng. Mina',ar:'مينا',type:'private'},
+      {id:'tm2',name:'Eng. Merihan',ar:'ميريهان',type:'private'},
+      {id:'tm3',name:'Eng. Mohamed Mustafa',ar:'محمد مصطفى',type:'public'},
+      {id:'tm4',name:'Eng. Shreine',ar:'شيرين',type:'public'},
+    ],
     reminders:[{id:uid(),at:Date.now()+26*HOUR,msg:'Weekly tender review meeting',repeat:'weekly',fired:false,to:['all'],email:true}],
     outbox:[],sentLog:[],
     tags:TAGS.slice(),
     drive:{provider:'google',connected:true,account:'tenders@rendcon.example',root:'https://drive.google.com/drive/folders/1TendersRoot'},
     mail:{connected:true,address:'tenders@rendcon.example',subject:'ورد الينا',hourly:true,lastSync:Date.now()-38*60000,processed:[],log:[]},
     projects:[
-      P({title:'توريد وتركيب أعمال الكهرباء – مبنى الإدارة',client:'Ministry of Housing',type:'public',leader:u2,team:[u2,u1],tags:['upd'],columnId:c2,pos:0,status:'Pricing MEP BOQ – waiting on lighting supplier quote',due:isoIn(5),folder:'https://drive.google.com/drive/folders/1aEl104',
+      P({title:'توريد وتركيب أعمال الكهرباء – مبنى الإدارة',client:'Ministry of Housing',type:'public',tender:'tm3',mailSeen:Date.now()-30*HOUR,mailLog:[{id:uid(),at:Date.now()-26*HOUR,kind:'upd',summary:'Annex 1 issued · submission date 22 Nov → 29 Nov 2026',subject:'ورد الينا – ملحق رقم 1: توريد وتركيب أعمال الكهرباء – مبنى الإدارة',links:1},{id:uid(),at:Date.now()-4*24*HOUR,kind:'new',summary:'New tender received · submission 22 Nov 2026',subject:'ورد الينا – مناقصة عامة: توريد وتركيب أعمال الكهرباء – مبنى الإدارة',links:1}],leader:u2,team:[u2,u1],tags:['upd'],columnId:c2,pos:0,status:'Pricing MEP BOQ – waiting on lighting supplier quote',due:isoIn(5),folder:'https://drive.google.com/drive/folders/1aEl104',
         dueHistory:[{from:isoIn(-2),to:isoIn(5),by:'email',at:Date.now()-26*HOUR}],updatedAt:Date.now()-40*60000,updatedBy:'email',
         subtasks:[{id:uid(),text:'Review specs & drawings',done:true,note:'',due:''},{id:uid(),text:'Request supplier quotes',done:true,note:'3 suppliers contacted',due:''},{id:uid(),text:'Price lighting package',done:false,note:'',due:isoIn(2)},{id:uid(),text:'Final BOQ sign-off',done:false,note:'',due:isoIn(4)}],
         links:[{id:uid(),title:'Tender portal',url:'https://tenders.example/electrical-admin'}],
         files:[{id:uid(),name:'Specs_Electrical.pdf',size:'4.2 MB'},{id:uid(),name:'SLD_Rev02.dwg',size:'1.1 MB'},{id:uid(),name:'BOQ_Electrical.xlsx',size:'380 KB'}],
         comments:[{id:uid(),who:'Eng. Sara Mostafa',text:'Lighting quote expected Thursday.',at:Date.now()-26*HOUR}],
         notifications:[{id:uid(),at:Date.now()+20*HOUR,msg:'Chase lighting supplier quote',repeat:'none',fired:false,to:['assignee','me'],email:true}]}),
-      P({title:'إنشاء خزان مياه أرضي سعة 5000 م³',client:'Water Authority',type:'public',leader:u1,team:[u1],tags:['new'],columnId:c1,pos:0,status:'Site visit done – structural take-off in progress',due:isoIn(9),folder:'https://drive.google.com/drive/folders/1aEl097',
+      P({title:'إنشاء خزان مياه أرضي سعة 5000 م³',client:'Water Authority',type:'public',tender:'tm4',mailSeen:Date.now(),mailLog:[{id:uid(),at:Date.now()-6*24*HOUR,kind:'new',summary:'New tender received · submission 03 Dec 2026',subject:'ورد الينا – إنشاء خزان مياه أرضي سعة 5000 م³',links:0}],leader:u1,team:[u1],tags:['new'],columnId:c1,pos:0,status:'Site visit done – structural take-off in progress',due:isoIn(9),folder:'https://drive.google.com/drive/folders/1aEl097',
         updatedAt:Date.now()-3*HOUR,updatedBy:'Eng. Ahmed Hassan',
         subtasks:[{id:uid(),text:'Site visit',done:true,note:'',due:''},{id:uid(),text:'Structural take-off',done:false,note:'',due:isoIn(3)},{id:uid(),text:'Send queries to client',done:true,note:'Sent 12 queries',due:''}],
         files:[{id:uid(),name:'Tank_GA.pdf',size:'2.7 MB'}]}),
-      P({title:'Rehabilitation of Internal Roads – Phase 2',client:'New Cities Authority',type:'public',leader:u3,team:[u3],tags:['pp'],columnId:c3,pos:0,status:'Postponed by client – new date to be announced',due:isoIn(30),
+      P({title:'Rehabilitation of Internal Roads – Phase 2',client:'New Cities Authority',type:'public',tender:'tm3',mailSeen:Date.now(),mailLog:[{id:uid(),at:Date.now()-50*HOUR,kind:'pp',summary:'Submission postponed · 28 Nov → 24 Dec 2026',subject:'تأجيل موعد تقديم العطاءات – إعادة تأهيل الطرق الداخلية – المرحلة الثانية',links:1}],leader:u3,team:[u3],tags:['pp'],columnId:c3,pos:0,status:'Postponed by client – new date to be announced',due:isoIn(30),
         dueHistory:[{from:isoIn(4),to:isoIn(30),by:'email',at:Date.now()-50*HOUR}],updatedAt:Date.now()-50*HOUR,updatedBy:'email',
         links:[{id:uid(),title:'Postponement notice',url:'https://tenders.example/roads-phase-2/notice'}]}),
-      P({title:'Fire fighting system – Logistics Hub',client:'Port Logistics Co.',type:'private',leader:u2,team:[u2,u0],tags:['new','urgent'],columnId:c2,pos:1,status:'Hydraulic calc pending',due:isoIn(2),
+      P({title:'Fire fighting system – Logistics Hub',client:'Port Logistics Co.',type:'private',tender:'tm1',leader:u2,team:[u2,u0],tags:['new','urgent'],columnId:c2,pos:1,status:'Hydraulic calc pending',due:isoIn(2),
         updatedAt:Date.now()-20*60000,updatedBy:'Eng. Sara Mostafa',
         subtasks:[{id:uid(),text:'Hydraulic calculation',done:false,note:'',due:isoIn(1)},{id:uid(),text:'Pump room pricing',done:false,note:'',due:isoIn(2)}]}),
-      P({title:'صيانة شبكات الصرف الصحي – الحي الثالث',client:'Municipality',type:'public',tags:['new','un'],status:'Received by email – needs an engineer',source:'email',due:isoIn(12),updatedAt:Date.now()-5*HOUR,updatedBy:'email'}),
-      P({title:'Steel shed – Industrial Zone plot 14',client:'Private client',type:'private',tags:['un'],status:'',due:isoIn(18),updatedAt:Date.now()-26*HOUR,updatedBy:'Mohamed Ibrahim'}),
-      P({title:'Boundary wall & gatehouse',client:'Education Directorate',type:'public',leader:u1,team:[u1],tags:['sub'],columnId:c1,pos:1,status:'Submitted – awaiting opening',due:isoIn(-1),updatedAt:Date.now()-30*HOUR,updatedBy:'Eng. Ahmed Hassan'}),
+      P({title:'صيانة شبكات الصرف الصحي – الحي الثالث',client:'Municipality',type:'public',tender:'tm4',mailLog:[{id:uid(),at:Date.now()-5*HOUR,kind:'new',summary:'New tender received · submission 06 Dec 2026',subject:'ورد الينا – صيانة شبكات الصرف الصحي – الحي الثالث',links:0}],tags:['new','un'],status:'Received by email – needs an engineer',source:'email',due:isoIn(12),updatedAt:Date.now()-5*HOUR,updatedBy:'email'}),
+      P({title:'Steel shed – Industrial Zone plot 14',client:'Private client',type:'private',tender:'tm2',tags:['un'],status:'',due:isoIn(18),updatedAt:Date.now()-26*HOUR,updatedBy:'Mohamed Ibrahim'}),
+      P({title:'Boundary wall & gatehouse',client:'Education Directorate',type:'public',tender:'tm3',leader:u1,team:[u1],tags:['sub'],columnId:c1,pos:1,status:'Submitted – awaiting opening',due:isoIn(-1),updatedAt:Date.now()-30*HOUR,updatedBy:'Eng. Ahmed Hassan'}),
     ]
   };
 }
@@ -655,8 +699,8 @@ function toast(html,ico='check',ms=3200){
 
 /* ---------------- Board ---------------- */
 function matches(p){
-  if(filterTags.size&&![...filterTags].every(t=>t.startsWith('type:')?p.type===t.slice(5):p.tags.includes(t)))return false;
-  if(query){const h=(p.title+' '+p.client+' '+p.status+' '+teamOf(p).map(u=>u.name).join(' ')).toLowerCase();if(!h.includes(query))return false}
+  if(filterTags.size&&![...filterTags].every(t=>t.startsWith('type:')?projType(p)===t.slice(5):t.startsWith('tm:')?p.tender===t.slice(3):p.tags.includes(t)))return false;
+  if(query){const h=(p.title+' '+p.client+' '+p.status+' '+((tenderById(p.tender)||{}).name||'')+' '+colName(p.columnId)).toLowerCase();if(!h.includes(query))return false}
   return true;
 }
 function ago(ms){
@@ -680,17 +724,25 @@ function dueInfo(d){
   if(diff<=3)return{cls:'soon',rel:diff===1?'Tomorrow':`In ${diff} days`};
   return{cls:'',rel:`In ${diff} days`};
 }
+const tenderById=id=>(S.tenderTeam||[]).find(t=>t.id===id);
+const projType=p=>{const t=tenderById(p.tender);return t?t.type:(p.type||'public')};
+const KIND={new:'New project',upd:'New update',pp:'Postponed',qa:'Queries answers'};
+let openLogs=new Set();
+function findTender(txt){return (S.tenderTeam||[]).find(t=>(t.ar&&txt.includes(norm(t.ar)))||txt.includes(norm(t.name.replace(/^Eng\.?\s*/i,''))))}
 const typeBadge=t=>`<span class="ttype ${t==='private'?'priv':'pub'}">${t==='private'?'Private':'Public'}</span>`;
 function cardHTML(p){
   const done=p.subtasks.filter(s=>s.done).length, tot=p.subtasks.length;
   const rem=p.notifications.filter(n=>!n.fired).length;
   const com=p.comments.filter(c=>!c.sys).length, fil=p.files.length+p.uploads.length;
-  const du=p.tags.includes('sub')&&p.due?{cls:'done',rel:'Submitted'}:dueInfo(p.due), team=teamOf(p), lead=userById(p.leader);
+  const du=p.tags.includes('sub')&&p.due?{cls:'done',rel:'Submitted'}:dueInfo(p.due), eng=colUser(colById(p.columnId)), tnd=tenderById(p.tender);
+  const ml=p.mailLog||[], unread=ml.filter(e=>e.at>(p.mailSeen||0)).length, open=openLogs.has(p.id);
   const last=(p.dueHistory||[])[0];
   const fresh=p.updatedAt&&Date.now()-p.updatedAt<24*HOUR;
   return `<article class="card ${du.cls==='late'?'is-late':''}" data-id="${p.id}" tabindex="0" aria-label="${esc(p.title)}">
-    <div class="c-top">${typeBadge(p.type)}${p.source==='email'?'<span class="src">email</span>':''}
-      <span class="c-upd ${fresh?'fresh':''}" title="Last updated ${p.updatedAt?fmtDT(p.updatedAt):''}${p.updatedBy?' by '+esc(p.updatedBy==='email'?'email':p.updatedBy):''}"><i></i>${p.updatedBy==='email'?icon('mail'):''}Updated ${ago(p.updatedAt)}</span></div>
+    <div class="c-top">${typeBadge(projType(p))}${tnd?`<span class="c-tender" title="Tender team">${esc(tnd.name)}</span>`:''}
+      ${ml.length?`<button class="c-upd-btn ${unread?'new':''} ${open?'open':''}" data-nodrag data-log="${p.id}" aria-expanded="${open}" title="Updates from email · last change ${p.updatedAt?fmtDT(p.updatedAt):''}">${unread?`<i></i><b>${unread} new</b>`:icon('mail')+ml.length} · ${ago(p.updatedAt)}${icon('chev','chev')}</button>`
+      :`<span class="c-upd ${fresh?'fresh':''}" title="Last updated ${p.updatedAt?fmtDT(p.updatedAt):''}${p.updatedBy?' by '+esc(p.updatedBy):''}"><i></i>Updated ${ago(p.updatedAt)}</span>`}</div>
+    ${ml.length?`<div class="c-log ${open?'open':''}" data-logbox="${p.id}"><div><div class="c-log-in"><div class="c-log-h">${icon('mail')}Updates from email</div>${ml.slice(0,6).map(e=>`<div class="c-log-it"><div class="r"><span class="k k-${e.kind}">${KIND[e.kind]||'Update'}</span>${e.at>(p.mailSeen||0)?'<span class="nw">new</span>':''}<time title="${fmtDT(e.at)}">${ago(e.at)}</time></div><p>${esc(e.summary)}${e.links?` <span class="ln">${icon('link')}${e.links}</span>`:''}</p><small dir="rtl" title="${esc(e.subject)}">${esc(e.subject)}</small></div>`).join('')}${ml.length>6?`<div class="c-log-more">+ ${ml.length-6} older in the project</div>`:''}</div></div></div>`:''}
     <h3 dir="auto">${esc(p.title)}</h3>
     ${p.client?`<div class="c-client" dir="auto">${esc(p.client)}</div>`:''}
     <div class="c-due ${du.cls}" title="Submission date">
@@ -702,14 +754,14 @@ function cardHTML(p){
     </div>
     ${p.status?`<div class="c-status" dir="auto">${esc(p.status)}</div>`:''}
     ${p.tags.length?`<div class="card-tags">${p.tags.map(id=>{const t=tagById(id);return t?`<span class="tag"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</span>`:''}).join('')}</div>`:''}
-    ${tot||p.links.length||com||fil||rem||team.length?`<div class="c-foot">
+    ${tot||p.links.length||com||fil||rem||eng?`<div class="c-foot">
       ${tot?`<span class="c-tasks" title="${done} of ${tot} sub-tasks done"><span class="c-bar"><i style="width:${done/tot*100}%"></i></span>${done}/${tot}</span>`:''}
       ${p.links.length?`<span title="Links">${icon('link')}${p.links.length}</span>`:''}
       ${com?`<span title="Comments">${icon('msg')}${com}</span>`:''}
       ${fil?`<span title="Files">${icon('file')}${fil}</span>`:''}
       ${rem?`<span class="bell" title="Reminders set">${icon('bell')}${rem}</span>`:''}
       <span class="grow"></span>
-      ${team.length?`<span class="c-team" title="Team leader: ${esc(lead?lead.name:'not set')}${team.length>1?' · Team: '+esc(team.map(u=>u.name).join(', ')):''}">${lead?`<span class="lead">${avatar(lead,'sm')}<b>Lead</b></span>`:''}<span class="stack">${team.filter(u=>u!==lead).slice(0,3).map(u=>avatar(u,'sm')).join('')}</span></span>`:''}
+      ${eng?`<span class="c-eng" title="Planning engineer: ${esc(eng.name)}">${avatar(eng,'sm')}<span>${esc(eng.name.replace(/^Eng\.\s*/,'').split(' ')[0])}</span></span>`:''}
     </div>`:''}
   </article>`;
 }
@@ -726,7 +778,7 @@ function colHTML(col,unassigned){
   return `<section class="col ${unassigned?'unassigned':''}" data-col="${col?col.id:''}">
     <div class="col-head">
       ${unassigned?`<div class="col-who"><div class="avatar">${icon('mail')}</div><div class="col-title"><span>Unassigned projects</span><small>New jobs land here${workload(items)}</small></div></div>`
-      :`<${canEdit?'button':'div'} class="col-who" ${canEdit?`data-profile="${u.id}" title="Edit ${esc(u.name)}'s profile"`:''}>${avatar(u)}<div class="col-title"><span dir="auto">${esc(u.name)}</span><small>${esc(u.discipline||'Engineer')}${workload(items)}${u.status==='invited'?' <span class="pill inv">invited</span>':''}${canEdit?`<span class="edit-hint">${icon('edit')}</span>`:''}</small></div></${canEdit?'button':'div'}>`}
+      :`<${canEdit?'button':'div'} class="col-who" ${canEdit?`data-profile="${u.id}" title="Edit ${esc(u.name)}'s profile"`:''}>${avatar(u)}<div class="col-title"><span dir="auto">${esc(u.name)}</span><small>${items.length} project${items.length===1?'':'s'}${workload(items)}${u.status==='invited'?' <span class="pill inv">invited</span>':''}${canEdit?`<span class="edit-hint">${icon('edit')}</span>`:''}</small></div></${canEdit?'button':'div'}>`}
       <span class="col-count">${shown.length}</span>
       ${unassigned||!isAdmin()?'':`<button class="btn ghost icon sm" data-colmenu="${col.id}" aria-label="Column options">${icon('dots')}</button>`}
     </div>
@@ -741,7 +793,7 @@ function renderBoard(){
   renderFilters(); renderHeader();
 }
 function renderFilters(){
-  $('#filters').innerHTML=['public','private'].map(t=>`<button class="fchip ${filterTags.has('type:'+t)?'on':''}" data-filter="type:${t}">${t==='public'?'Public':'Private'}</button>`).join('')+'<span class="fsep"></span>'+S.tags.map(t=>`<button class="fchip ${filterTags.has(t.id)?'on':''}" data-filter="${t.id}"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</button>`).join('');
+  $('#filters').innerHTML=['public','private'].map(t=>`<button class="fchip ${filterTags.has('type:'+t)?'on':''}" data-filter="type:${t}">${t==='public'?'Public':'Private'}</button>`).join('')+'<span class="fsep"></span>'+(S.tenderTeam||[]).map(t=>`<button class="fchip ${filterTags.has('tm:'+t.id)?'on':''}" data-filter="tm:${t.id}"><i class="tdot" style="background:${t.type==='private'?'#111':'#fff'};border:1px solid #111"></i>${esc(t.name.replace(/^Eng\.?\s*/,''))}</button>`).join('')+'<span class="fsep"></span>'+S.tags.map(t=>`<button class="fchip ${filterTags.has(t.id)?'on':''}" data-filter="${t.id}"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</button>`).join('');
 }
 function upcomingCount(){return S.projects.reduce((a,p)=>a+p.notifications.filter(n=>!n.fired).length,0)+S.reminders.filter(n=>!n.fired).length}
 function renderHeader(){
@@ -805,7 +857,7 @@ document.addEventListener('pointerup',()=>{
   const ids=[...list.children].map(n=>n===d.ph?d.id:n.dataset.id).filter(Boolean);
   const p=proj(d.id); const prev=p.columnId||null;
   p.columnId=target;
-  if(prev!==target){touch(p);const u=colUser(colById(target));if(u&&!(p.team||[]).includes(u.id)){p.team=[...(p.team||[]),u.id];if(!p.leader)p.leader=u.id}}
+  if(prev!==target)touch(p);
   ids.forEach((id,i)=>{const x=proj(id);if(x)x.pos=i});
   if(prev!==target){
     if(target){p.tags=p.tags.filter(t=>t!=='un'); const n=colName(target);
@@ -825,11 +877,20 @@ $('#board').addEventListener('click',e=>{
   if(e.target.closest('#addCol')){addColumn();return}
   const m=e.target.closest('[data-colmenu]'); if(m){colMenu(m,m.dataset.colmenu);return}
   const pr=e.target.closest('[data-profile]'); if(pr){editProfile(pr.dataset.profile);return}
+  const lg=e.target.closest('[data-log]'); if(lg){toggleLog(lg.dataset.log);return}
   const dd=e.target.closest('[data-due]'); if(dd){const i=$(`[data-duein="${dd.dataset.due}"]`);try{i.showPicker()}catch(_){editDue(dd.dataset.due)}return}
 });
 $('#board').addEventListener('keydown',e=>{const c=e.target.closest('.card');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openProject(c.dataset.id)}});
 
 $('#board').addEventListener('change',e=>{const i=e.target.closest('[data-duein]');if(!i)return;const p=proj(i.dataset.duein);if(setDue(p,i.value,me().name)){save();renderBoard();flash(p.id);toast(`Submission date set to <b>${fmtDate(p.due)}</b>`,'cal')}});
+function toggleLog(id){
+  const p=proj(id),card=$(`.card[data-id="${id}"]`);if(!p||!card)return;
+  const open=!openLogs.has(id);open?openLogs.add(id):openLogs.delete(id);
+  $('.c-log',card).classList.toggle('open',open);
+  const btn=$('.c-upd-btn',card);btn.classList.toggle('open',open);btn.setAttribute('aria-expanded',open);
+  if(open&&btn.classList.contains('new')){p.mailSeen=Date.now();save();
+    btn.classList.remove('new');btn.innerHTML=`${icon('mail')}${p.mailLog.length} · ${ago(p.updatedAt)}${icon('chev','chev')}`;}
+}
 function editDue(id){const p=proj(id);modal(`<h3>Submission date</h3><div class="row"><label for="eD">Latest submission date</label><input class="in" type="date" id="eD" value="${p.due||''}"></div><div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="eOk">Save date</button></div>`,()=>{$('#eOk').onclick=()=>{if(setDue(p,$('#eD').value,me().name)){save();renderBoard()}closeModal()}})}
 $('#filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;const id=b.dataset.filter;filterTags.has(id)?filterTags.delete(id):filterTags.add(id);renderBoard()});
 $('#q').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();renderBoard()});
@@ -871,17 +932,20 @@ function modal(html,after){const m=$('#modal');$('.box',m).className='box';$('.b
   $$('[data-close]',m).forEach(b=>b.onclick=closeModal);after&&after();const f=$('input,textarea,select',m);f&&f.focus()}
 function closeModal(){$('#modal').classList.remove('show');if(!$('#page').classList.contains('show')&&!$('.sheet.show'))$('#scrim').classList.remove('show')}
 
+function tenderOptions(sel){
+  const g=t=>(S.tenderTeam||[]).filter(x=>x.type===t).map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${esc(x.name)}</option>`).join('');
+  return `<option value="">— Not set —</option><optgroup label="Private">${g('private')}</optgroup><optgroup label="Public">${g('public')}</optgroup>`;
+}
 function newProject(colId){
   modal(`<h3>New project</h3>
     <div class="row"><label for="nT">Project title</label><input class="in" id="nT" dir="auto" placeholder="Project name (Arabic or English)"></div>
-    <div class="formgrid"><div class="row"><label>Tender type</label><div class="seg" id="nTy"><button type="button" class="on" data-v="public">Public</button><button type="button" data-v="private">Private</button></div></div>
+    <div class="formgrid"><div class="row"><label for="nTm">Tender team</label><select class="in" id="nTm">${tenderOptions('')}</select></div>
     <div class="row"><label for="nD">Submission date</label><input class="in" type="date" id="nD" value="${isoIn(14)}"></div>
     <div class="row full"><label for="nC">Client</label><input class="in" id="nC" dir="auto"></div></div>
     <div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="nOk">Create project</button></div>`,()=>{
-    $('#nTy').onclick=e=>{const b=e.target.closest('[data-v]');if(b)$$('#nTy button').forEach(x=>x.classList.toggle('on',x===b))};
     $('#nOk').onclick=()=>{const t=$('#nT').value.trim();if(!t)return $('#nT').focus();
-      const cu=colId&&colUser(colById(colId));
-      const p=mkProject({title:t,type:$('#nTy .on').dataset.v,leader:cu?cu.id:null,team:cu?[cu.id]:[],due:$('#nD').value,client:$('#nC').value.trim(),columnId:colId,tags:colId?['new']:['new','un']});
+      const tm=tenderById($('#nTm').value);
+      const p=mkProject({title:t,tender:tm?tm.id:null,type:tm?tm.type:'public',due:$('#nD').value,client:$('#nC').value.trim(),columnId:colId,tags:colId?['new']:['new','un']});
       log(p,'Project created manually');save();closeModal();renderBoard();flash(p.id);toast('Project created')};
   });
 }
@@ -910,7 +974,7 @@ function renderPage(){
   <div class="page-head">
     <button class="btn icon" id="back" aria-label="Back to board">${icon('left')}</button>
     <div class="t">
-      <div class="crumb">${typeBadge(p.type)} received ${fmtDate(p.received)} · updated ${ago(p.updatedAt)}${p.updatedBy?' by '+esc(p.updatedBy):''}${p.source==='email'?' <span class="src">from email</span>':''}</div>
+      <div class="crumb">${typeBadge(projType(p))}${tenderById(p.tender)?' '+esc(tenderById(p.tender).name)+' ·':''} received ${fmtDate(p.received)} · updated ${ago(p.updatedAt)}${p.updatedBy?' by '+esc(p.updatedBy):''}${p.source==='email'?' <span class="src">from email</span>':''}</div>
       <input class="title-in" id="pTitle" value="${esc(p.title)}" dir="auto" aria-label="Project title">
     </div>
     <button class="btn icon" id="pMore" aria-label="More">${icon('dots')}</button>
@@ -924,9 +988,8 @@ function renderPage(){
         <datalist id="statusList"><option>Reviewing documents</option><option>Site visit scheduled</option><option>Queries sent to client</option><option>Pricing in progress</option><option>Waiting supplier quotes</option><option>Ready for submission</option><option>Submitted</option></datalist>
         <div class="field due-field"><label for="pDue">Submission date</label><div style="display:flex;gap:8px;align-items:center"><input class="in" type="date" id="pDue" value="${p.due||''}"><span class="c-rel" style="${dueInfo(p.due).cls==='late'?'background:var(--danger);color:#fff;border-color:var(--danger)':dueInfo(p.due).cls==='soon'?'background:var(--accent);color:#fff;border-color:var(--accent)':''}">${dueInfo(p.due).rel}</span></div>
           ${(p.dueHistory||[]).length?`<div class="due-hist">${p.dueHistory.slice(0,3).map(h=>`<div>${icon(h.by==='email'?'mail':'user')}${h.from?fmtDate(h.from)+' → ':''}<b style="color:var(--ink-2)">${fmtDate(h.to)}</b> · ${h.by==='email'?'from email':esc(h.by)} · ${ago(h.at)}</div>`).join('')}</div>`:'<div class="due-hist">Updates automatically when an email gives a new date. You can change it here at any time.</div>'}</div>
-        <div class="field"><label>Tender type</label><div class="seg" id="pType"><button type="button" data-v="public" class="${p.type!=='private'?'on':''}">Public</button><button type="button" data-v="private" class="${p.type==='private'?'on':''}">Private</button></div></div>
-        <div class="field"><label for="pLead">Team leader</label><select class="in" id="pLead"><option value="">— Not set —</option>${S.users.map(u=>`<option value="${u.id}" ${u.id===p.leader?'selected':''}>${esc(u.name)}</option>`).join('')}</select></div>
-        <div class="field"><label>Tendering team</label><div class="recips" id="pTeam">${S.users.map(u=>`<button type="button" data-r="${u.id}" class="${(p.team||[]).includes(u.id)||u.id===p.leader?'on':''}">${avatar(u,'sm')}${esc(u.name.replace(/^Eng\.\s*/,''))}</button>`).join('')}</div></div>
+        <div class="field"><label for="pTender">Tender team</label><div style="display:flex;gap:8px;align-items:center"><select class="in" id="pTender">${tenderOptions(p.tender)}</select>${typeBadge(projType(p))}</div></div>
+        ${tenderById(p.tender)?'':`<div class="field"><label>Tender type</label><div class="seg" id="pType"><button type="button" data-v="public" class="${p.type!=='private'?'on':''}">Public</button><button type="button" data-v="private" class="${p.type==='private'?'on':''}">Private</button></div></div>`}
         <div class="field"><label for="pClient">Client</label><input class="in" id="pClient" value="${esc(p.client)}" dir="auto"></div>
         <div class="field"><label for="pRec">Received</label><input class="in" type="date" id="pRec" value="${p.received||''}"></div>
       </div>
@@ -987,11 +1050,8 @@ function bindPage(p){
   $('#pClient').onchange=e=>{p.client=e.target.value;upd()};
   $('#pRec').onchange=e=>{p.received=e.target.value;upd()};
   $('#pDue').onchange=e=>{if(setDue(p,e.target.value,me().name)){save();renderBoard();renderPage();toast(`Submission date set to <b>${fmtDate(p.due)}</b>`,'cal')}};
-  $('#pType').onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;p.type=b.dataset.v;$$('#pType button').forEach(x=>x.classList.toggle('on',x===b));upd()};
-  $('#pLead').onchange=e=>{p.leader=e.target.value||null;if(p.leader&&!(p.team||[]).includes(p.leader))p.team=[...(p.team||[]),p.leader];log(p,'Team leader: '+(p.leader?userById(p.leader).name:'not set'));upd();renderPage()};
-  $('#pTeam').onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;const id=b.dataset.r;
-    if(id===p.leader)return toast('The team leader is always on the team','x');
-    p.team=(p.team||[]).includes(id)?p.team.filter(x=>x!==id):[...(p.team||[]),id];b.classList.toggle('on');upd()};
+  const pt=$('#pType');if(pt)pt.onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;p.type=b.dataset.v;$$('#pType button').forEach(x=>x.classList.toggle('on',x===b));upd()};
+  $('#pTender').onchange=e=>{const t=tenderById(e.target.value);p.tender=t?t.id:null;if(t)p.type=t.type;log(p,'Tender team: '+(t?t.name+' ('+t.type+')':'not set'));upd();renderPage()};
   $('#pCol').onchange=e=>{const v=e.target.value||null;p.columnId=v;p.pos=-1;
     if(v){p.tags=p.tags.filter(t=>t!=='un');log(p,'Assigned to '+colName(v));toast(`Assigned to <b>${esc(colName(v))}</b>`,'user')}else{if(!p.tags.includes('un'))p.tags.push('un')}
     upd();renderPage()};
@@ -1119,7 +1179,7 @@ function uploadFiles(p,files){
    ------------------------------------------------ */
 const MAILBOX=[
   {id:'m1',from:'procurement@nca.example',subject:'ورد الينا – مناقصة عامة: إنشاء مبنى إداري بالمنطقة الصناعية',received:-50,
-   body:'السادة / إدارة المناقصات\nورد الينا طلب تسعير للمشروع التالي:\nاسم المشروع: إنشاء مبنى إداري بالمنطقة الصناعية\nنوع المناقصة: عامة\nالجهة المالكة: هيئة المجتمعات العمرانية\nآخر موعد للتقديم: ٢٠٢٦-١٢-٢٠\nرابط كراسة الشروط: https://tenders.example/admin-building/specs.pdf\nوتفضلوا بقبول فائق الاحترام'},
+   body:'السادة / إدارة المناقصات\nورد الينا طلب تسعير للمشروع التالي:\nاسم المشروع: إنشاء مبنى إداري بالمنطقة الصناعية\nنوع المناقصة: عامة\nمهندس المناقصات: م/ شيرين\nالجهة المالكة: هيئة المجتمعات العمرانية\nآخر موعد للتقديم: ٢٠٢٦-١٢-٢٠\nرابط كراسة الشروط: https://tenders.example/admin-building/specs.pdf\nوتفضلوا بقبول فائق الاحترام'},
   {id:'m2',from:'tenders@moh.example',subject:'تأجيل موعد تقديم العطاءات – توريد وتركيب أعمال الكهرباء – مبنى الإدارة',received:-44,
    body:'نحيطكم علماً بأنه تم تأجيل موعد تقديم العطاءات لمشروع: توريد وتركيب أعمال الكهرباء – مبنى الإدارة ليصبح 2027-01-10 بدلاً من الموعد السابق.\nالإخطار الرسمي: https://tenders.example/electrical-admin/postponement'},
   {id:'m3',from:'wa-procurement@water.example',subject:'الرد على الاستفسارات – إنشاء خزان مياه أرضي سعة 5000 م³',received:-31,
@@ -1127,7 +1187,7 @@ const MAILBOX=[
   {id:'m4',from:'newsletter@supplier.example',subject:'النشرة الشهرية – عروض نوفمبر',received:-20,
    body:'تعرف على أحدث عروضنا لمواد البناء لهذا الشهر.'},
   {id:'m5',from:'procurement@city.example',subject:'ورد إلينا – ممارسة محدودة: تطوير شبكة الطرق الداخلية',received:-12,
-   body:'ورد إلينا من الجهة التالية دعوة لتقديم عطاء:\nاسم المشروع: تطوير شبكة الطرق الداخلية – المرحلة الثالثة\nنوع المناقصة: محدودة\nالجهة المالكة: محافظة المدينة\nآخر موعد للتقديم: 28/12/2026\nالمستندات: https://tenders.example/roads-phase-3/docs'},
+   body:'ورد إلينا من الجهة التالية دعوة لتقديم عطاء:\nاسم المشروع: تطوير شبكة الطرق الداخلية – المرحلة الثالثة\nنوع المناقصة: محدودة\nمهندس المناقصات: م/ مينا\nالجهة المالكة: محافظة المدينة\nآخر موعد للتقديم: 28/12/2026\nالمستندات: https://tenders.example/roads-phase-3/docs'},
   {id:'m6',from:'procurement@nca.example',subject:'ورد الينا – ملحق: إنشاء مبنى إداري بالمنطقة الصناعية',received:-5,
    body:'ورد الينا ملحق جديد لمشروع إنشاء مبنى إداري بالمنطقة الصناعية يتضمن جداول كميات معدلة، وتم تعديل آخر موعد للتقديم ليصبح 2026-12-27.\nالملحق: https://tenders.example/admin-building/boq-rev1.xlsx'},
 ];
@@ -1187,6 +1247,12 @@ function applyMail(m){
       res={kind:'qa',label:`Queries answers → ${short(existing)} · ${r.urls.length} link${r.urls.length!==1?'s':''} added${dn}`,pid:existing.id}}
     else res={kind:'ignore',label:'Queries answers for a project not on the board – review manually',pid:null};
   }
+  if(res.pid){const pj=proj(res.pid);
+    const te=findTender(r.txt);if(te&&!pj.tender){pj.tender=te.id;pj.type=te.type}
+    const h=(pj.dueHistory||[])[0];const dch=h&&h.by==='email'&&Date.now()-h.at<2000;
+    const sum={new:`New tender received${pj.due?' · submission '+fmtDate(pj.due):''}`,upd:'Update / annex received',pp:'Submission postponed',qa:'Answers to queries received'}[res.kind]
+      +(dch&&res.kind!=='new'?` · ${h.from?fmtDate(h.from)+' → ':''}${fmtDate(h.to)}`:'');
+    (pj.mailLog=pj.mailLog||[]).unshift({id:uid(),at:Date.now(),kind:res.kind,summary:sum,subject:m.subject,links:r.urls.length});}
   S.mail.processed.push(m.id); S.mail.log.unshift({id:m.id,...res,at:Date.now()});
   return res;
 }
@@ -1346,7 +1412,6 @@ function inviteFormHTML(pre){
   return `<div class="formgrid">
     <div class="full"><label class="lbl-sm" for="${pre}Email">Email address</label><input class="in" id="${pre}Email" type="email" placeholder="name@rendcon.example" autocomplete="off"></div>
     <div><label class="lbl-sm" for="${pre}Name">Full name</label><input class="in" id="${pre}Name" placeholder="Eng. Name Surname" dir="auto"></div>
-    <div><label class="lbl-sm" for="${pre}Disc">Discipline</label><input class="in" id="${pre}Disc" placeholder="e.g. Architecture" list="discList"></div>
     <div><label class="lbl-sm" for="${pre}Role">Access</label><select class="in" id="${pre}Role"><option value="engineer">Engineer</option><option value="admin">Admin</option></select></div>
     <label class="chk-row" style="align-self:end"><input type="checkbox" id="${pre}Col" checked>Give them a board column</label>
   </div>
@@ -1357,7 +1422,7 @@ function sendInvite(pre){
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Enter a valid email address','x');$('#'+pre+'Email').focus();return false}
   if(S.users.some(u=>u.email.toLowerCase()===email)){toast('That email is already on the team','x');return false}
   const name=$('#'+pre+'Name').value.trim()||email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-  const u={id:uid(),name,email,role:$('#'+pre+'Role').value,discipline:$('#'+pre+'Disc').value.trim(),color:COLORS[S.users.length%COLORS.length],status:'invited',invitedAt:Date.now(),token:uid()+uid(),prefs:{browser:true,email:true,digest:false}};
+  const u={id:uid(),name,email,role:$('#'+pre+'Role').value,color:COLORS[S.users.length%COLORS.length],status:'invited',invitedAt:Date.now(),token:uid()+uid(),prefs:{browser:true,email:true,digest:false}};
   S.users.push(u);
   if($('#'+pre+'Col').checked)S.columns.push({id:uid(),userId:u.id});
   inviteEmail(u);save();renderBoard();
@@ -1380,7 +1445,7 @@ function removeMember(id){
 function memberStats(u){
   const c=colOfUser(u.id);const ps=c?S.projects.filter(p=>p.columnId===c.id):[];
   const today=new Date(new Date().toDateString());
-  return{active:ps.length,week:ps.filter(p=>p.due&&(new Date(p.due)-today)/864e5>=0&&(new Date(p.due)-today)/864e5<=7).length,late:ps.filter(p=>p.due&&new Date(p.due)<today).length};
+  return{active:ps.length,week:ps.filter(p=>p.due&&(new Date(p.due)-today)/864e5>=0&&(new Date(p.due)-today)/864e5<=7).length,late:ps.filter(p=>p.due&&new Date(p.due)<today&&!p.tags.includes('sub')).length};
 }
 function renderTeamSheet(){
   const sh=$('#teamSheet');if(!sh.classList.contains('show'))return;
@@ -1392,10 +1457,18 @@ function renderTeamSheet(){
       ${inviteFormHTML('t')}
       <button class="btn primary" id="tSend" style="width:100%;justify-content:center">${icon('send')}Send invitation</button>
     </div>
-    <div class="section-label">Members · ${S.users.length}</div>
+    <div class="section-label">Tender team · we work with all of them</div>
+    <div id="ttList">${(S.tenderTeam||[]).map(t=>`<div class="tt-row">
+      <input class="in" data-tt="${t.id}" data-f="name" value="${esc(t.name)}" aria-label="Name">
+      <input class="in ar" dir="rtl" data-tt="${t.id}" data-f="ar" value="${esc(t.ar||'')}" placeholder="الاسم بالعربي" aria-label="Name in Arabic, used to read emails">
+      <select class="in" data-tt="${t.id}" data-f="type" aria-label="Public or private"><option value="private" ${t.type==='private'?'selected':''}>Private</option><option value="public" ${t.type==='public'?'selected':''}>Public</option></select>
+      <button class="btn ghost icon sm" data-ttrm="${t.id}" aria-label="Remove ${esc(t.name)}">${icon('trash')}</button></div>`).join('')}</div>
+    <button class="btn sm" id="ttAdd" style="margin-top:8px">${icon('plus')}Add tender engineer</button>
+    <p style="font-size:12px;color:var(--muted);margin:8px 0 0">The Arabic name is how emails are matched to a tender engineer.</p>
+    <div class="section-label">Planning team · ${S.users.length}</div>
     ${order.map(u=>{const st=memberStats(u);return `<div class="member">${avatar(u)}
       <div class="b"><b dir="auto">${esc(u.name)} ${u.role==='admin'?'<span class="pill o">admin</span>':''}${u.status==='invited'?'<span class="pill inv">invited</span>':''}${u.id===S.adminId?'<span class="pill">you</span>':''}</b>
-        <small>${esc(u.email)}${u.discipline?' · '+esc(u.discipline):''}</small>
+        <small>${esc(u.email)}</small>
         <small>${u.status==='invited'?'Invited '+fmtDT(u.invitedAt):`${st.active} project${st.active!==1?'s':''}${st.late?` · <span style="color:var(--danger)">${st.late} overdue</span>`:''}${colOfUser(u.id)?'':' · no board column'}`}</small></div>
       <div class="acts">
         ${u.status==='invited'?`<button class="btn sm" data-resend="${u.id}" title="Send the invitation again">Resend</button><button class="btn ghost icon sm" data-copy="${u.id}" aria-label="Copy invite link" title="Copy invite link">${icon('copy')}</button><button class="btn ghost sm" data-accept="${u.id}" title="Prototype only: pretend they accepted">Mark joined</button>`:''}
@@ -1407,6 +1480,9 @@ function renderTeamSheet(){
   </div>`;
   $('[data-x]',sh).onclick=()=>sheet(null);
   $('#tSend').onclick=()=>{if(sendInvite('t'))renderTeamSheet()};
+  $('#ttList').onchange=e=>{const el=e.target.closest('[data-tt]');if(!el)return;const t=tenderById(el.dataset.tt);t[el.dataset.f]=el.value.trim();
+    if(el.dataset.f==='type')S.projects.filter(x=>x.tender===t.id).forEach(x=>x.type=t.type);save();renderBoard()};
+  $('#ttAdd').onclick=()=>{S.tenderTeam.push({id:uid(),name:'Eng. ',ar:'',type:'public'});save();renderTeamSheet();renderBoard();const ins=$$('#ttList [data-f="name"]');ins[ins.length-1].focus()};
   sh.onclick=async e=>{
     const t=e.target.closest('button');if(!t)return;const d=t.dataset;
     if(d.resend){const u=userById(d.resend);inviteEmail(u);save();renderTeamSheet();toast(`Invitation sent again to <b>${esc(u.email)}</b>`,'send')}
@@ -1414,6 +1490,7 @@ function renderTeamSheet(){
     if(d.accept){const u=userById(d.accept);u.status='active';u.joinedAt=Date.now();save();renderBoard();renderTeamSheet();toast(`<b>${esc(u.name)}</b> joined the team`,'user')}
     if(d.edit)editProfile(d.edit);
     if(d.rm)removeMember(d.rm);
+    if(d.ttrm){const t=tenderById(d.ttrm);if(!confirm(`Remove ${t.name} from the tender team?`))return;S.tenderTeam=S.tenderTeam.filter(x=>x!==t);S.projects.filter(x=>x.tender===t.id).forEach(x=>x.tender=null);save();renderTeamSheet();renderBoard()}
   };
 }
 function editProfile(id){
@@ -1426,7 +1503,6 @@ function editProfile(id){
     <div class="formgrid">
       <div class="full"><label class="lbl-sm" for="pfName">Full name</label><input class="in" id="pfName" value="${esc(u.name)}" dir="auto"></div>
       <div><label class="lbl-sm" for="pfEmail">Email</label><input class="in" id="pfEmail" type="email" value="${esc(u.email)}" ${isAdmin()?'':'disabled'}></div>
-      <div><label class="lbl-sm" for="pfDisc">Discipline</label><input class="in" id="pfDisc" value="${esc(u.discipline||'')}" list="discList2"></div>
       ${isAdmin()&&!self?`<div><label class="lbl-sm" for="pfRole">Access</label><select class="in" id="pfRole"><option value="engineer" ${u.role==='engineer'?'selected':''}>Engineer</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></div>`:''}
       <div class="full"><span class="lbl-sm">Avatar colour</span><div class="swatches" id="pfSw">${COLORS.map(c=>`<button type="button" data-c="${c}" class="${c===u.color?'on':''}" style="background:${c}" aria-label="Colour ${c}"></button>`).join('')}</div></div>
     </div>
@@ -1443,7 +1519,7 @@ function editProfile(id){
       const n=$('#pfName').value.trim();if(!n)return $('#pfName').focus();
       const em=$('#pfEmail').value.trim();
       if(isAdmin()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return toast('Enter a valid email address','x');
-      const old=u.name;u.name=n;if(isAdmin())u.email=em;u.discipline=$('#pfDisc').value.trim();u.color=color;
+      const old=u.name;u.name=n;if(isAdmin())u.email=em;u.color=color;
       if($('#pfRole'))u.role=$('#pfRole').value;
       u.prefs={browser:$('#pfBr').checked,email:$('#pfEm').checked,digest:$('#pfDg').checked};
       S.projects.forEach(p=>p.comments.forEach(c=>{if(c.who===old)c.who=n}));
