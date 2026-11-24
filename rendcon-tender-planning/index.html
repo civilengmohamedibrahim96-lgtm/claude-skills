@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rendcon Tender Planning</title>
+<meta name="description" content="Tender planning board for Rendcon: assign projects to engineers, track tags, sub-tasks, links, files and reminders, with hourly email intake.">
+<meta name="theme-color" content="#161616">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9E9E6; --surface:#FFFFFF; --surface-2:#F5F5F3; --surface-3:#EFEFEC;
+  --line:#D8D8D3; --line-2:#C7C7C1;
+  --ink:#111111; --ink-2:#3A3A38; --muted:#74746F;
+  --accent:#EE6A1F; --accent-2:#D4560F; --accent-soft:#FCE5D6; --accent-line:#F6B38A;
+  --dark:#161616; --dark-2:#232323; --dark-line:#333331;
+  --danger:#C8321E; --ok:#2E7D4F;
+  --r-sm:6px; --r:10px; --r-lg:14px;
+  --shadow-1:0 1px 0 rgba(0,0,0,.04),0 1px 3px rgba(0,0,0,.06);
+  --shadow-2:0 6px 18px rgba(0,0,0,.10),0 2px 6px rgba(0,0,0,.06);
+  --shadow-3:0 22px 48px rgba(0,0,0,.22),0 6px 14px rgba(0,0,0,.10);
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --font:"IBM Plex Sans","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 var(--font);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column;height:100vh;height:100dvh}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+[dir=rtl],.ar{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",sans-serif}
+svg.i{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- App bar ---------- */
+.appbar{flex:none;height:58px;background:var(--dark);color:#F2F2EF;display:flex;align-items:center;gap:14px;padding:0 20px;position:relative;z-index:20}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.mark{width:30px;height:30px;border-radius:8px;background:var(--accent);display:grid;place-items:center;font-weight:700;color:#fff;font-size:15px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.brand small{display:block;font-weight:500;color:#9A9A95;font-size:11.5px;letter-spacing:.02em}
+.appbar .grow{flex:1}
+.chip-btn{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--dark-line);background:var(--dark-2);color:#E8E8E4;font-size:13px;font-weight:500;transition:background .2s,border-color .2s,transform .15s}
+.chip-btn:hover{background:#2C2C2B;border-color:#444}
+.chip-btn:active{transform:scale(.97)}
+.chip-btn .dot{width:8px;height:8px;border-radius:50%;background:#6B6B67}
+.chip-btn.on .dot{background:#3BC170;box-shadow:0 0 0 3px rgba(59,193,112,.18)}
+.chip-btn .count{background:var(--accent);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px;font-weight:600}
+.sync-btn.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sync-meta{font-size:11.5px;color:#9A9A95;font-family:var(--mono)}
+
+/* ---------- Toolbar ---------- */
+.toolbar{flex:none;display:flex;align-items:center;gap:10px;padding:14px 20px 4px;flex-wrap:wrap}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;height:36px;padding:0 14px;min-width:240px;transition:border-color .2s,box-shadow .2s}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search input{border:0;outline:0;background:none;width:100%}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{height:30px;padding:0 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .18s var(--ease)}
+.fchip:hover{border-color:var(--line-2);transform:translateY(-1px)}
+.fchip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.tdot{width:8px;height:8px;border-radius:50%;flex:none}
+.btn{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;height:36px;padding:0 14px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);font-weight:500;font-size:13px;transition:background .18s,border-color .18s,transform .12s,box-shadow .18s}
+.btn:hover{border-color:var(--line-2);background:var(--surface-2)}
+.btn:active{transform:translateY(1px) scale(.98)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)}
+.btn.primary:hover{background:var(--accent-2);border-color:var(--accent-2)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.ghost:hover{background:var(--surface-3)}
+.btn.sm{height:30px;padding:0 10px;font-size:12.5px}
+.btn.icon{width:32px;padding:0;justify-content:center}
+.toolbar .spacer{flex:1}
+
+/* ---------- Board ---------- */
+.board{display:flex;gap:14px;padding:12px 20px 24px;overflow-x:auto;flex:1;min-height:0;align-items:flex-start;scroll-behavior:smooth}
+.board::-webkit-scrollbar{height:10px}
+.board::-webkit-scrollbar-thumb{background:#C9C9C4;border-radius:9px;border:2px solid var(--bg)}
+.col{flex:0 0 304px;max-height:100%;display:flex;flex-direction:column;background:var(--surface-3);border:1px solid var(--line);border-radius:var(--r-lg);animation:colIn .45s var(--ease) both}
+@keyframes colIn{from{opacity:0;transform:translateY(10px)}}
+.col.unassigned{background:repeating-linear-gradient(135deg,#ECECE8 0 10px,#E6E6E2 10px 20px);border-style:dashed;border-color:var(--line-2)}
+.col-head{display:flex;align-items:center;gap:10px;padding:12px 12px 10px 14px}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font-size:11.5px;font-weight:600;display:grid;place-items:center;flex:none}
+.col.unassigned .avatar{background:var(--accent)}
+.col-title{font-weight:600;font-size:14px;line-height:1.2;flex:1;min-width:0}
+.col-title small{display:block;color:var(--muted);font-weight:500;font-size:11.5px}
+.col-title input{border:1px solid var(--accent);border-radius:6px;padding:2px 6px;width:100%;font-weight:600;background:#fff}
+.col-count{font:500 12px var(--mono);color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:1px 8px;border-radius:999px}
+.col-list{padding:4px 10px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;min-height:60px;flex:1;transition:background .2s}
+.col-list.over{background:rgba(238,106,31,.06)}
+.col-foot{padding:0 10px 10px}
+.add-card{width:100%;justify-content:flex-start;color:var(--muted);background:transparent;border:1px dashed transparent}
+.add-card:hover{color:var(--ink);background:var(--surface);border-color:var(--line)}
+.add-col{flex:0 0 260px;height:52px;border:1.5px dashed var(--line-2);border-radius:var(--r-lg);background:transparent;color:var(--ink-2);font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s var(--ease)}
+.add-col:hover{border-color:var(--accent);color:var(--accent);background:rgba(238,106,31,.05)}
+.empty-col{color:var(--muted);font-size:12.5px;text-align:center;padding:18px 8px;border:1px dashed var(--line-2);border-radius:var(--r)}
+
+/* ---------- Card ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:11px 12px 10px;box-shadow:var(--shadow-1);cursor:grab;user-select:none;touch-action:none;position:relative;transition:transform .18s var(--ease),box-shadow .18s var(--ease),border-color .18s;animation:cardIn .4s var(--ease) both}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-2);border-color:var(--line-2)}
+.card::before{content:"";position:absolute;left:-1px;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--accent);opacity:0;transition:opacity .2s}
+.card:hover::before{opacity:1}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px) scale(.98)}}
+.card.dropped{animation:pop .42s var(--ease)}
+@keyframes pop{0%{transform:scale(.96)}55%{transform:scale(1.025)}100%{transform:scale(1)}}
+.card.fresh{animation:fresh 2.4s var(--ease)}
+@keyframes fresh{0%,40%{box-shadow:0 0 0 3px var(--accent-line),var(--shadow-2)}100%{box-shadow:var(--shadow-1)}}
+.card.ghost{position:fixed;z-index:1000;pointer-events:none;box-shadow:var(--shadow-3);transform:scale(1.03);cursor:grabbing;transition:none;animation:none;border-color:var(--accent-line)}
+.placeholder{border:2px dashed var(--accent-line);background:rgba(238,106,31,.07);border-radius:var(--r);flex:none;animation:ph .2s var(--ease)}
+@keyframes ph{from{opacity:0}}
+.card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 8px 2px 7px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.card h3{margin:0 0 3px;font-size:14px;font-weight:600;line-height:1.35;letter-spacing:-.005em}
+.card .ref{font:500 11.5px var(--mono);color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.card .status{margin-top:8px;font-size:12.5px;color:var(--ink-2);display:flex;gap:7px;align-items:flex-start;background:var(--surface-2);border-radius:6px;padding:6px 8px}
+.card .status::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:6px;flex:none}
+.prog{height:4px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-top:9px}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .5s var(--ease)}
+.meta{display:flex;align-items:center;gap:10px;margin-top:9px;color:var(--muted);font-size:12px}
+.meta span{display:inline-flex;align-items:center;gap:4px}
+.meta svg.i{width:14px;height:14px}
+.meta .due{margin-right:auto;font-weight:500;color:var(--ink-2)}
+.meta .due.soon{color:var(--accent-2)}
+.meta .due.late{color:var(--danger)}
+.meta .bell{color:var(--accent)}
+.src{font:600 10px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--accent-2);background:var(--accent-soft);padding:1px 6px;border-radius:4px}
+
+/* ---------- Project page ---------- */
+.scrim{position:fixed;inset:0;background:rgba(17,17,17,.38);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40;backdrop-filter:blur(2px)}
+.scrim.show{opacity:1;pointer-events:auto}
+.page{position:fixed;top:0;right:0;bottom:0;width:min(1120px,100vw);background:var(--bg);z-index:50;transform:translateX(100%);transition:transform .42s var(--ease);display:flex;flex-direction:column;box-shadow:var(--shadow-3)}
+.page.show{transform:none}
+.page-head{background:var(--surface);border-bottom:1px solid var(--line);padding:16px 26px 14px;display:flex;gap:14px;align-items:flex-start}
+.page-head .t{flex:1;min-width:0}
+.crumb{font:500 12px var(--mono);color:var(--muted);display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.title-in{width:100%;border:1px solid transparent;border-radius:8px;padding:4px 8px;margin-left:-8px;font-size:22px;font-weight:600;letter-spacing:-.015em;background:transparent;transition:border-color .2s,background .2s}
+.title-in:hover{border-color:var(--line)}
+.title-in:focus{border-color:var(--accent);background:#fff;outline:0}
+.page-body{flex:1;overflow:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:18px;padding:20px 26px 40px;align-content:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;animation:cardIn .45s var(--ease) both}
+.panel + .panel{margin-top:16px}
+.panel h4{margin:0 0 12px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
+.panel h4 .grow{flex:1}
+.field{display:grid;grid-template-columns:118px 1fr;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--surface-3)}
+.field:last-child{border-bottom:0}
+.field label{color:var(--muted);font-size:12.5px;font-weight:500}
+.in{width:100%;height:34px;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 10px;background:var(--surface);transition:border-color .2s,box-shadow .2s}
+.in:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);outline:0}
+textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
+.tagpick{display:flex;flex-wrap:wrap;gap:6px}
+.tagpick button{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .18s var(--ease)}
+.tagpick button:hover{transform:translateY(-1px);border-color:var(--line-2)}
+.tagpick button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tagpick .newtag{width:120px;height:28px;border-radius:999px;border:1px dashed var(--line-2);padding:0 10px;font-size:12px;background:transparent}
+.folder{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2)}
+.folder .gd{width:26px;height:26px;flex:none}
+.folder a{color:var(--ink);font-weight:500;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;background:linear-gradient(var(--accent),var(--accent)) 0 100%/0 1.5px no-repeat;transition:background-size .3s var(--ease)}
+.folder a:hover{background-size:100% 1.5px}
+
+/* sub-tasks */
+.sub-head{cursor:pointer;user-select:none}
+.sub-head .chev{transition:transform .3s var(--ease)}
+.sub-head.closed .chev{transform:rotate(-90deg)}
+.collapse{display:grid;grid-template-rows:1fr;transition:grid-template-rows .35s var(--ease)}
+.collapse.closed{grid-template-rows:0fr}
+.collapse > div{overflow:hidden}
+.sub{border:1px solid var(--line);border-radius:var(--r);margin-bottom:7px;background:var(--surface);transition:border-color .2s,box-shadow .2s;animation:cardIn .3s var(--ease) both}
+.sub:hover{border-color:var(--line-2)}
+.sub-row{display:flex;align-items:center;gap:9px;padding:7px 8px 7px 10px}
+.chk{width:18px;height:18px;border-radius:5px;border:1.6px solid var(--line-2);display:grid;place-items:center;flex:none;background:#fff;transition:all .2s var(--ease);padding:0}
+.chk svg{width:12px;height:12px;stroke:#fff;stroke-width:3;opacity:0;transform:scale(.4);transition:all .25s var(--ease)}
+.sub.done .chk{background:var(--accent);border-color:var(--accent)}
+.sub.done .chk svg{opacity:1;transform:none}
+.sub-text{flex:1;border:0;background:transparent;padding:3px 4px;border-radius:5px;min-width:0}
+.sub-text:focus{background:var(--surface-2);outline:0}
+.sub.done .sub-text{text-decoration:line-through;color:var(--muted)}
+.sub-due{font:500 11px var(--mono);color:var(--muted);white-space:nowrap}
+.sub-x{opacity:0;transition:opacity .15s}
+.sub:hover .sub-x{opacity:1}
+.sub-tog svg{transition:transform .3s var(--ease)}
+.sub.open .sub-tog svg{transform:rotate(180deg)}
+.sub-more{padding:0 10px 10px 37px;display:grid;gap:8px;grid-template-columns:1fr 150px}
+.sub-more textarea{min-height:56px;grid-column:1/2}
+.addrow{display:flex;gap:8px;margin-top:6px}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);position:relative;margin:-4px -18px 14px;padding:0 10px;overflow-x:auto}
+.tab{background:none;border:0;padding:10px 10px 11px;font-weight:500;color:var(--muted);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:color .2s}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink)}
+.tab .n{font:500 10.5px var(--mono);background:var(--surface-3);border-radius:999px;padding:0 6px}
+.tab.on .n{background:var(--accent-soft);color:var(--accent-2)}
+.tab-ink{position:absolute;bottom:-1px;height:2px;background:var(--accent);border-radius:2px;transition:left .35s var(--ease),width .35s var(--ease)}
+.tabpane{animation:paneIn .35s var(--ease)}
+@keyframes paneIn{from{opacity:0;transform:translateY(6px)}}
+.list-item{display:flex;align-items:center;gap:11px;padding:10px 4px;border-bottom:1px solid var(--surface-3);transition:background .15s}
+.list-item:hover{background:var(--surface-2)}
+.list-item:last-child{border-bottom:0}
+.ico{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--surface-3);color:var(--ink-2);font:700 9.5px var(--mono)}
+.ico.pdf{background:#FBE3DF;color:#B42318}
+.ico.dwg{background:#E4E9F2;color:#2D4A7A}
+.ico.xls{background:#DFF1E5;color:#1D6B3B}
+.ico.doc{background:#E1E9FB;color:#1E4FB8}
+.ico.img{background:#F3E9D7;color:#7A5410}
+.list-item .body{flex:1;min-width:0}
+.list-item .body b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list-item .body a{color:var(--ink);text-decoration:none}
+.list-item .body a:hover{color:var(--accent-2)}
+.list-item .body small{color:var(--muted);font-size:12px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{color:var(--muted);text-align:center;padding:26px 10px;font-size:13px}
+.comment{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--surface-3);animation:cardIn .3s var(--ease) both}
+.comment .avatar{width:30px;height:30px}
+.comment .b{flex:1;min-width:0}
+.comment .who{font-weight:600;font-size:13px}
+.comment .who time{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.comment p{margin:3px 0 0;white-space:pre-wrap;word-wrap:break-word}
+.comment.sys .avatar{background:var(--accent-soft);color:var(--accent-2)}
+.comment.sys p{color:var(--ink-2);font-size:13px}
+.drop{display:block;cursor:pointer;border:1.5px dashed var(--line-2);border-radius:var(--r);padding:24px;text-align:center;color:var(--muted);transition:all .2s var(--ease);background:var(--surface-2)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-2);transform:scale(1.01)}
+.drop b{color:var(--ink)}
+.up{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--surface-3)}
+.up .bar{height:4px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-top:5px}
+.up .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s linear}
+.up.done .bar i{background:var(--ok)}
+.rem{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--surface-3)}
+.rem.fired{opacity:.55}
+.rem .when{font:500 12px var(--mono);color:var(--ink-2)}
+.pill{font:600 10.5px var(--mono);padding:1px 7px;border-radius:999px;background:var(--surface-3);color:var(--ink-2);text-transform:uppercase;letter-spacing:.03em}
+.pill.o{background:var(--accent-soft);color:var(--accent-2)}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.formgrid .full{grid-column:1/-1}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+
+/* ---------- Side sheets (email, reminders) ---------- */
+.sheet{position:fixed;top:0;right:0;bottom:0;width:min(500px,100vw);background:var(--surface);z-index:60;transform:translateX(100%);transition:transform .4s var(--ease);display:flex;flex-direction:column;box-shadow:var(--shadow-3)}
+.sheet.show{transform:none}
+.sheet-head{padding:18px 20px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.sheet-head h2{margin:0;font-size:17px;flex:1}
+.sheet-body{flex:1;overflow:auto;padding:16px 20px 30px}
+.mail{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;animation:cardIn .35s var(--ease) both;background:var(--surface)}
+.mail .subj{font-weight:600;font-size:14px}
+.mail .from{color:var(--muted);font-size:12px;margin-top:2px}
+.mail .snip{color:var(--ink-2);font-size:13px;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mail .res{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:9px;font-size:12px;color:var(--ink-2)}
+.mail.pending{background:var(--surface-2);border-style:dashed}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:8px 10px;align-items:center;margin-bottom:16px}
+.kv label{color:var(--muted);font-size:12.5px}
+.switch{width:38px;height:22px;border-radius:999px;background:var(--line-2);border:0;position:relative;transition:background .25s;padding:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s var(--ease);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.switch.on{background:var(--accent)}
+.switch.on::after{transform:translateX(16px)}
+.section-label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:18px 0 10px}
+.scan{height:3px;border-radius:3px;background:var(--surface-3);overflow:hidden;margin:4px 0 14px;opacity:0;transition:opacity .2s}
+.scan.on{opacity:1}
+.scan i{display:block;height:100%;width:35%;background:var(--accent);border-radius:3px;animation:scan 1.1s var(--ease) infinite}
+@keyframes scan{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
+
+/* ---------- Modal ---------- */
+.modal{position:fixed;inset:0;display:grid;place-items:center;z-index:70;pointer-events:none}
+.modal .box{width:min(460px,calc(100vw - 32px));background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:20px;opacity:0;transform:translateY(12px) scale(.98);transition:all .3s var(--ease)}
+.modal.show{pointer-events:auto}
+.modal.show .box{opacity:1;transform:none}
+.modal h3{margin:0 0 14px;font-size:17px}
+.modal .row{display:grid;gap:6px;margin-bottom:12px}
+.modal .row label{font-size:12.5px;color:var(--muted);font-weight:500}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+
+/* ---------- Toasts ---------- */
+.toasts{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--dark);color:#F2F2EF;padding:10px 14px 10px 12px;border-radius:10px;box-shadow:var(--shadow-3);display:flex;align-items:center;gap:10px;font-size:13px;animation:toastIn .4s var(--ease) both;pointer-events:auto;max-width:min(520px,calc(100vw - 32px))}
+.toast .ti{width:24px;height:24px;border-radius:6px;background:var(--accent);display:grid;place-items:center;flex:none}
+.toast .ti svg{stroke:#fff;width:14px;height:14px}
+.toast b{font-weight:600}
+.toast.out{animation:toastOut .3s var(--ease) both}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px) scale(.96)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(8px) scale(.97)}}
+
+/* ---------- Menu ---------- */
+.menu{position:fixed;z-index:80;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-2);padding:5px;min-width:180px;animation:menuIn .18s var(--ease)}
+@keyframes menuIn{from{opacity:0;transform:translateY(-4px) scale(.98)}}
+.menu button{display:flex;align-items:center;gap:9px;width:100%;border:0;background:none;padding:8px 10px;border-radius:6px;text-align:left;font-size:13px}
+.menu button:hover{background:var(--surface-2)}
+.menu button.danger{color:var(--danger)}
+
+@media (max-width:860px){
+  .page-body{grid-template-columns:1fr;padding:16px}
+  .page-head{padding:14px 16px}
+  .appbar{padding:0 12px;gap:8px}
+  .brand small,.sync-meta,.chip-btn .lbl{display:none}
+  .toolbar{padding:12px 12px 4px}
+  .search{min-width:0;flex:1}
+  .board{padding:10px 12px 20px}
+  .col{flex-basis:84vw}
+  .field{grid-template-columns:96px 1fr}
+  .sub-more{grid-template-columns:1fr;padding-left:10px}
+  .brand>div:last-child{display:none}
+  .filters{flex-wrap:nowrap;overflow-x:auto;width:100%;order:3;padding-bottom:2px}
+  .fchip{flex:none}
+  #resetBtn{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 20h16"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+  <symbol id="i-sync" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-gdrive" viewBox="0 0 87.3 78"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da" stroke="none"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47" stroke="none"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335" stroke="none"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d" stroke="none"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc" stroke="none"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00" stroke="none"/></symbol>
+</svg>
+
+<a class="sr" href="#board">Skip to board</a>
+<header class="appbar">
+  <div class="brand"><div class="mark">R</div><div>Rendcon Tender Planning<small>Tenders board · Engineering</small></div></div>
+  <div class="grow"></div>
+  <span class="sync-meta" id="syncMeta"></span>
+  <button class="chip-btn sync-btn" id="syncBtn" title="Read the tender mailbox now"><svg class="i"><use href="#i-sync"/></svg><span class="lbl">Sync email</span></button>
+  <button class="chip-btn" id="mailBtn" title="Email intake settings and log"><span class="dot" id="mailDot"></span><svg class="i"><use href="#i-mail"/></svg><span class="lbl">Inbox</span></button>
+  <button class="chip-btn" id="driveBtn" title="Google Drive connection"><span class="dot" id="driveDot"></span><svg class="i" viewBox="0 0 87.3 78"><use href="#i-gdrive"/></svg><span class="lbl">Drive</span></button>
+  <button class="chip-btn" id="remBtn" title="All reminders"><svg class="i"><use href="#i-bell"/></svg><span class="lbl">Reminders</span><span class="count" id="remCount">0</span></button>
+</header>
+
+<div class="toolbar">
+  <label class="search"><svg class="i"><use href="#i-search"/></svg><span class="sr">Search projects</span><input id="q" placeholder="Search projects, tender no., client…" dir="auto"></label>
+  <div class="filters" id="filters"></div>
+  <div class="spacer"></div>
+  <button class="btn" id="resetBtn" title="Reset the demo data">Reset demo</button>
+  <button class="btn primary" id="newBtn"><svg class="i"><use href="#i-plus"/></svg>New project</button>
+</div>
+
+<main class="board" id="board" aria-label="Tender board"></main>
+
+<div class="scrim" id="scrim"></div>
+<section class="page" id="page" aria-label="Project details"></section>
+<aside class="sheet" id="mailSheet" aria-label="Email intake"></aside>
+<aside class="sheet" id="remSheet" aria-label="Reminders"></aside>
+<div class="modal" id="modal"><div class="box" role="dialog" aria-modal="true"></div></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   Rendcon Tender Planning — prototype
+   Everything runs in the browser; data is kept in localStorage.
+   Email intake and Google Drive are simulated with the same
+   parsing rules the real integration would use.
+   ============================================================ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const icon=(n,c='')=>`<svg class="i ${c}"><use href="#i-${n}"/></svg>`;
+const KEY='rendcon-tp-v1';
+const HOUR=3600000;
+const fmtDate=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';
+const fmtShort=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'';
+const fmtDT=d=>new Date(d).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const initials=n=>(n||'?').replace(/^Eng\.?\s*/i,'').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const isoIn=days=>{const d=new Date();d.setDate(d.getDate()+days);return d.toISOString().slice(0,10)};
+const localDT=ms=>{const d=new Date(ms);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
+
+const TAGS=[
+  {id:'new',name:'New project',color:'#EE6A1F'},
+  {id:'upd',name:'New updates',color:'#B8860B'},
+  {id:'qa',name:'Queries answers',color:'#2F7D7A'},
+  {id:'pp',name:'Postponed',color:'#8A8A85'},
+  {id:'un',name:'Unassigned',color:'#111111'},
+  {id:'urgent',name:'Urgent',color:'#C8321E'},
+  {id:'sub',name:'Submitted',color:'#2E7D4F'},
+];
+
+function seed(){
+  const c1=uid(),c2=uid(),c3=uid();
+  const P=(o)=>Object.assign({id:uid(),columnId:null,pos:0,tags:[],status:'',received:isoIn(-3),due:isoIn(14),folder:'',client:'',ref:'',subtasks:[],links:[],comments:[],notifications:[],files:[],uploads:[],source:'manual',subOpen:true},o);
+  return {
+    me:'Mohamed Ibrahim',
+    columns:[{id:c1,name:'Eng. Ahmed Hassan',role:'Civil & structure'},{id:c2,name:'Eng. Sara Mostafa',role:'MEP'},{id:c3,name:'Eng. Omar Khaled',role:'Infrastructure'}],
+    tags:TAGS.slice(),
+    drive:{connected:true,account:'tenders@rendcon.example'},
+    mail:{connected:true,address:'tenders@rendcon.example',subject:'ورد الينا',hourly:true,lastSync:Date.now()-38*60000,processed:[],log:[]},
+    projects:[
+      P({title:'توريد وتركيب أعمال الكهرباء – مبنى الإدارة',client:'Ministry of Housing',ref:'2026/104',tags:['upd'],columnId:c2,pos:0,status:'Pricing MEP BOQ – waiting on lighting supplier quote',due:isoIn(5),folder:'https://drive.google.com/drive/folders/1aEl104',
+        subtasks:[{id:uid(),text:'Review specs & drawings',done:true,note:'',due:''},{id:uid(),text:'Request supplier quotes',done:true,note:'3 suppliers contacted',due:''},{id:uid(),text:'Price lighting package',done:false,note:'',due:isoIn(2)},{id:uid(),text:'Final BOQ sign-off',done:false,note:'',due:isoIn(4)}],
+        links:[{id:uid(),title:'Tender portal',url:'https://tenders.example/2026-104'}],
+        files:[{id:uid(),name:'Specs_Electrical.pdf',size:'4.2 MB'},{id:uid(),name:'SLD_Rev02.dwg',size:'1.1 MB'},{id:uid(),name:'BOQ_Electrical.xlsx',size:'380 KB'}],
+        comments:[{id:uid(),who:'Eng. Sara Mostafa',text:'Lighting quote expected Thursday.',at:Date.now()-26*HOUR}],
+        notifications:[{id:uid(),at:Date.now()+20*HOUR,msg:'Chase lighting supplier quote',repeat:'none',fired:false}]}),
+      P({title:'إنشاء خزان مياه أرضي سعة 5000 م³',client:'Water Authority',ref:'2026/097',tags:['new'],columnId:c1,pos:0,status:'Site visit done – structural take-off in progress',due:isoIn(9),folder:'https://drive.google.com/drive/folders/1aEl097',
+        subtasks:[{id:uid(),text:'Site visit',done:true,note:'',due:''},{id:uid(),text:'Structural take-off',done:false,note:'',due:isoIn(3)},{id:uid(),text:'Send queries to client',done:true,note:'Sent 12 queries',due:''}],
+        files:[{id:uid(),name:'Tank_GA.pdf',size:'2.7 MB'}]}),
+      P({title:'Rehabilitation of Internal Roads – Phase 2',client:'New Cities Authority',ref:'2026/088',tags:['pp'],columnId:c3,pos:0,status:'Postponed by client – new date to be announced',due:isoIn(30),links:[{id:uid(),title:'Postponement notice',url:'https://tenders.example/2026-088/notice'}]}),
+      P({title:'Fire fighting system – Logistics Hub',client:'Port Logistics Co.',ref:'2026/111',tags:['new','urgent'],columnId:c2,pos:1,status:'Hydraulic calc pending',due:isoIn(2),subtasks:[{id:uid(),text:'Hydraulic calculation',done:false,note:'',due:isoIn(1)},{id:uid(),text:'Pump room pricing',done:false,note:'',due:isoIn(2)}]}),
+      P({title:'صيانة شبكات الصرف الصحي – الحي الثالث',client:'Municipality',ref:'2026/115',tags:['new','un'],status:'Received by email – needs an engineer',source:'email',due:isoIn(12)}),
+      P({title:'Steel shed – Industrial Zone plot 14',client:'Private client',ref:'RFQ-0412',tags:['un'],status:'',due:isoIn(18)}),
+      P({title:'Boundary wall & gatehouse',client:'Education Directorate',ref:'2026/079',tags:['sub'],columnId:c1,pos:1,status:'Submitted – awaiting opening',due:isoIn(-1)}),
+    ]
+  };
+}
+
+let S;
+function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):seed()}catch(e){S=seed()}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+load();
+
+const tagById=id=>S.tags.find(t=>t.id===id);
+const colById=id=>S.columns.find(c=>c.id===id);
+const proj=id=>S.projects.find(p=>p.id===id);
+let filterTags=new Set(), query='';
+
+/* ---------------- Toasts ---------------- */
+function toast(html,ico='check',ms=3200){
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span class="ti">${icon(ico)}</span><span>${html}</span>`;
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300)},ms);
+}
+
+/* ---------------- Board ---------------- */
+function matches(p){
+  if(filterTags.size&&![...filterTags].every(t=>p.tags.includes(t)))return false;
+  if(query){const h=(p.title+' '+p.ref+' '+p.client+' '+p.status).toLowerCase();if(!h.includes(query))return false}
+  return true;
+}
+function dueClass(d){if(!d)return'';const diff=(new Date(d)-new Date(new Date().toDateString()))/864e5;return diff<0?'late':diff<=3?'soon':''}
+function cardHTML(p){
+  const done=p.subtasks.filter(s=>s.done).length, tot=p.subtasks.length;
+  const rem=p.notifications.filter(n=>!n.fired).length;
+  return `<article class="card" data-id="${p.id}" tabindex="0" aria-label="${esc(p.title)}">
+    ${p.tags.length?`<div class="card-tags">${p.tags.map(id=>{const t=tagById(id);return t?`<span class="tag"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</span>`:''}).join('')}</div>`:''}
+    <h3 dir="auto">${esc(p.title)}</h3>
+    <div class="ref">${esc(p.ref||'No ref')}${p.client?` · <span dir="auto">${esc(p.client)}</span>`:''}${p.source==='email'?' <span class="src">email</span>':''}</div>
+    ${p.status?`<div class="status" dir="auto">${esc(p.status)}</div>`:''}
+    ${tot?`<div class="prog" title="${done}/${tot} sub-tasks"><i style="width:${tot?done/tot*100:0}%"></i></div>`:''}
+    <div class="meta">
+      <span class="due ${dueClass(p.due)}">${icon('cal')}${p.due?fmtShort(p.due):'No date'}</span>
+      ${tot?`<span title="Sub-tasks">${icon('check')}${done}/${tot}</span>`:''}
+      ${p.links.length?`<span title="Links">${icon('link')}${p.links.length}</span>`:''}
+      ${p.comments.filter(c=>!c.sys).length?`<span title="Comments">${icon('msg')}${p.comments.filter(c=>!c.sys).length}</span>`:''}
+      ${(p.files.length+p.uploads.length)?`<span title="Files">${icon('file')}${p.files.length+p.uploads.length}</span>`:''}
+      ${rem?`<span class="bell" title="Reminders set">${icon('bell')}${rem}</span>`:''}
+    </div>
+  </article>`;
+}
+function colHTML(col,unassigned){
+  const items=S.projects.filter(p=>(p.columnId||null)===(col?col.id:null)).sort((a,b)=>a.pos-b.pos);
+  const shown=items.filter(matches);
+  return `<section class="col ${unassigned?'unassigned':''}" data-col="${col?col.id:''}">
+    <div class="col-head">
+      <div class="avatar">${unassigned?icon('mail'):esc(initials(col.name))}</div>
+      <div class="col-title" data-rename="${col?col.id:''}">${unassigned?'Unassigned projects<small>New jobs land here</small>':`${esc(col.name)}<small>${esc(col.role||'Engineer')}</small>`}</div>
+      <span class="col-count">${shown.length}</span>
+      ${unassigned?'':`<button class="btn ghost icon sm" data-colmenu="${col.id}" aria-label="Column options">${icon('dots')}</button>`}
+    </div>
+    <div class="col-list" data-list="${col?col.id:''}">${shown.map(cardHTML).join('')||`<div class="empty-col">${unassigned?'No unassigned projects':'Drag a project here to assign it'}</div>`}</div>
+    <div class="col-foot"><button class="btn sm add-card" data-add="${col?col.id:''}">${icon('plus')}Add project</button></div>
+  </section>`;
+}
+function renderBoard(){
+  const b=$('#board'), sl=b.scrollLeft;
+  b.innerHTML=colHTML(null,true)+S.columns.map(c=>colHTML(c,false)).join('')+`<button class="add-col" id="addCol">${icon('plus')}Add engineer column</button>`;
+  b.scrollLeft=sl;
+  renderFilters(); renderHeader();
+}
+function renderFilters(){
+  $('#filters').innerHTML=S.tags.map(t=>`<button class="fchip ${filterTags.has(t.id)?'on':''}" data-filter="${t.id}"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</button>`).join('');
+}
+function renderHeader(){
+  $('#driveDot').parentElement.classList.toggle('on',S.drive.connected);
+  $('#mailDot').parentElement.classList.toggle('on',S.mail.connected);
+  const up=S.projects.reduce((a,p)=>a+p.notifications.filter(n=>!n.fired).length,0);
+  $('#remCount').textContent=up;
+  updateSyncMeta();
+}
+function updateSyncMeta(){
+  if(!S.mail.connected||!S.mail.hourly){$('#syncMeta').textContent=S.mail.connected?'auto-sync off':'mail not connected';return}
+  const next=Math.max(0,S.mail.lastSync+HOUR-Date.now());
+  const ago=Math.round((Date.now()-S.mail.lastSync)/60000);
+  $('#syncMeta').textContent=`synced ${ago}m ago · next in ${Math.ceil(next/60000)}m`;
+}
+
+/* ---------------- Drag & drop (mouse + touch, pointer events) ---------------- */
+let drag=null;
+$('#board').addEventListener('pointerdown',e=>{
+  const card=e.target.closest('.card'); if(!card||e.button>0)return;
+  drag={card,id:card.dataset.id,x:e.clientX,y:e.clientY,started:false,from:card.closest('.col-list').dataset.list};
+});
+document.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  if(!drag.started){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<6)return;startDrag(e)}
+  const g=drag.ghost; g.style.left=(e.clientX-drag.ox)+'px'; g.style.top=(e.clientY-drag.oy)+'px';
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  const col=el&&el.closest('.col'); $$('.col-list.over').forEach(l=>l.classList.remove('over'));
+  if(col){
+    const list=$('.col-list',col); list.classList.add('over');
+    const emp=$('.empty-col',list); if(emp)emp.style.display='none';
+    const cards=$$('.card',list).filter(c=>c!==drag.card);
+    const before=cards.find(c=>{const r=c.getBoundingClientRect();return e.clientY<r.top+r.height/2});
+    if(before)list.insertBefore(drag.ph,before);else list.appendChild(drag.ph);
+  }
+  const b=$('#board'),br=b.getBoundingClientRect();
+  if(e.clientX>br.right-60)b.scrollLeft+=14; else if(e.clientX<br.left+60)b.scrollLeft-=14;
+});
+function startDrag(e){
+  drag.started=true;
+  const r=drag.card.getBoundingClientRect();
+  drag.ox=e.clientX-r.left; drag.oy=e.clientY-r.top;
+  const g=drag.card.cloneNode(true); g.classList.add('ghost'); g.style.width=r.width+'px'; g.style.left=r.left+'px'; g.style.top=r.top+'px';
+  document.body.appendChild(g); drag.ghost=g;
+  const ph=document.createElement('div'); ph.className='placeholder'; ph.style.height=r.height+'px'; drag.ph=ph;
+  drag.card.replaceWith(ph); document.body.style.cursor='grabbing';
+  $('#board').style.scrollBehavior='auto';
+}
+document.addEventListener('pointerup',()=>{
+  if(!drag)return;
+  const d=drag; drag=null;
+  if(!d.started){openProject(d.id);return}
+  document.body.style.cursor=''; $('#board').style.scrollBehavior='';
+  const list=d.ph.parentElement; const target=list.dataset.list||null;
+  const ids=[...list.children].map(n=>n===d.ph?d.id:n.dataset.id).filter(Boolean);
+  const p=proj(d.id); const prev=p.columnId||null;
+  p.columnId=target;
+  ids.forEach((id,i)=>{const x=proj(id);if(x)x.pos=i});
+  if(prev!==target){
+    if(target){p.tags=p.tags.filter(t=>t!=='un'); const c=colById(target);
+      log(p,`Assigned to ${c.name}`); toast(`<b dir="auto">${esc(p.title)}</b> assigned to <b>${esc(c.name)}</b>`,'user');}
+    else{if(!p.tags.includes('un'))p.tags.push('un'); log(p,'Moved back to unassigned'); toast('Moved to <b>Unassigned</b>','user')}
+  }
+  d.ghost.remove(); save(); renderBoard();
+  const nc=$(`.card[data-id="${d.id}"]`); if(nc){nc.style.animation='none';nc.offsetHeight;nc.style.animation='';nc.classList.add('dropped')}
+});
+document.addEventListener('pointercancel',()=>{if(drag&&drag.started){drag.ghost.remove();drag=null;renderBoard()}else drag=null});
+
+function log(p,text){p.comments.push({id:uid(),who:'System',text,at:Date.now(),sys:true})}
+
+/* ---------------- Board clicks ---------------- */
+$('#board').addEventListener('click',e=>{
+  const a=e.target.closest('[data-add]'); if(a){newProject(a.dataset.add||null);return}
+  if(e.target.closest('#addCol')){addColumn();return}
+  const m=e.target.closest('[data-colmenu]'); if(m){colMenu(m,m.dataset.colmenu);return}
+});
+$('#board').addEventListener('keydown',e=>{const c=e.target.closest('.card');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openProject(c.dataset.id)}});
+$('#board').addEventListener('dblclick',e=>{const t=e.target.closest('[data-rename]');if(t&&t.dataset.rename)renameCol(t.dataset.rename)});
+$('#filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;const id=b.dataset.filter;filterTags.has(id)?filterTags.delete(id):filterTags.add(id);renderBoard()});
+$('#q').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();renderBoard()});
+$('#newBtn').onclick=()=>newProject(null);
+$('#resetBtn').onclick=()=>{if(confirm('Reset the board to the demo data?')){S=seed();save();renderBoard();toast('Demo data restored')}};
+
+function addColumn(){
+  modal(`<h3>Add engineer column</h3>
+    <div class="row"><label for="mName">Engineer name</label><input class="in" id="mName" placeholder="Eng. Name Surname" dir="auto"></div>
+    <div class="row"><label for="mRole">Discipline</label><input class="in" id="mRole" placeholder="e.g. Architecture"></div>
+    <div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="mOk">Add column</button></div>`,()=>{
+    $('#mOk').onclick=()=>{const n=$('#mName').value.trim();if(!n)return $('#mName').focus();
+      S.columns.push({id:uid(),name:n,role:$('#mRole').value.trim()});save();closeModal();renderBoard();
+      $('#board').scrollLeft=$('#board').scrollWidth;toast(`Column <b>${esc(n)}</b> added`)};
+  });
+}
+function renameCol(id){
+  const c=colById(id); const host=$(`[data-rename="${id}"]`);
+  host.innerHTML=`<input value="${esc(c.name)}" dir="auto" aria-label="Column name">`;
+  const i=$('input',host); i.focus(); i.select();
+  const done=()=>{const v=i.value.trim();if(v)c.name=v;save();renderBoard()};
+  i.onblur=done; i.onkeydown=e=>{if(e.key==='Enter')i.blur();if(e.key==='Escape'){i.value=c.name;i.blur()}};
+}
+function colMenu(btn,id){
+  const r=btn.getBoundingClientRect();
+  menu(r.right-190,r.bottom+4,[
+    ['Rename column','user',()=>renameCol(id)],
+    ['Add project here','plus',()=>newProject(id)],
+    ['Remove column','trash',()=>{const c=colById(id);if(!confirm(`Remove ${c.name}? Their projects move to Unassigned.`))return;
+      S.projects.filter(p=>p.columnId===id).forEach(p=>{p.columnId=null;if(!p.tags.includes('un'))p.tags.push('un')});
+      S.columns=S.columns.filter(x=>x.id!==id);save();renderBoard();toast('Column removed – projects moved to Unassigned')},'danger'],
+  ]);
+}
+function menu(x,y,items){
+  closeMenu(); const m=document.createElement('div'); m.className='menu'; m.id='menu';
+  m.style.left=Math.max(8,x)+'px'; m.style.top=y+'px';
+  m.innerHTML=items.map((it,i)=>`<button data-i="${i}" class="${it[3]||''}">${icon(it[1])}${it[0]}</button>`).join('');
+  document.body.appendChild(m);
+  m.onclick=e=>{const b=e.target.closest('[data-i]');if(b){closeMenu();items[b.dataset.i][2]()}};
+  setTimeout(()=>document.addEventListener('click',closeMenu,{once:true}),0);
+}
+function closeMenu(){const m=$('#menu');if(m)m.remove()}
+
+/* ---------------- Modal ---------------- */
+function modal(html,after){const m=$('#modal');$('.box',m).innerHTML=html;m.classList.add('show');$('#scrim').classList.add('show');
+  $$('[data-close]',m).forEach(b=>b.onclick=closeModal);after&&after();const f=$('input,textarea,select',m);f&&f.focus()}
+function closeModal(){$('#modal').classList.remove('show');if(!$('#page').classList.contains('show')&&!$('.sheet.show'))$('#scrim').classList.remove('show')}
+
+function newProject(colId){
+  modal(`<h3>New project</h3>
+    <div class="row"><label for="nT">Project title</label><input class="in" id="nT" dir="auto" placeholder="Project name (Arabic or English)"></div>
+    <div class="formgrid"><div class="row"><label for="nR">Tender no.</label><input class="in" id="nR" placeholder="2026/130"></div>
+    <div class="row"><label for="nD">Submission date</label><input class="in" type="date" id="nD" value="${isoIn(14)}"></div>
+    <div class="row full"><label for="nC">Client</label><input class="in" id="nC" dir="auto"></div></div>
+    <div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="nOk">Create project</button></div>`,()=>{
+    $('#nOk').onclick=()=>{const t=$('#nT').value.trim();if(!t)return $('#nT').focus();
+      const p=mkProject({title:t,ref:$('#nR').value.trim(),due:$('#nD').value,client:$('#nC').value.trim(),columnId:colId,tags:colId?['new']:['new','un']});
+      log(p,'Project created manually');save();closeModal();renderBoard();flash(p.id);toast('Project created')};
+  });
+}
+function mkProject(o){
+  const p=Object.assign({id:uid(),columnId:null,pos:-1,tags:[],status:'',received:new Date().toISOString().slice(0,10),due:'',folder:'',client:'',ref:'',subtasks:[],links:[],comments:[],notifications:[],files:[],uploads:[],source:'manual',subOpen:true},o);
+  S.projects.forEach(x=>{if((x.columnId||null)===(p.columnId||null))x.pos++}); p.pos=0;
+  S.projects.push(p); return p;
+}
+function flash(id){requestAnimationFrame(()=>{const c=$(`.card[data-id="${id}"]`);if(c){c.classList.add('fresh');c.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'})}})}
+
+/* ---------------- Project page ---------------- */
+let cur=null, curTab='files';
+function openProject(id){location.hash='#p/'+id}
+function route(){
+  const m=location.hash.match(/^#p\/(\w+)/);
+  if(m&&proj(m[1])){cur=m[1];renderPage();$('#page').classList.add('show');$('#scrim').classList.add('show')}
+  else{cur=null;$('#page').classList.remove('show');if(!$('.sheet.show'))$('#scrim').classList.remove('show')}
+}
+window.addEventListener('hashchange',route);
+function closePage(){if(location.hash)history.pushState('',document.title,location.pathname+location.search);route()}
+
+function renderPage(){
+  const p=proj(cur); if(!p)return;
+  const done=p.subtasks.filter(s=>s.done).length;
+  $('#page').innerHTML=`
+  <div class="page-head">
+    <button class="btn icon" id="back" aria-label="Back to board">${icon('left')}</button>
+    <div class="t">
+      <div class="crumb">${esc(p.ref||'No ref')} · received ${fmtDate(p.received)}${p.source==='email'?' <span class="src">from email</span>':''}</div>
+      <input class="title-in" id="pTitle" value="${esc(p.title)}" dir="auto" aria-label="Project title">
+    </div>
+    <button class="btn icon" id="pMore" aria-label="More">${icon('dots')}</button>
+  </div>
+  <div class="page-body">
+    <div>
+      <div class="panel">
+        <h4>Details</h4>
+        <div class="field"><label for="pCol">Assigned to</label><select class="in" id="pCol"><option value="">— Unassigned —</option>${S.columns.map(c=>`<option value="${c.id}" ${c.id===p.columnId?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>
+        <div class="field"><label for="pStatus">Status</label><input class="in" id="pStatus" value="${esc(p.status)}" dir="auto" placeholder="Write the current status…" list="statusList"></div>
+        <datalist id="statusList"><option>Reviewing documents</option><option>Site visit scheduled</option><option>Queries sent to client</option><option>Pricing in progress</option><option>Waiting supplier quotes</option><option>Ready for submission</option><option>Submitted</option></datalist>
+        <div class="field"><label for="pRef">Tender no.</label><input class="in" id="pRef" value="${esc(p.ref)}"></div>
+        <div class="field"><label for="pClient">Client</label><input class="in" id="pClient" value="${esc(p.client)}" dir="auto"></div>
+        <div class="field"><label for="pRec">Received</label><input class="in" type="date" id="pRec" value="${p.received||''}"></div>
+        <div class="field"><label for="pDue">Submission</label><input class="in" type="date" id="pDue" value="${p.due||''}"></div>
+      </div>
+      <div class="panel">
+        <h4>Tags</h4>
+        <div class="tagpick" id="tagpick">${S.tags.map(t=>`<button data-tag="${t.id}" class="${p.tags.includes(t.id)?'on':''}"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</button>`).join('')}<input class="newtag" id="newTag" placeholder="+ New tag" dir="auto" aria-label="New tag"></div>
+      </div>
+      <div class="panel">
+        <h4>Project folder</h4>
+        ${p.folder?`<div class="folder"><svg class="gd" viewBox="0 0 87.3 78"><use href="#i-gdrive"/></svg><a href="${esc(p.folder)}" target="_blank" rel="noopener">${esc(p.folder.replace(/^https?:\/\//,''))}</a><button class="btn sm ghost" id="unlink">Unlink</button></div>`
+        :`<div class="addrow"><input class="in" id="folderIn" placeholder="Paste a Drive folder link"><button class="btn sm" id="folderLink">Link</button><button class="btn sm dark" id="folderNew">${icon('folder')}Create in Drive</button></div>`}
+      </div>
+      <div class="panel">
+        <h4 class="sub-head ${p.subOpen?'':'closed'}" id="subHead">${icon('chev','chev')}Sub-tasks <span class="pill">${done}/${p.subtasks.length}</span><span class="grow"></span></h4>
+        <div class="collapse ${p.subOpen?'':'closed'}" id="subWrap"><div>
+          <div class="prog" style="margin:0 0 12px"><i style="width:${p.subtasks.length?done/p.subtasks.length*100:0}%"></i></div>
+          <div id="subs">${p.subtasks.map(subHTML).join('')}</div>
+          <form class="addrow" id="subAdd"><input class="in" id="subIn" placeholder="Add a sub-task…" dir="auto"><input class="in" type="date" id="subDue" style="width:150px" aria-label="Sub-task date"><button class="btn primary sm" style="height:34px">${icon('plus')}Add</button></form>
+        </div></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="animation-delay:.06s">
+        <div class="tabs" id="tabs">
+          ${[['files','file','Files',p.files.length],['links','link','Links',p.links.length],['comments','msg','Comments',p.comments.filter(c=>!c.sys).length],['notifications','bell','Notifications',p.notifications.filter(n=>!n.fired).length],['uploads','up','Uploads',p.uploads.length]]
+            .map(([k,ic,l,n])=>`<button class="tab ${curTab===k?'on':''}" data-tab="${k}">${icon(ic)}${l}${n?`<span class="n">${n}</span>`:''}</button>`).join('')}
+          <span class="tab-ink" id="tabInk"></span>
+        </div>
+        <div id="pane"></div>
+      </div>
+    </div>
+  </div>`;
+  bindPage(p); renderPane(); moveInk();
+}
+function subHTML(s){
+  return `<div class="sub ${s.done?'done':''} ${s.open?'open':''}" data-sub="${s.id}">
+    <div class="sub-row">
+      <button class="chk" data-act="toggle" aria-label="Done"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10" fill="none"/></svg></button>
+      <input class="sub-text" value="${esc(s.text)}" dir="auto" data-act="text" aria-label="Sub-task">
+      ${s.due?`<span class="sub-due">${fmtShort(s.due)}</span>`:''}
+      ${s.note?`<span title="Has notes" style="color:var(--muted)">${icon('msg')}</span>`:''}
+      <button class="btn ghost icon sm sub-tog" data-act="open" aria-label="Expand">${icon('chev')}</button>
+      <button class="btn ghost icon sm sub-x" data-act="del" aria-label="Delete">${icon('x')}</button>
+    </div>
+    <div class="collapse ${s.open?'':'closed'}"><div><div class="sub-more">
+      <textarea class="in" data-act="note" placeholder="Notes, details…" dir="auto">${esc(s.note||'')}</textarea>
+      <input class="in" type="date" data-act="due" value="${s.due||''}" aria-label="Due date">
+    </div></div></div>
+  </div>`;
+}
+function bindPage(p){
+  const upd=()=>{save();renderBoard()};
+  $('#back').onclick=closePage;
+  $('#pMore').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();menu(r.right-190,r.bottom+4,[
+    ['Delete project','trash',()=>{if(!confirm('Delete this project?'))return;S.projects=S.projects.filter(x=>x.id!==p.id);save();closePage();renderBoard();toast('Project deleted')},'danger']])};
+  $('#pTitle').onchange=e=>{p.title=e.target.value;upd()};
+  $('#pStatus').onchange=e=>{p.status=e.target.value;log(p,'Status: '+p.status);upd();toast('Status updated')};
+  $('#pRef').onchange=e=>{p.ref=e.target.value;upd()};
+  $('#pClient').onchange=e=>{p.client=e.target.value;upd()};
+  $('#pRec').onchange=e=>{p.received=e.target.value;upd()};
+  $('#pDue').onchange=e=>{p.due=e.target.value;upd()};
+  $('#pCol').onchange=e=>{const v=e.target.value||null;p.columnId=v;p.pos=-1;
+    if(v){p.tags=p.tags.filter(t=>t!=='un');log(p,'Assigned to '+colById(v).name);toast(`Assigned to <b>${esc(colById(v).name)}</b>`,'user')}else{if(!p.tags.includes('un'))p.tags.push('un')}
+    upd();renderPage()};
+  $('#tagpick').onclick=e=>{const b=e.target.closest('[data-tag]');if(!b)return;const id=b.dataset.tag;
+    p.tags.includes(id)?p.tags=p.tags.filter(t=>t!==id):p.tags.push(id);b.classList.toggle('on');upd()};
+  $('#newTag').onkeydown=e=>{if(e.key!=='Enter')return;const n=e.target.value.trim();if(!n)return;
+    const pal=['#EE6A1F','#5B5B57','#9C4A12','#2F7D7A','#B8860B'];const t={id:uid(),name:n,color:pal[S.tags.length%pal.length]};
+    S.tags.push(t);p.tags.push(t.id);upd();renderPage();toast(`Tag <b>${esc(n)}</b> created`)};
+  if(p.folder) $('#unlink').onclick=()=>{p.folder='';upd();renderPage()};
+  else{
+    $('#folderLink').onclick=()=>{const v=$('#folderIn').value.trim();if(!/^https?:\/\//.test(v))return toast('Paste a full folder link (https://…)','x');p.folder=v;upd();renderPage();toast('Folder linked')};
+    $('#folderNew').onclick=()=>{if(!S.drive.connected)return toast('Connect Google Drive first','x');
+      p.folder='https://drive.google.com/drive/folders/'+uid()+uid();log(p,'Drive folder created');upd();renderPage();toast(`Folder <b>Tenders/${esc(p.ref||'New')}</b> created in Drive`,'folder')};
+  }
+  $('#subHead').onclick=()=>{p.subOpen=!p.subOpen;save();$('#subHead').classList.toggle('closed');$('#subWrap').classList.toggle('closed')};
+  $('#subAdd').onsubmit=e=>{e.preventDefault();const t=$('#subIn').value.trim();if(!t)return;
+    p.subtasks.push({id:uid(),text:t,done:false,note:'',due:$('#subDue').value,open:false});upd();renderPage();$('#subIn').focus()};
+  $('#subs').addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(!a)return;const el=a.closest('.sub');const s=p.subtasks.find(x=>x.id===el.dataset.sub);
+    if(a.dataset.act==='toggle'){s.done=!s.done;el.classList.toggle('done');upd();refreshSubProg(p);if(s.done)toast('Sub-task completed')}
+    if(a.dataset.act==='open'){s.open=!s.open;el.classList.toggle('open');$('.collapse',el).classList.toggle('closed');save()}
+    if(a.dataset.act==='del'){p.subtasks=p.subtasks.filter(x=>x!==s);el.style.transition='opacity .2s,transform .2s';el.style.opacity=0;el.style.transform='translateX(10px)';setTimeout(()=>{upd();renderPage()},200)}
+  });
+  $('#subs').addEventListener('change',e=>{const a=e.target.closest('[data-act]');if(!a)return;const s=p.subtasks.find(x=>x.id===a.closest('.sub').dataset.sub);
+    if(a.dataset.act==='text')s.text=a.value;if(a.dataset.act==='note')s.note=a.value;if(a.dataset.act==='due')s.due=a.value;upd()});
+  $('#tabs').onclick=e=>{const t=e.target.closest('[data-tab]');if(!t)return;curTab=t.dataset.tab;$$('.tab').forEach(x=>x.classList.toggle('on',x===t));moveInk();renderPane()};
+}
+function refreshSubProg(p){const d=p.subtasks.filter(s=>s.done).length,t=p.subtasks.length;$('#subWrap .prog i').style.width=(t?d/t*100:0)+'%';$('#subHead .pill').textContent=`${d}/${t}`}
+function moveInk(){const t=$('.tab.on'),ink=$('#tabInk');if(!t||!ink)return;ink.style.left=t.offsetLeft+'px';ink.style.width=t.offsetWidth+'px'}
+window.addEventListener('resize',moveInk);
+
+function fileIco(n){const e=(n.split('.').pop()||'').toLowerCase();const map={pdf:'pdf',dwg:'dwg',dxf:'dwg',xls:'xls',xlsx:'xls',csv:'xls',doc:'doc',docx:'doc',png:'img',jpg:'img',jpeg:'img'};return `<span class="ico ${map[e]||''}">${esc(e.slice(0,4).toUpperCase()||'FILE')}</span>`}
+
+function renderPane(){
+  const p=proj(cur), pane=$('#pane'); pane.className='tabpane'; void pane.offsetWidth;
+  const refresh=()=>{save();renderBoard();renderPage()};
+  if(curTab==='files'){
+    const all=[...p.files,...p.uploads.filter(u=>u.done).map(u=>({...u,up:true}))];
+    pane.innerHTML=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;color:var(--muted);font-size:12.5px">
+      <svg class="i" viewBox="0 0 87.3 78"><use href="#i-gdrive"/></svg>${p.folder?'Files in the linked Drive folder':'No folder linked – showing files attached to this project'}<span style="flex:1"></span>
+      ${p.folder?`<a class="btn sm" href="${esc(p.folder)}" target="_blank" rel="noopener">${icon('ext')}Open folder</a>`:''}</div>
+      ${all.length?all.map(f=>`<div class="list-item">${fileIco(f.name)}<div class="body"><b>${esc(f.name)}</b><small>${esc(f.size||'')}${f.up?' · uploaded '+fmtDT(f.at):''}</small></div><button class="btn ghost icon sm" data-delf="${f.id}" aria-label="Remove">${icon('x')}</button></div>`).join('')
+      :`<div class="empty">No files yet. Use <b>Uploads</b> to send files to Drive.</div>`}`;
+    pane.onclick=e=>{const b=e.target.closest('[data-delf]');if(!b)return;p.files=p.files.filter(f=>f.id!==b.dataset.delf);p.uploads=p.uploads.filter(f=>f.id!==b.dataset.delf);refresh()};
+  }
+  if(curTab==='links'){
+    pane.innerHTML=`<form class="addrow" id="lf" style="margin-bottom:10px"><input class="in" id="lt" placeholder="Title" style="max-width:160px" dir="auto"><input class="in" id="lu" placeholder="https://…" type="url" required><button class="btn primary sm" style="height:34px">${icon('plus')}Add</button></form>
+      ${p.links.length?p.links.map(l=>`<div class="list-item"><span class="ico">${icon('link')}</span><div class="body"><b><a href="${esc(l.url)}" target="_blank" rel="noopener" dir="auto">${esc(l.title||l.url)}</a></b><small>${esc(l.url)}${l.src?' · from email':''}</small></div><button class="btn ghost icon sm" data-dell="${l.id}" aria-label="Remove">${icon('x')}</button></div>`).join('')
+      :`<div class="empty">No links yet. Links found in emails are added here automatically.</div>`}`;
+    $('#lf').onsubmit=e=>{e.preventDefault();p.links.push({id:uid(),title:$('#lt').value.trim(),url:$('#lu').value.trim()});refresh();toast('Link added','link')};
+    pane.onclick=e=>{const b=e.target.closest('[data-dell]');if(!b)return;p.links=p.links.filter(l=>l.id!==b.dataset.dell);refresh()};
+  }
+  if(curTab==='comments'){
+    const list=[...p.comments].sort((a,b)=>b.at-a.at);
+    pane.innerHTML=`<form id="cf"><textarea class="in" id="ct" placeholder="Write a comment…" dir="auto"></textarea><div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 6px"><small style="color:var(--muted)">Posting as ${esc(S.me)}</small><button class="btn primary sm">Post comment</button></div></form>
+      ${list.map(c=>`<div class="comment ${c.sys?'sys':''}"><div class="avatar">${c.sys?icon('clock'):esc(initials(c.who))}</div><div class="b"><div class="who">${esc(c.who)}<time>${fmtDT(c.at)}</time></div><p dir="auto">${esc(c.text)}</p></div></div>`).join('')||'<div class="empty">No comments yet.</div>'}`;
+    $('#cf').onsubmit=e=>{e.preventDefault();const t=$('#ct').value.trim();if(!t)return;p.comments.push({id:uid(),who:S.me,text:t,at:Date.now()});refresh()};
+  }
+  if(curTab==='notifications'){
+    const perm=('Notification' in window)?Notification.permission:'unsupported';
+    const list=[...p.notifications].sort((a,b)=>a.at-b.at);
+    pane.innerHTML=`${perm!=='granted'?`<div class="folder" style="margin-bottom:12px"><span style="color:var(--accent)">${icon('bell')}</span><span style="flex:1;font-size:13px">${perm==='denied'?'Desktop notifications are blocked in this browser. Reminders will still show inside the app.':perm==='unsupported'?'This browser has no desktop notifications; reminders show inside the app.':'Allow desktop notifications to get reminders even when this tab is in the background.'}</span>${perm==='default'?'<button class="btn sm primary" id="perm">Allow</button>':''}</div>`:''}
+      <div class="presets">
+        <button class="btn sm" data-pre="1m">In 1 min (test)</button>
+        <button class="btn sm" data-pre="1h">In 1 hour</button>
+        <button class="btn sm" data-pre="tom9">Tomorrow 09:00</button>
+        ${p.due?'<button class="btn sm" data-pre="due1">1 day before submission</button><button class="btn sm" data-pre="due3">3 days before</button>':''}
+      </div>
+      <form class="formgrid" id="nf">
+        <input class="in full" id="nm" placeholder="Reminder message" dir="auto" value="${esc(p.title.slice(0,60))}">
+        <input class="in" type="datetime-local" id="nat" value="${localDT(Date.now()+HOUR)}" required aria-label="Date and time">
+        <select class="in" id="nrep" aria-label="Repeat"><option value="none">Once</option><option value="hourly">Every hour</option><option value="daily">Every day</option><option value="weekly">Every week</option></select>
+        <button class="btn primary full">${icon('bell')}Set reminder</button>
+      </form>
+      ${list.length?list.map(n=>`<div class="rem ${n.fired?'fired':''}"><span class="ico" style="width:34px;height:34px;border-radius:8px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-2)">${icon('bell')}</span><div style="flex:1;min-width:0"><div dir="auto" style="font-weight:500">${esc(n.msg)}</div><span class="when">${fmtDT(n.at)}</span> ${n.repeat!=='none'?`<span class="pill o">${n.repeat}</span>`:''} ${n.fired?'<span class="pill">sent</span>':''}</div><button class="btn ghost icon sm" data-deln="${n.id}" aria-label="Delete">${icon('x')}</button></div>`).join('')
+      :'<div class="empty">No reminders for this project.</div>'}`;
+    const pb=$('#perm'); if(pb)pb.onclick=async()=>{await Notification.requestPermission();renderPane()};
+    $('.presets',pane).onclick=e=>{const b=e.target.closest('[data-pre]');if(!b)return;const k=b.dataset.pre;let t;
+      if(k==='1m')t=Date.now()+60000;if(k==='1h')t=Date.now()+HOUR;
+      if(k==='tom9'){const d=new Date();d.setDate(d.getDate()+1);d.setHours(9,0,0,0);t=+d}
+      if(k.startsWith('due')){const d=new Date(p.due);d.setDate(d.getDate()-(k==='due1'?1:3));d.setHours(9,0,0,0);t=+d;$('#nm').value=`Submission ${k==='due1'?'tomorrow':'in 3 days'}: ${p.title}`}
+      $('#nat').value=localDT(t)};
+    $('#nf').onsubmit=e=>{e.preventDefault();const at=new Date($('#nat').value).getTime();
+      p.notifications.push({id:uid(),at,msg:$('#nm').value.trim()||p.title,repeat:$('#nrep').value,fired:false});
+      refresh();toast(`Reminder set for <b>${fmtDT(at)}</b>`,'bell');
+      if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()};
+    pane.onclick=e=>{const b=e.target.closest('[data-deln]');if(!b)return;p.notifications=p.notifications.filter(n=>n.id!==b.dataset.deln);refresh()};
+  }
+  if(curTab==='uploads'){
+    pane.innerHTML=`<label class="drop" id="drop"><input type="file" multiple id="fi" class="sr">
+      <div style="margin-bottom:6px;color:var(--accent)">${icon('up')}</div><b>Drop files here</b> or click to browse<br>
+      <small>${S.drive.connected?`Uploads go to <b>${p.folder?'the linked folder':'Tenders/'+esc(p.ref||'project')}</b> on Google Drive`:'Google Drive is not connected – connect it from the top bar'}</small></label>
+      <div id="ups" style="margin-top:10px">${[...p.uploads].reverse().map(upHTML).join('')}</div>`;
+    const drop=$('#drop');
+    ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+    ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+    drop.addEventListener('drop',e=>uploadFiles(p,e.dataTransfer.files));
+    $('#fi').onchange=e=>uploadFiles(p,e.target.files);
+  }
+}
+const upHTML=u=>`<div class="up ${u.done?'done':''}" data-up="${u.id}">${fileIco(u.name)}<div style="flex:1;min-width:0"><b style="font-weight:500;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.name)}</b><small style="color:var(--muted)">${esc(u.size)} · <span class="st">${u.done?'Saved to Drive':'Uploading…'}</span></small><div class="bar"><i style="width:${u.done?100:0}%"></i></div></div></div>`;
+function uploadFiles(p,files){
+  if(!S.drive.connected)return toast('Connect Google Drive first','x');
+  if(!p.folder){p.folder='https://drive.google.com/drive/folders/'+uid()+uid();log(p,'Drive folder created for uploads')}
+  [...files].forEach((f,i)=>{
+    const kb=f.size/1024;const u={id:uid(),name:f.name,size:kb>1024?(kb/1024).toFixed(1)+' MB':Math.max(1,Math.round(kb))+' KB',done:false,at:Date.now()};
+    p.uploads.push(u); $('#ups').insertAdjacentHTML('afterbegin',upHTML(u));
+    const el=$(`[data-up="${u.id}"]`); let pct=0;
+    const tick=setInterval(()=>{pct=Math.min(100,pct+8+Math.random()*18);$('.bar i',el).style.width=pct+'%';
+      if(pct>=100){clearInterval(tick);u.done=true;el.classList.add('done');$('.st',el).textContent='Saved to Drive';log(p,`Uploaded ${u.name} to Drive`);save();renderBoard();
+        if(i===files.length-1)toast(`${files.length} file${files.length>1?'s':''} saved to Drive`,'up')}},160+i*40);
+  });
+  save();
+}
+
+/* ---------------- Email intake ----------------
+   Rules (same as the real integration):
+   • subject/body contains "ورد الينا" (any alef form) → new project, or "New updates" if tender no. already exists
+   • contains تأجيل / مؤجل → tag Postponed, status + new date
+   • contains استفسار → tag Queries answers, status updated
+   • every URL in the body → Links tab
+   ------------------------------------------------ */
+const MAILBOX=[
+  {id:'m1',from:'procurement@nca.example',subject:'ورد الينا – مناقصة رقم 2026/118',received:-50,
+   body:'السادة / إدارة المناقصات\nورد الينا طلب تسعير للمشروع التالي:\nاسم المشروع: إنشاء مبنى إداري بالمنطقة الصناعية\nالجهة المالكة: هيئة المجتمعات العمرانية\nرقم المناقصة: 2026/118\nآخر موعد للتقديم: ٢٠٢٦-١٢-٢٠\nرابط كراسة الشروط: https://tenders.example/2026-118/specs.pdf\nوتفضلوا بقبول فائق الاحترام'},
+  {id:'m2',from:'tenders@moh.example',subject:'تأجيل موعد تقديم العطاءات – مناقصة 2026/104',received:-44,
+   body:'نحيطكم علماً بأنه تم تأجيل موعد تقديم العطاءات للمناقصة رقم 2026/104 ليصبح 2027-01-10 بدلاً من الموعد السابق.\nالإخطار الرسمي: https://tenders.example/2026-104/postponement'},
+  {id:'m3',from:'wa-procurement@water.example',subject:'الرد على الاستفسارات – مناقصة 2026/097',received:-31,
+   body:'مرفق لسيادتكم الرد على استفسارات السادة المتقدمين للمناقصة رقم 2026/097.\nملف الردود: https://tenders.example/2026-097/answers.pdf\nملحق رقم 1: https://tenders.example/2026-097/addendum-1.pdf'},
+  {id:'m4',from:'newsletter@supplier.example',subject:'النشرة الشهرية – عروض نوفمبر',received:-20,
+   body:'تعرف على أحدث عروضنا لمواد البناء لهذا الشهر.'},
+  {id:'m5',from:'procurement@city.example',subject:'ورد إلينا – أعمال تطوير شبكة الطرق الداخلية',received:-12,
+   body:'ورد إلينا من الجهة التالية طلب تقديم عطاء:\nاسم المشروع: تطوير شبكة الطرق الداخلية – المرحلة الثالثة\nالجهة المالكة: محافظة المدينة\nرقم المناقصة: 2026/125\nآخر موعد للتقديم: 28/12/2026\nالمستندات: https://tenders.example/2026-125/docs'},
+  {id:'m6',from:'procurement@nca.example',subject:'ورد الينا – مناقصة رقم 2026/118 (ملحق)',received:-5,
+   body:'ورد الينا ملحق جديد للمناقصة رقم 2026/118 يتضمن جداول كميات معدلة.\nالملحق: https://tenders.example/2026-118/boq-rev1.xlsx'},
+];
+const digits=s=>s.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+const norm=s=>digits(s).replace(/[إأآ]/g,'ا').replace(/ى/g,'ي');
+const field=(b,labels)=>{for(const l of labels){const m=b.match(new RegExp(l+'\\s*[:：]\\s*(.+)'));if(m)return m[1].trim()}return''};
+const findDate=s=>{let m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  m=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m)return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;return''};
+function parseMail(m){
+  const txt=norm(m.subject+'\n'+m.body);
+  const tender=(txt.match(/(\d{4}\/\d{2,4})/)||[])[1]||'';
+  const urls=(m.body.match(/https?:\/\/[^\s)،]+/g)||[]);
+  let kind='ignore';
+  if(/تاجيل|مؤجل|موجل/.test(txt))kind='postpone';
+  else if(/استفسار/.test(txt))kind='queries';
+  else if(/ورد\s*الينا/.test(txt))kind='new';
+  return {kind,tender,urls,txt,
+    title:field(digits(m.body),['اسم المشروع']),client:field(digits(m.body),['الجهة المالكة','الجهة']),
+    due:findDate(field(digits(m.body),['[اأإآ]خر موعد للتقديم'])||txt)};
+}
+function applyMail(m){
+  const r=parseMail(m); const existing=r.tender&&S.projects.find(p=>p.ref===r.tender);
+  const addLinks=p=>r.urls.forEach((u,i)=>{if(!p.links.some(l=>l.url===u))p.links.push({id:uid(),title:(u.split('/').pop()||'Link'),url:u,src:true})});
+  let res={kind:r.kind,label:'Ignored – not a tender email',pid:null};
+  if(r.kind==='new'){
+    if(existing){if(!existing.tags.includes('upd'))existing.tags.push('upd');existing.status='New update received by email';addLinks(existing);log(existing,'Email: '+m.subject);res={kind:'upd',label:`New update → ${existing.ref}`,pid:existing.id}}
+    else{const p=mkProject({title:r.title||m.subject.replace(/ورد\s*[اإ]لينا\s*[–-]?\s*/,''),client:r.client,ref:r.tender,due:r.due,tags:['new','un'],status:'Received by email – needs an engineer',source:'email'});
+      addLinks(p);log(p,'Created from email: '+m.subject);res={kind:'new',label:`New project created → ${p.ref||'no ref'}`,pid:p.id}}
+  }
+  if(r.kind==='postpone'){
+    if(existing){if(!existing.tags.includes('pp'))existing.tags.push('pp');const nd=findDate(r.txt);if(nd)existing.due=nd;
+      existing.status='Postponed'+(nd?' to '+fmtDate(nd):'');addLinks(existing);log(existing,'Email: '+m.subject);res={kind:'pp',label:`Postponed → ${existing.ref}${nd?' · new date '+fmtDate(nd):''}`,pid:existing.id}}
+    else res={kind:'ignore',label:'Postponement for an unknown tender – review manually',pid:null};
+  }
+  if(r.kind==='queries'){
+    if(existing){if(!existing.tags.includes('qa'))existing.tags.push('qa');existing.status='Answers to queries received – review';addLinks(existing);log(existing,'Email: '+m.subject);
+      res={kind:'qa',label:`Queries answers → ${existing.ref} · ${r.urls.length} link${r.urls.length!==1?'s':''} added`,pid:existing.id}}
+    else res={kind:'ignore',label:'Queries answers for an unknown tender – review manually',pid:null};
+  }
+  S.mail.processed.push(m.id); S.mail.log.unshift({id:m.id,...res,at:Date.now()});
+  return res;
+}
+let syncing=false;
+async function syncMail(auto=false){
+  if(syncing)return; if(!S.mail.connected)return toast('Connect the mailbox first','x');
+  syncing=true; $('#syncBtn').classList.add('spin'); const sc=$('#scanBar'); sc&&sc.classList.add('on');
+  await new Promise(r=>setTimeout(r,1400));
+  const pending=MAILBOX.filter(m=>!S.mail.processed.includes(m.id)).slice(0,3);
+  const results=pending.map(applyMail);
+  S.mail.lastSync=Date.now(); save(); syncing=false; $('#syncBtn').classList.remove('spin');
+  renderBoard(); if(cur)renderPage(); if($('#mailSheet').classList.contains('show'))renderMailSheet();
+  results.forEach(r=>r.pid&&flash(r.pid));
+  const made=results.filter(r=>r.kind==='new').length, upd=results.filter(r=>r.pid&&r.kind!=='new').length;
+  toast(pending.length?`Email ${auto?'auto-':''}sync: <b>${pending.length}</b> read · ${made} new · ${upd} updated`:'Inbox up to date – no new emails','mail',4200);
+  if(made&&'Notification' in window&&Notification.permission==='granted')new Notification('Rendcon – new tender'+(made>1?'s':''),{body:`${made} new project${made>1?'s':''} added to Unassigned`});
+}
+$('#syncBtn').onclick=()=>syncMail(false);
+const kindPill={new:'<span class="pill o">New project</span>',upd:'<span class="pill o">New updates</span>',pp:'<span class="pill">Postponed</span>',qa:'<span class="pill o">Queries answers</span>',ignore:'<span class="pill">Ignored</span>'};
+function renderMailSheet(){
+  const sh=$('#mailSheet'); const m=S.mail;
+  sh.innerHTML=`<div class="sheet-head"><span style="color:var(--accent)">${icon('mail')}</span><h2>Email intake</h2><button class="btn icon" data-x aria-label="Close">${icon('x')}</button></div>
+  <div class="sheet-body">
+    <div class="kv">
+      <label>Mailbox</label><div style="display:flex;gap:8px"><input class="in" id="mAddr" value="${esc(m.address)}"><button class="btn sm" id="mConn" style="height:34px">${m.connected?'Disconnect':'Connect'}</button></div>
+      <label>Subject contains</label><input class="in ar" id="mSubj" value="${esc(m.subject)}" dir="rtl">
+      <label>Hourly auto-sync</label><div><button class="switch ${m.hourly?'on':''}" id="mHourly" aria-label="Hourly auto-sync" aria-pressed="${m.hourly}"></button></div>
+      <label>Last sync</label><span style="font:500 12.5px var(--mono)">${fmtDT(m.lastSync)}</span>
+    </div>
+    <button class="btn primary" id="mSync" style="width:100%;justify-content:center">${icon('sync')}Read inbox now</button>
+    <div class="scan ${syncing?'on':''}" id="scanBar"><i></i></div>
+    <div class="section-label">Rules</div>
+    <div style="font-size:13px;color:var(--ink-2);display:grid;gap:6px;margin-bottom:8px">
+      <div><span class="ar" dir="rtl">«ورد الينا»</span> → new project in <b>Unassigned</b>, tagged <b>New project</b> (existing tender no. → <b>New updates</b>)</div>
+      <div><span class="ar" dir="rtl">«تأجيل»</span> → tag <b>Postponed</b>, status and submission date updated</div>
+      <div><span class="ar" dir="rtl">«استفسارات»</span> → tag <b>Queries answers</b>, status updated</div>
+      <div>Every link in the body → project's <b>Links</b> tab</div>
+    </div>
+    <div class="section-label">Inbox</div>
+    ${MAILBOX.map(x=>{const L=m.log.find(l=>l.id===x.id);return `<div class="mail ${L?'':'pending'}"><div class="subj ar" dir="rtl">${esc(x.subject)}</div><div class="from">${esc(x.from)}</div><div class="snip ar" dir="rtl">${esc(x.body)}</div>
+      <div class="res">${L?`${kindPill[L.kind]||''}<span>${esc(L.label)}</span>${L.pid?`<button class="btn sm ghost" data-open="${L.pid}" style="margin-left:auto">Open ${icon('ext')}</button>`:''}`:'<span class="pill">Waiting for next sync</span>'}</div></div>`}).join('')}
+  </div>`;
+  $('[data-x]',sh).onclick=()=>sheet(null);
+  $('#mSync').onclick=()=>syncMail(false);
+  $('#mAddr').onchange=e=>{m.address=e.target.value;save()};
+  $('#mSubj').onchange=e=>{m.subject=e.target.value;save()};
+  $('#mHourly').onclick=()=>{m.hourly=!m.hourly;save();renderMailSheet();renderHeader()};
+  $('#mConn').onclick=()=>{m.connected=!m.connected;save();renderMailSheet();renderHeader();toast(m.connected?'Mailbox connected':'Mailbox disconnected','mail')};
+  sh.onclick=e=>{const o=e.target.closest('[data-open]');if(o){sheet(null);openProject(o.dataset.open)}};
+}
+function renderRemSheet(){
+  const sh=$('#remSheet');
+  const all=S.projects.flatMap(p=>p.notifications.map(n=>({...n,p}))).sort((a,b)=>(a.fired-b.fired)||(a.at-b.at));
+  const perm=('Notification' in window)?Notification.permission:'unsupported';
+  sh.innerHTML=`<div class="sheet-head"><span style="color:var(--accent)">${icon('bell')}</span><h2>Reminders</h2><button class="btn icon" data-x aria-label="Close">${icon('x')}</button></div>
+  <div class="sheet-body">
+    <div class="folder" style="margin-bottom:14px"><span style="flex:1;font-size:13px">Desktop notifications: <b>${perm}</b></span>${perm==='default'?'<button class="btn sm primary" id="rPerm">Allow</button>':''}<button class="btn sm" id="rTest">Send test</button></div>
+    ${all.length?all.map(n=>`<div class="rem ${n.fired?'fired':''}"><div style="flex:1;min-width:0"><div dir="auto" style="font-weight:500">${esc(n.msg)}</div><small dir="auto" style="color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.p.title)}</small><span class="when">${fmtDT(n.at)}</span> ${n.repeat!=='none'?`<span class="pill o">${n.repeat}</span>`:''} ${n.fired?'<span class="pill">sent</span>':''}</div><button class="btn sm ghost" data-open="${n.p.id}">Open ${icon('ext')}</button></div>`).join('')
+    :'<div class="empty">No reminders yet. Open a project → Notifications to set one.</div>'}
+  </div>`;
+  $('[data-x]',sh).onclick=()=>sheet(null);
+  const rp=$('#rPerm'); if(rp)rp.onclick=async()=>{await Notification.requestPermission();renderRemSheet()};
+  $('#rTest').onclick=()=>notify('Test reminder','Notifications are working for Rendcon Tender Planning.');
+  sh.onclick=e=>{const o=e.target.closest('[data-open]');if(o){sheet(null);curTab='notifications';openProject(o.dataset.open)}};
+}
+function sheet(id){
+  $$('.sheet').forEach(s=>s.classList.toggle('show',s.id===id));
+  if(id==='mailSheet')renderMailSheet(); if(id==='remSheet')renderRemSheet();
+  $('#scrim').classList.toggle('show',!!id||!!cur);
+}
+$('#mailBtn').onclick=()=>sheet('mailSheet');
+$('#remBtn').onclick=()=>sheet('remSheet');
+$('#driveBtn').onclick=()=>{
+  const d=S.drive;
+  modal(`<h3 style="display:flex;align-items:center;gap:10px"><svg class="i" viewBox="0 0 87.3 78" style="width:22px;height:22px"><use href="#i-gdrive"/></svg>Google Drive</h3>
+    <p style="margin:0 0 14px;color:var(--ink-2)">${d.connected?`Connected as <b>${esc(d.account)}</b>. Project folders are created under <b>Tenders/</b> and uploads are saved there.`:'Connect a Google account so projects can create folders and upload files to Drive.'}</p>
+    <div class="acts"><button class="btn" data-close>Close</button><button class="btn ${d.connected?'':'primary'}" id="dOk">${d.connected?'Disconnect':'Connect Google Drive'}</button></div>`,()=>{
+    $('#dOk').onclick=()=>{d.connected=!d.connected;save();closeModal();renderHeader();toast(d.connected?'Google Drive connected':'Google Drive disconnected','folder')}});
+};
+$('#scrim').onclick=()=>{if($('#modal').classList.contains('show'))return closeModal();if($('.sheet.show'))return sheet(null);closePage()};
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#modal').classList.contains('show'))return closeModal();if($('.sheet.show'))return sheet(null);if(cur)closePage()});
+
+/* ---------------- Reminder engine ---------------- */
+function notify(title,body){
+  toast(`<b>${esc(title)}</b><br><span dir="auto">${esc(body)}</span>`,'bell',7000);
+  try{if('Notification' in window&&Notification.permission==='granted'){const n=new Notification(title,{body,tag:title+body});n.onclick=()=>window.focus()}}catch(e){}
+}
+function tick(){
+  const now=Date.now(); let changed=false;
+  S.projects.forEach(p=>p.notifications.forEach(n=>{
+    if(n.fired||n.at>now)return;
+    notify('Reminder · '+(p.ref||'Rendcon'),n.msg+(n.msg===p.title?'':' — '+p.title));
+    const step={hourly:HOUR,daily:24*HOUR,weekly:168*HOUR}[n.repeat];
+    if(step){while(n.at<=now)n.at+=step}else n.fired=true; changed=true;
+  }));
+  if(S.mail.connected&&S.mail.hourly&&now-S.mail.lastSync>=HOUR)syncMail(true);
+  if(changed){save();renderBoard();if(cur&&curTab==='notifications')renderPane()}
+  updateSyncMeta();
+}
+setInterval(tick,15000);
+
+renderBoard(); route(); tick();
+</script>
+</body>
+</html>
