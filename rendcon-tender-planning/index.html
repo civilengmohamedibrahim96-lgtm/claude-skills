@@ -380,6 +380,73 @@ textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 }
+/* ---------- v3: type, submission date, team, last update ---------- */
+.c-top{justify-content:flex-start}
+.ttype{font-size:11px;font-weight:600;letter-spacing:.02em;padding:2px 9px;border-radius:999px;border:1px solid var(--line-2);color:var(--ink);background:var(--surface)}
+.ttype.priv{background:var(--ink);border-color:var(--ink);color:#fff}
+.c-upd{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.c-upd i{width:6px;height:6px;border-radius:50%;background:var(--line-2)}
+.c-upd.fresh i{background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.c-upd svg.i{width:12px;height:12px}
+.c-due{position:relative;margin-top:14px;display:flex;align-items:center;gap:10px;padding:10px 8px 10px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.c-due-main{flex:1;min-width:0}
+.c-due small{display:flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+.c-due small em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:600;color:var(--accent-2);display:inline-flex;align-items:center;gap:3px}
+.c-due small em svg.i{width:11px;height:11px}
+.c-due b{display:block;font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.25;margin-top:2px;color:var(--ink);font-variant-numeric:tabular-nums}
+.c-rel{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.c-due.soon{background:var(--accent-soft);border-color:var(--accent-line)}
+.c-due.soon .c-rel{background:var(--accent);border-color:var(--accent);color:#fff}
+.c-due.late{background:#FCEBE7;border-color:#F2B8AC}
+.c-due.late b{color:var(--danger)}
+.c-due.late .c-rel{background:var(--danger);border-color:var(--danger);color:#fff}
+.c-due.none b{color:var(--muted);font-weight:500}
+.c-due-edit{width:32px;height:32px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--ink-2);display:grid;place-items:center;flex:none;transition:all .18s var(--ease);cursor:pointer}
+.c-due-edit:hover{background:var(--surface);border-color:var(--line-2);color:var(--ink)}
+.c-due-edit svg.i{width:15px;height:15px}
+.due-in{position:absolute;right:8px;bottom:6px;width:1px;height:1px;opacity:0;border:0;padding:0;pointer-events:none}
+.c-status{margin-top:12px}
+.c-team{display:inline-flex;align-items:center;gap:6px}
+.c-team .lead{display:inline-flex;align-items:center;gap:5px;padding:2px 8px 2px 2px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line)}
+.c-team .lead b{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.c-team .stack{display:inline-flex}
+.c-team .stack .avatar{margin-left:-6px;box-shadow:0 0 0 2px var(--surface)}
+.c-team .stack .avatar:first-child{margin-left:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:0 14px;height:32px;font-weight:500;font-size:13px;color:var(--ink-2);transition:all .18s}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--ink);color:#fff}
+.due-field{background:var(--surface-2);border-radius:10px;padding:12px;margin:6px 0 4px;border-bottom:0!important}
+.due-field label{color:var(--ink)!important;font-weight:600!important}
+.due-field .in{height:40px;font-size:16px;font-weight:600}
+.due-hist{grid-column:1/-1;font-size:12.5px;color:var(--muted);display:grid;gap:4px}
+.due-hist div{display:flex;gap:6px;align-items:center}
+.due-hist svg.i{width:13px;height:13px}
+.fsep{width:1px;height:22px;background:var(--line-2);margin:0 4px}
+
+.provs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.prov{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;padding:14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);transition:all .18s var(--ease)}
+.prov:hover{border-color:var(--line-2);transform:translateY(-1px)}
+.prov.on{border-color:var(--accent);background:#FFF8F3;box-shadow:0 0 0 3px var(--accent-soft)}
+.prov .pi{width:28px;height:28px;grid-row:1/3}
+.prov b{font-size:14px}
+.prov small{color:var(--muted);font-size:12px;line-height:1.3}
+.dot-st{width:8px;height:8px;border-radius:50%;background:var(--line-2);flex:none}
+.dot-st.on{background:#3BC170;box-shadow:0 0 0 3px rgba(59,193,112,.18)}
+.folder .gd{width:26px;height:26px;flex:none}
+@media (max-width:520px){.provs{grid-template-columns:1fr}}
+
+.c-due{display:block;padding:10px 8px 10px 14px}
+.c-due-r1{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-right:6px}
+.c-due-r2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px}
+.c-due-r2 b{margin:0;white-space:nowrap}
+.c-due-note{display:flex;align-items:center;gap:5px;margin-top:4px;font-size:11.5px;color:var(--muted)}
+.c-due-note.em{color:var(--accent-2);font-weight:500}
+.c-due-note svg.i{width:12px;height:12px}
+.filters{flex:1;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:2px 0;-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
+.filters::-webkit-scrollbar{display:none}
+.fchip{flex:none}
+.fsep{flex:none}
 </style>
 </head>
 <body>
@@ -408,6 +475,7 @@ textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
   <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 10 14"/><path d="m21 3-7 18-4-7-7-4z"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-onedrive" viewBox="0 0 32 20"><path d="M12.6 6.2A8 8 0 0 1 26.4 9a5.6 5.6 0 0 1 1.4 10.9H13z" fill="#0364B8" stroke="none"/><path d="M12.6 6.2 13 19.9H6.5a5.4 5.4 0 0 1-1-10.7 7.6 7.6 0 0 1 7.1-3z" fill="#0078D4" stroke="none"/><path d="M26.4 9a5.6 5.6 0 0 1 4.3 8.2l-4.2-1.9-9.1 4.6H13l4.2-10.5z" fill="#1490DF" stroke="none"/><path d="M5.5 9.2 13 12.6l4.2-2.2-4.2 9.5H6.5a5.4 5.4 0 0 1-1-10.7z" fill="#28A8EA" stroke="none"/></symbol>
   <symbol id="i-gdrive" viewBox="0 0 87.3 78"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da" stroke="none"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47" stroke="none"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335" stroke="none"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d" stroke="none"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc" stroke="none"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00" stroke="none"/></symbol>
 </svg>
 
@@ -419,16 +487,15 @@ textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
   <span class="sync-meta" id="syncMeta"></span>
   <button class="chip-btn sync-btn" id="syncBtn" title="Read the tender mailbox now"><svg class="i"><use href="#i-sync"/></svg><span class="lbl">Sync email</span></button>
   <button class="chip-btn" id="mailBtn" title="Email intake settings and log"><span class="dot" id="mailDot"></span><svg class="i"><use href="#i-mail"/></svg><span class="lbl">Inbox</span></button>
-  <button class="chip-btn" id="driveBtn" title="Google Drive connection"><span class="dot" id="driveDot"></span><svg class="i" viewBox="0 0 87.3 78"><use href="#i-gdrive"/></svg><span class="lbl">Drive</span></button>
+  <button class="chip-btn" id="driveBtn" title="Cloud storage: Google Drive or OneDrive"><span class="dot" id="driveDot"></span><span id="driveIco"></span><span class="lbl" id="driveLbl">Drive</span></button>
   <button class="chip-btn" id="remBtn" title="All reminders"><svg class="i"><use href="#i-bell"/></svg><span class="lbl">Reminders</span><span class="count" id="remCount">0</span></button>
   <button class="chip-btn" id="teamBtn" title="Team and invitations"><svg class="i"><use href="#i-users"/></svg><span class="lbl">Team</span></button>
   <button class="me-btn" id="meBtn" aria-label="Your profile"></button>
 </header>
 
 <div class="toolbar">
-  <label class="search"><svg class="i"><use href="#i-search"/></svg><span class="sr">Search projects</span><input id="q" placeholder="Search projects, tender no., client…" dir="auto"></label>
+  <label class="search"><svg class="i"><use href="#i-search"/></svg><span class="sr">Search projects</span><input id="q" placeholder="Search projects, client, engineer…" dir="auto"></label>
   <div class="filters" id="filters"></div>
-  <div class="spacer"></div>
   <button class="btn" id="resetBtn" title="Reset the demo data">Reset demo</button>
   <button class="btn primary" id="newBtn"><svg class="i"><use href="#i-plus"/></svg>New project</button>
 </div>
@@ -447,14 +514,14 @@ textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
 /* ============================================================
    Rendcon Tender Planning — prototype
    Everything runs in the browser; data is kept in localStorage.
-   Email intake and Google Drive are simulated with the same
+   Email intake and Google Drive / OneDrive are simulated with the same
    parsing rules the real integration would use.
    ============================================================ */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,9);
 const icon=(n,c='')=>`<svg class="i ${c}"><use href="#i-${n}"/></svg>`;
-const KEY='rendcon-tp-v2';
+const KEY='rendcon-tp-v3';
 const HOUR=3600000;
 const fmtDate=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';
 const fmtShort=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'';
@@ -476,7 +543,7 @@ const TAGS=[
 const COLORS=['#111111','#EE6A1F','#5B5B57','#9C4A12','#2F7D7A','#B8860B'];
 function seed(){
   const c1=uid(),c2=uid(),c3=uid(),u0=uid(),u1=uid(),u2=uid(),u3=uid();
-  const P=(o)=>Object.assign({id:uid(),columnId:null,pos:0,tags:[],status:'',received:isoIn(-3),due:isoIn(14),folder:'',client:'',ref:'',subtasks:[],links:[],comments:[],notifications:[],files:[],uploads:[],source:'manual',subOpen:true},o);
+  const P=(o)=>Object.assign({id:uid(),columnId:null,pos:0,tags:[],status:'',received:isoIn(-3),due:isoIn(14),folder:'',client:'',ref:'',type:'public',leader:null,team:[],dueHistory:[],updatedAt:Date.now(),updatedBy:'Mohamed Ibrahim',subtasks:[],links:[],comments:[],notifications:[],files:[],uploads:[],source:'manual',subOpen:true},o);
   return {
     me:u0, adminId:u0,
     users:[
@@ -489,23 +556,29 @@ function seed(){
     reminders:[{id:uid(),at:Date.now()+26*HOUR,msg:'Weekly tender review meeting',repeat:'weekly',fired:false,to:['all'],email:true}],
     outbox:[],sentLog:[],
     tags:TAGS.slice(),
-    drive:{connected:true,account:'tenders@rendcon.example'},
+    drive:{provider:'google',connected:true,account:'tenders@rendcon.example',root:'https://drive.google.com/drive/folders/1TendersRoot'},
     mail:{connected:true,address:'tenders@rendcon.example',subject:'ورد الينا',hourly:true,lastSync:Date.now()-38*60000,processed:[],log:[]},
     projects:[
-      P({title:'توريد وتركيب أعمال الكهرباء – مبنى الإدارة',client:'Ministry of Housing',ref:'2026/104',tags:['upd'],columnId:c2,pos:0,status:'Pricing MEP BOQ – waiting on lighting supplier quote',due:isoIn(5),folder:'https://drive.google.com/drive/folders/1aEl104',
+      P({title:'توريد وتركيب أعمال الكهرباء – مبنى الإدارة',client:'Ministry of Housing',type:'public',leader:u2,team:[u2,u1],tags:['upd'],columnId:c2,pos:0,status:'Pricing MEP BOQ – waiting on lighting supplier quote',due:isoIn(5),folder:'https://drive.google.com/drive/folders/1aEl104',
+        dueHistory:[{from:isoIn(-2),to:isoIn(5),by:'email',at:Date.now()-26*HOUR}],updatedAt:Date.now()-40*60000,updatedBy:'email',
         subtasks:[{id:uid(),text:'Review specs & drawings',done:true,note:'',due:''},{id:uid(),text:'Request supplier quotes',done:true,note:'3 suppliers contacted',due:''},{id:uid(),text:'Price lighting package',done:false,note:'',due:isoIn(2)},{id:uid(),text:'Final BOQ sign-off',done:false,note:'',due:isoIn(4)}],
-        links:[{id:uid(),title:'Tender portal',url:'https://tenders.example/2026-104'}],
+        links:[{id:uid(),title:'Tender portal',url:'https://tenders.example/electrical-admin'}],
         files:[{id:uid(),name:'Specs_Electrical.pdf',size:'4.2 MB'},{id:uid(),name:'SLD_Rev02.dwg',size:'1.1 MB'},{id:uid(),name:'BOQ_Electrical.xlsx',size:'380 KB'}],
         comments:[{id:uid(),who:'Eng. Sara Mostafa',text:'Lighting quote expected Thursday.',at:Date.now()-26*HOUR}],
         notifications:[{id:uid(),at:Date.now()+20*HOUR,msg:'Chase lighting supplier quote',repeat:'none',fired:false,to:['assignee','me'],email:true}]}),
-      P({title:'إنشاء خزان مياه أرضي سعة 5000 م³',client:'Water Authority',ref:'2026/097',tags:['new'],columnId:c1,pos:0,status:'Site visit done – structural take-off in progress',due:isoIn(9),folder:'https://drive.google.com/drive/folders/1aEl097',
+      P({title:'إنشاء خزان مياه أرضي سعة 5000 م³',client:'Water Authority',type:'public',leader:u1,team:[u1],tags:['new'],columnId:c1,pos:0,status:'Site visit done – structural take-off in progress',due:isoIn(9),folder:'https://drive.google.com/drive/folders/1aEl097',
+        updatedAt:Date.now()-3*HOUR,updatedBy:'Eng. Ahmed Hassan',
         subtasks:[{id:uid(),text:'Site visit',done:true,note:'',due:''},{id:uid(),text:'Structural take-off',done:false,note:'',due:isoIn(3)},{id:uid(),text:'Send queries to client',done:true,note:'Sent 12 queries',due:''}],
         files:[{id:uid(),name:'Tank_GA.pdf',size:'2.7 MB'}]}),
-      P({title:'Rehabilitation of Internal Roads – Phase 2',client:'New Cities Authority',ref:'2026/088',tags:['pp'],columnId:c3,pos:0,status:'Postponed by client – new date to be announced',due:isoIn(30),links:[{id:uid(),title:'Postponement notice',url:'https://tenders.example/2026-088/notice'}]}),
-      P({title:'Fire fighting system – Logistics Hub',client:'Port Logistics Co.',ref:'2026/111',tags:['new','urgent'],columnId:c2,pos:1,status:'Hydraulic calc pending',due:isoIn(2),subtasks:[{id:uid(),text:'Hydraulic calculation',done:false,note:'',due:isoIn(1)},{id:uid(),text:'Pump room pricing',done:false,note:'',due:isoIn(2)}]}),
-      P({title:'صيانة شبكات الصرف الصحي – الحي الثالث',client:'Municipality',ref:'2026/115',tags:['new','un'],status:'Received by email – needs an engineer',source:'email',due:isoIn(12)}),
-      P({title:'Steel shed – Industrial Zone plot 14',client:'Private client',ref:'RFQ-0412',tags:['un'],status:'',due:isoIn(18)}),
-      P({title:'Boundary wall & gatehouse',client:'Education Directorate',ref:'2026/079',tags:['sub'],columnId:c1,pos:1,status:'Submitted – awaiting opening',due:isoIn(-1)}),
+      P({title:'Rehabilitation of Internal Roads – Phase 2',client:'New Cities Authority',type:'public',leader:u3,team:[u3],tags:['pp'],columnId:c3,pos:0,status:'Postponed by client – new date to be announced',due:isoIn(30),
+        dueHistory:[{from:isoIn(4),to:isoIn(30),by:'email',at:Date.now()-50*HOUR}],updatedAt:Date.now()-50*HOUR,updatedBy:'email',
+        links:[{id:uid(),title:'Postponement notice',url:'https://tenders.example/roads-phase-2/notice'}]}),
+      P({title:'Fire fighting system – Logistics Hub',client:'Port Logistics Co.',type:'private',leader:u2,team:[u2,u0],tags:['new','urgent'],columnId:c2,pos:1,status:'Hydraulic calc pending',due:isoIn(2),
+        updatedAt:Date.now()-20*60000,updatedBy:'Eng. Sara Mostafa',
+        subtasks:[{id:uid(),text:'Hydraulic calculation',done:false,note:'',due:isoIn(1)},{id:uid(),text:'Pump room pricing',done:false,note:'',due:isoIn(2)}]}),
+      P({title:'صيانة شبكات الصرف الصحي – الحي الثالث',client:'Municipality',type:'public',tags:['new','un'],status:'Received by email – needs an engineer',source:'email',due:isoIn(12),updatedAt:Date.now()-5*HOUR,updatedBy:'email'}),
+      P({title:'Steel shed – Industrial Zone plot 14',client:'Private client',type:'private',tags:['un'],status:'',due:isoIn(18),updatedAt:Date.now()-26*HOUR,updatedBy:'Mohamed Ibrahim'}),
+      P({title:'Boundary wall & gatehouse',client:'Education Directorate',type:'public',leader:u1,team:[u1],tags:['sub'],columnId:c1,pos:1,status:'Submitted – awaiting opening',due:isoIn(-1),updatedAt:Date.now()-30*HOUR,updatedBy:'Eng. Ahmed Hassan'}),
     ]
   };
 }
@@ -537,28 +610,50 @@ function toast(html,ico='check',ms=3200){
 
 /* ---------------- Board ---------------- */
 function matches(p){
-  if(filterTags.size&&![...filterTags].every(t=>p.tags.includes(t)))return false;
-  if(query){const h=(p.title+' '+p.ref+' '+p.client+' '+p.status).toLowerCase();if(!h.includes(query))return false}
+  if(filterTags.size&&![...filterTags].every(t=>t.startsWith('type:')?p.type===t.slice(5):p.tags.includes(t)))return false;
+  if(query){const h=(p.title+' '+p.client+' '+p.status+' '+teamOf(p).map(u=>u.name).join(' ')).toLowerCase();if(!h.includes(query))return false}
   return true;
 }
-function dueInfo(d){
-  if(!d)return{cls:'',txt:'No date'};
-  const diff=Math.round((new Date(d)-new Date(new Date().toDateString()))/864e5);
-  if(diff<0)return{cls:'late',txt:`Overdue ${-diff}d`};
-  if(diff===0)return{cls:'late',txt:'Due today'};
-  if(diff<=3)return{cls:'soon',txt:diff===1?'Due tomorrow':`Due in ${diff}d`};
-  return{cls:'',txt:fmtShort(d)};
+function ago(ms){
+  if(!ms)return'';const m=Math.round((Date.now()-ms)/60000);
+  if(m<1)return'just now';if(m<60)return m+'m ago';const h=Math.round(m/60);if(h<24)return h+'h ago';
+  const d=Math.round(h/24);return d<7?d+'d ago':fmtShort(new Date(ms));
 }
+function touch(p,by){p.updatedAt=Date.now();p.updatedBy=by||me().name}
+function setDue(p,val,by){
+  if(!val||val===p.due)return false;
+  (p.dueHistory=p.dueHistory||[]).unshift({from:p.due,to:val,by,at:Date.now()});
+  log(p,`Submission date ${p.due?'changed from '+fmtDate(p.due)+' to ':'set to '}${fmtDate(val)}${by==='email'?' (from email)':''}`);
+  p.due=val;touch(p,by);return true;
+}
+function teamOf(p){const ids=[...new Set([p.leader,...(p.team||[])].filter(Boolean))];return ids.map(userById).filter(Boolean)}
+function dueInfo(d){
+  if(!d)return{cls:'none',rel:'Not set'};
+  const diff=Math.round((new Date(d)-new Date(new Date().toDateString()))/864e5);
+  if(diff<0)return{cls:'late',rel:`${-diff} day${diff===-1?'':'s'} overdue`};
+  if(diff===0)return{cls:'late',rel:'Today'};
+  if(diff<=3)return{cls:'soon',rel:diff===1?'Tomorrow':`In ${diff} days`};
+  return{cls:'',rel:`In ${diff} days`};
+}
+const typeBadge=t=>`<span class="ttype ${t==='private'?'priv':'pub'}">${t==='private'?'Private':'Public'}</span>`;
 function cardHTML(p){
   const done=p.subtasks.filter(s=>s.done).length, tot=p.subtasks.length;
   const rem=p.notifications.filter(n=>!n.fired).length;
   const com=p.comments.filter(c=>!c.sys).length, fil=p.files.length+p.uploads.length;
-  const du=dueInfo(p.due), u=colUser(colById(p.columnId));
+  const du=dueInfo(p.due), team=teamOf(p), lead=userById(p.leader);
+  const last=(p.dueHistory||[])[0];
+  const fresh=p.updatedAt&&Date.now()-p.updatedAt<24*HOUR;
   return `<article class="card ${du.cls==='late'?'is-late':''}" data-id="${p.id}" tabindex="0" aria-label="${esc(p.title)}">
-    <div class="c-top"><span class="c-ref">${esc(p.ref||'No ref')}${p.source==='email'?'<span class="src">email</span>':''}</span>
-      <span class="duepill ${du.cls}" title="Submission ${fmtDate(p.due)}">${icon(du.cls?'clock':'cal')}${du.txt}</span></div>
+    <div class="c-top">${typeBadge(p.type)}${p.source==='email'?'<span class="src">email</span>':''}
+      <span class="c-upd ${fresh?'fresh':''}" title="Last updated ${p.updatedAt?fmtDT(p.updatedAt):''}${p.updatedBy?' by '+esc(p.updatedBy==='email'?'email':p.updatedBy):''}"><i></i>${p.updatedBy==='email'?icon('mail'):''}Updated ${ago(p.updatedAt)}</span></div>
     <h3 dir="auto">${esc(p.title)}</h3>
     ${p.client?`<div class="c-client" dir="auto">${esc(p.client)}</div>`:''}
+    <div class="c-due ${du.cls}">
+      <div class="c-due-r1"><small>Submission date</small><span class="c-rel">${du.rel}</span></div>
+      <div class="c-due-r2"><b>${p.due?fmtDate(p.due):'Not set'}</b><button class="c-due-edit" data-nodrag data-due="${p.id}" aria-label="Change submission date" title="Change submission date">${icon('edit')}</button></div>
+      ${last&&Date.now()-last.at<7*24*HOUR?`<div class="c-due-note ${last.by==='email'?'em':''}">${icon(last.by==='email'?'mail':'user')}${last.by==='email'?'Updated from email':'Changed by '+esc(last.by.replace(/^Eng\.\s*/,''))} · ${ago(last.at)}</div>`:''}
+      <input type="date" class="due-in" data-duein="${p.id}" value="${p.due||''}" tabindex="-1" aria-hidden="true">
+    </div>
     ${p.status?`<div class="c-status" dir="auto">${esc(p.status)}</div>`:''}
     ${p.tags.length?`<div class="card-tags">${p.tags.map(id=>{const t=tagById(id);return t?`<span class="tag"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</span>`:''}).join('')}</div>`:''}
     <div class="c-foot">
@@ -568,7 +663,7 @@ function cardHTML(p){
       ${fil?`<span title="Files">${icon('file')}${fil}</span>`:''}
       ${rem?`<span class="bell" title="Reminders set">${icon('bell')}${rem}</span>`:''}
       <span class="grow"></span>
-      ${u?avatar(u,'sm'):'<span class="na">Not assigned yet</span>'}
+      ${team.length?`<span class="c-team" title="Team leader: ${esc(lead?lead.name:'not set')}${team.length>1?' · Team: '+esc(team.map(u=>u.name).join(', ')):''}">${lead?`<span class="lead">${avatar(lead,'sm')}<b>Lead</b></span>`:''}<span class="stack">${team.filter(u=>u!==lead).slice(0,3).map(u=>avatar(u,'sm')).join('')}</span></span>`:'<span class="na">No team yet</span>'}
     </div>
   </article>`;
 }
@@ -595,11 +690,12 @@ function renderBoard(){
   renderFilters(); renderHeader();
 }
 function renderFilters(){
-  $('#filters').innerHTML=S.tags.map(t=>`<button class="fchip ${filterTags.has(t.id)?'on':''}" data-filter="${t.id}"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</button>`).join('');
+  $('#filters').innerHTML=['public','private'].map(t=>`<button class="fchip ${filterTags.has('type:'+t)?'on':''}" data-filter="type:${t}">${t==='public'?'Public':'Private'}</button>`).join('')+'<span class="fsep"></span>'+S.tags.map(t=>`<button class="fchip ${filterTags.has(t.id)?'on':''}" data-filter="${t.id}"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</button>`).join('');
 }
 function upcomingCount(){return S.projects.reduce((a,p)=>a+p.notifications.filter(n=>!n.fired).length,0)+S.reminders.filter(n=>!n.fired).length}
 function renderHeader(){
   $('#driveDot').parentElement.classList.toggle('on',S.drive.connected);
+  $('#driveIco').innerHTML=provIcon(S.drive.provider);$('#driveLbl').textContent=prov().short;$('#driveBtn').title=`${driveName()} – ${S.drive.connected?'connected':'not connected'}`;
   $('#mailDot').parentElement.classList.toggle('on',S.mail.connected);
   $('#remCount').textContent=upcomingCount();
   $('#teamBtn').hidden=!isAdmin();
@@ -619,6 +715,7 @@ function updateSyncMeta(){
 /* ---------------- Drag & drop (mouse + touch, pointer events) ---------------- */
 let drag=null;
 $('#board').addEventListener('pointerdown',e=>{
+  if(e.target.closest('[data-nodrag]'))return;
   const card=e.target.closest('.card'); if(!card||e.button>0)return;
   drag={card,id:card.dataset.id,x:e.clientX,y:e.clientY,started:false,from:card.closest('.col-list').dataset.list};
 });
@@ -657,6 +754,7 @@ document.addEventListener('pointerup',()=>{
   const ids=[...list.children].map(n=>n===d.ph?d.id:n.dataset.id).filter(Boolean);
   const p=proj(d.id); const prev=p.columnId||null;
   p.columnId=target;
+  if(prev!==target){touch(p);const u=colUser(colById(target));if(u&&!(p.team||[]).includes(u.id)){p.team=[...(p.team||[]),u.id];if(!p.leader)p.leader=u.id}}
   ids.forEach((id,i)=>{const x=proj(id);if(x)x.pos=i});
   if(prev!==target){
     if(target){p.tags=p.tags.filter(t=>t!=='un'); const n=colName(target);
@@ -676,9 +774,12 @@ $('#board').addEventListener('click',e=>{
   if(e.target.closest('#addCol')){addColumn();return}
   const m=e.target.closest('[data-colmenu]'); if(m){colMenu(m,m.dataset.colmenu);return}
   const pr=e.target.closest('[data-profile]'); if(pr){editProfile(pr.dataset.profile);return}
+  const dd=e.target.closest('[data-due]'); if(dd){const i=$(`[data-duein="${dd.dataset.due}"]`);try{i.showPicker()}catch(_){editDue(dd.dataset.due)}return}
 });
 $('#board').addEventListener('keydown',e=>{const c=e.target.closest('.card');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openProject(c.dataset.id)}});
 
+$('#board').addEventListener('change',e=>{const i=e.target.closest('[data-duein]');if(!i)return;const p=proj(i.dataset.duein);if(setDue(p,i.value,me().name)){save();renderBoard();flash(p.id);toast(`Submission date set to <b>${fmtDate(p.due)}</b>`,'cal')}});
+function editDue(id){const p=proj(id);modal(`<h3>Submission date</h3><div class="row"><label for="eD">Latest submission date</label><input class="in" type="date" id="eD" value="${p.due||''}"></div><div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="eOk">Save date</button></div>`,()=>{$('#eOk').onclick=()=>{if(setDue(p,$('#eD').value,me().name)){save();renderBoard()}closeModal()}})}
 $('#filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;const id=b.dataset.filter;filterTags.has(id)?filterTags.delete(id):filterTags.add(id);renderBoard()});
 $('#q').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();renderBoard()});
 $('#newBtn').onclick=()=>newProject(null);
@@ -722,17 +823,19 @@ function closeModal(){$('#modal').classList.remove('show');if(!$('#page').classL
 function newProject(colId){
   modal(`<h3>New project</h3>
     <div class="row"><label for="nT">Project title</label><input class="in" id="nT" dir="auto" placeholder="Project name (Arabic or English)"></div>
-    <div class="formgrid"><div class="row"><label for="nR">Tender no.</label><input class="in" id="nR" placeholder="2026/130"></div>
+    <div class="formgrid"><div class="row"><label>Tender type</label><div class="seg" id="nTy"><button type="button" class="on" data-v="public">Public</button><button type="button" data-v="private">Private</button></div></div>
     <div class="row"><label for="nD">Submission date</label><input class="in" type="date" id="nD" value="${isoIn(14)}"></div>
     <div class="row full"><label for="nC">Client</label><input class="in" id="nC" dir="auto"></div></div>
     <div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="nOk">Create project</button></div>`,()=>{
+    $('#nTy').onclick=e=>{const b=e.target.closest('[data-v]');if(b)$$('#nTy button').forEach(x=>x.classList.toggle('on',x===b))};
     $('#nOk').onclick=()=>{const t=$('#nT').value.trim();if(!t)return $('#nT').focus();
-      const p=mkProject({title:t,ref:$('#nR').value.trim(),due:$('#nD').value,client:$('#nC').value.trim(),columnId:colId,tags:colId?['new']:['new','un']});
+      const cu=colId&&colUser(colById(colId));
+      const p=mkProject({title:t,type:$('#nTy .on').dataset.v,leader:cu?cu.id:null,team:cu?[cu.id]:[],due:$('#nD').value,client:$('#nC').value.trim(),columnId:colId,tags:colId?['new']:['new','un']});
       log(p,'Project created manually');save();closeModal();renderBoard();flash(p.id);toast('Project created')};
   });
 }
 function mkProject(o){
-  const p=Object.assign({id:uid(),columnId:null,pos:-1,tags:[],status:'',received:new Date().toISOString().slice(0,10),due:'',folder:'',client:'',ref:'',subtasks:[],links:[],comments:[],notifications:[],files:[],uploads:[],source:'manual',subOpen:true},o);
+  const p=Object.assign({id:uid(),columnId:null,pos:-1,tags:[],status:'',received:new Date().toISOString().slice(0,10),due:'',folder:'',client:'',ref:'',type:'public',leader:null,team:[],dueHistory:[],updatedAt:Date.now(),updatedBy:me().name,subtasks:[],links:[],comments:[],notifications:[],files:[],uploads:[],source:'manual',subOpen:true},o);
   S.projects.forEach(x=>{if((x.columnId||null)===(p.columnId||null))x.pos++}); p.pos=0;
   S.projects.push(p); return p;
 }
@@ -756,7 +859,7 @@ function renderPage(){
   <div class="page-head">
     <button class="btn icon" id="back" aria-label="Back to board">${icon('left')}</button>
     <div class="t">
-      <div class="crumb">${esc(p.ref||'No ref')} · received ${fmtDate(p.received)}${p.source==='email'?' <span class="src">from email</span>':''}</div>
+      <div class="crumb">${typeBadge(p.type)} received ${fmtDate(p.received)} · updated ${ago(p.updatedAt)}${p.updatedBy?' by '+esc(p.updatedBy):''}${p.source==='email'?' <span class="src">from email</span>':''}</div>
       <input class="title-in" id="pTitle" value="${esc(p.title)}" dir="auto" aria-label="Project title">
     </div>
     <button class="btn icon" id="pMore" aria-label="More">${icon('dots')}</button>
@@ -768,10 +871,13 @@ function renderPage(){
         <div class="field"><label for="pCol">Assigned to</label><select class="in" id="pCol"><option value="">— Unassigned —</option>${S.columns.filter(c=>colUser(c)).map(c=>`<option value="${c.id}" ${c.id===p.columnId?'selected':''}>${esc(colName(c.id))}</option>`).join('')}</select></div>
         <div class="field"><label for="pStatus">Status</label><input class="in" id="pStatus" value="${esc(p.status)}" dir="auto" placeholder="Write the current status…" list="statusList"></div>
         <datalist id="statusList"><option>Reviewing documents</option><option>Site visit scheduled</option><option>Queries sent to client</option><option>Pricing in progress</option><option>Waiting supplier quotes</option><option>Ready for submission</option><option>Submitted</option></datalist>
-        <div class="field"><label for="pRef">Tender no.</label><input class="in" id="pRef" value="${esc(p.ref)}"></div>
+        <div class="field due-field"><label for="pDue">Submission date</label><div style="display:flex;gap:8px;align-items:center"><input class="in" type="date" id="pDue" value="${p.due||''}"><span class="c-rel" style="${dueInfo(p.due).cls==='late'?'background:var(--danger);color:#fff;border-color:var(--danger)':dueInfo(p.due).cls==='soon'?'background:var(--accent);color:#fff;border-color:var(--accent)':''}">${dueInfo(p.due).rel}</span></div>
+          ${(p.dueHistory||[]).length?`<div class="due-hist">${p.dueHistory.slice(0,3).map(h=>`<div>${icon(h.by==='email'?'mail':'user')}${h.from?fmtDate(h.from)+' → ':''}<b style="color:var(--ink-2)">${fmtDate(h.to)}</b> · ${h.by==='email'?'from email':esc(h.by)} · ${ago(h.at)}</div>`).join('')}</div>`:'<div class="due-hist">Updates automatically when an email gives a new date. You can change it here at any time.</div>'}</div>
+        <div class="field"><label>Tender type</label><div class="seg" id="pType"><button type="button" data-v="public" class="${p.type!=='private'?'on':''}">Public</button><button type="button" data-v="private" class="${p.type==='private'?'on':''}">Private</button></div></div>
+        <div class="field"><label for="pLead">Team leader</label><select class="in" id="pLead"><option value="">— Not set —</option>${S.users.map(u=>`<option value="${u.id}" ${u.id===p.leader?'selected':''}>${esc(u.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>Tendering team</label><div class="recips" id="pTeam">${S.users.map(u=>`<button type="button" data-r="${u.id}" class="${(p.team||[]).includes(u.id)||u.id===p.leader?'on':''}">${avatar(u,'sm')}${esc(u.name.replace(/^Eng\.\s*/,''))}</button>`).join('')}</div></div>
         <div class="field"><label for="pClient">Client</label><input class="in" id="pClient" value="${esc(p.client)}" dir="auto"></div>
         <div class="field"><label for="pRec">Received</label><input class="in" type="date" id="pRec" value="${p.received||''}"></div>
-        <div class="field"><label for="pDue">Submission</label><input class="in" type="date" id="pDue" value="${p.due||''}"></div>
       </div>
       <div class="panel">
         <h4>Tags</h4>
@@ -779,8 +885,8 @@ function renderPage(){
       </div>
       <div class="panel">
         <h4>Project folder</h4>
-        ${p.folder?`<div class="folder"><svg class="gd" viewBox="0 0 87.3 78"><use href="#i-gdrive"/></svg><a href="${esc(p.folder)}" target="_blank" rel="noopener">${esc(p.folder.replace(/^https?:\/\//,''))}</a><button class="btn sm ghost" id="unlink">Unlink</button></div>`
-        :`<div class="addrow"><input class="in" id="folderIn" placeholder="Paste a Drive folder link"><button class="btn sm" id="folderLink">Link</button><button class="btn sm dark" id="folderNew">${icon('folder')}Create in Drive</button></div>`}
+        ${p.folder?`<div class="folder">${provIcon(folderProv(p.folder)||S.drive.provider,"gd")}<a href="${esc(p.folder)}" target="_blank" rel="noopener">${esc(p.folder.replace(/^https?:\/\//,''))}</a><button class="btn sm ghost" id="unlink">Unlink</button></div>`
+        :`<div class="addrow"><input class="in" id="folderIn" placeholder="Paste a Google Drive or OneDrive folder link"><button class="btn sm" id="folderLink">Link</button><button class="btn sm dark" id="folderNew">${icon('folder')}Create in ${esc(prov().short)}</button></div>`}
       </div>
       <div class="panel">
         <h4 class="sub-head ${p.subOpen?'':'closed'}" id="subHead">${icon('chev','chev')}Sub-tasks <span class="pill">${done}/${p.subtasks.length}</span><span class="grow"></span></h4>
@@ -821,16 +927,20 @@ function subHTML(s){
   </div>`;
 }
 function bindPage(p){
-  const upd=()=>{save();renderBoard()};
+  const upd=()=>{touch(p);save();renderBoard()};
   $('#back').onclick=closePage;
   $('#pMore').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();menu(r.right-190,r.bottom+4,[
     ['Delete project','trash',()=>{if(!confirm('Delete this project?'))return;S.projects=S.projects.filter(x=>x.id!==p.id);save();closePage();renderBoard();toast('Project deleted')},'danger']])};
   $('#pTitle').onchange=e=>{p.title=e.target.value;upd()};
   $('#pStatus').onchange=e=>{p.status=e.target.value;log(p,'Status: '+p.status);upd();toast('Status updated')};
-  $('#pRef').onchange=e=>{p.ref=e.target.value;upd()};
   $('#pClient').onchange=e=>{p.client=e.target.value;upd()};
   $('#pRec').onchange=e=>{p.received=e.target.value;upd()};
-  $('#pDue').onchange=e=>{p.due=e.target.value;upd()};
+  $('#pDue').onchange=e=>{if(setDue(p,e.target.value,me().name)){save();renderBoard();renderPage();toast(`Submission date set to <b>${fmtDate(p.due)}</b>`,'cal')}};
+  $('#pType').onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;p.type=b.dataset.v;$$('#pType button').forEach(x=>x.classList.toggle('on',x===b));upd()};
+  $('#pLead').onchange=e=>{p.leader=e.target.value||null;if(p.leader&&!(p.team||[]).includes(p.leader))p.team=[...(p.team||[]),p.leader];log(p,'Team leader: '+(p.leader?userById(p.leader).name:'not set'));upd();renderPage()};
+  $('#pTeam').onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;const id=b.dataset.r;
+    if(id===p.leader)return toast('The team leader is always on the team','x');
+    p.team=(p.team||[]).includes(id)?p.team.filter(x=>x!==id):[...(p.team||[]),id];b.classList.toggle('on');upd()};
   $('#pCol').onchange=e=>{const v=e.target.value||null;p.columnId=v;p.pos=-1;
     if(v){p.tags=p.tags.filter(t=>t!=='un');log(p,'Assigned to '+colName(v));toast(`Assigned to <b>${esc(colName(v))}</b>`,'user')}else{if(!p.tags.includes('un'))p.tags.push('un')}
     upd();renderPage()};
@@ -841,9 +951,9 @@ function bindPage(p){
     S.tags.push(t);p.tags.push(t.id);upd();renderPage();toast(`Tag <b>${esc(n)}</b> created`)};
   if(p.folder) $('#unlink').onclick=()=>{p.folder='';upd();renderPage()};
   else{
-    $('#folderLink').onclick=()=>{const v=$('#folderIn').value.trim();if(!/^https?:\/\//.test(v))return toast('Paste a full folder link (https://…)','x');p.folder=v;upd();renderPage();toast('Folder linked')};
-    $('#folderNew').onclick=()=>{if(!S.drive.connected)return toast('Connect Google Drive first','x');
-      p.folder='https://drive.google.com/drive/folders/'+uid()+uid();log(p,'Drive folder created');upd();renderPage();toast(`Folder <b>Tenders/${esc(p.ref||'New')}</b> created in Drive`,'folder')};
+    $('#folderLink').onclick=()=>{const v=$('#folderIn').value.trim();if(!/^https?:\/\//.test(v))return toast('Paste the full folder link (https://…)','x');const fp=folderProv(v);p.folder=v;log(p,'Folder linked: '+v);upd();renderPage();toast(fp?`${PROV[fp].name} folder linked`:'Folder linked','folder')};
+    $('#folderNew').onclick=()=>{if(!S.drive.connected)return driveSettings();
+      p.folder=newFolderUrl();log(p,driveName()+' folder created');upd();renderPage();toast(`Folder <b>Tenders/${esc(p.title.slice(0,30))}</b> created in ${esc(driveName())}`,'folder')};
   }
   $('#subHead').onclick=()=>{p.subOpen=!p.subOpen;save();$('#subHead').classList.toggle('closed');$('#subWrap').classList.toggle('closed')};
   $('#subAdd').onsubmit=e=>{e.preventDefault();const t=$('#subIn').value.trim();if(!t)return;
@@ -865,14 +975,14 @@ function fileIco(n){const e=(n.split('.').pop()||'').toLowerCase();const map={pd
 
 function renderPane(){
   const p=proj(cur), pane=$('#pane'); pane.className='tabpane'; void pane.offsetWidth;
-  const refresh=()=>{save();renderBoard();renderPage()};
+  const refresh=()=>{touch(p);save();renderBoard();renderPage()};
   if(curTab==='files'){
     const all=[...p.files,...p.uploads.filter(u=>u.done).map(u=>({...u,up:true}))];
     pane.innerHTML=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;color:var(--muted);font-size:12.5px">
-      <svg class="i" viewBox="0 0 87.3 78"><use href="#i-gdrive"/></svg>${p.folder?'Files in the linked Drive folder':'No folder linked – showing files attached to this project'}<span style="flex:1"></span>
+      ${provIcon(folderProv(p.folder)||S.drive.provider)}${p.folder?`Files in the linked ${PROV[folderProv(p.folder)||S.drive.provider].name} folder`:'No folder linked – showing files attached to this project'}<span style="flex:1"></span>
       ${p.folder?`<a class="btn sm" href="${esc(p.folder)}" target="_blank" rel="noopener">${icon('ext')}Open folder</a>`:''}</div>
       ${all.length?all.map(f=>`<div class="list-item">${fileIco(f.name)}<div class="body"><b>${esc(f.name)}</b><small>${esc(f.size||'')}${f.up?' · uploaded '+fmtDT(f.at):''}</small></div><button class="btn ghost icon sm" data-delf="${f.id}" aria-label="Remove">${icon('x')}</button></div>`).join('')
-      :`<div class="empty">No files yet. Use <b>Uploads</b> to send files to Drive.</div>`}`;
+      :`<div class="empty">No files yet. Use <b>Uploads</b> to save files to ${esc(driveName())}.</div>`}`;
     pane.onclick=e=>{const b=e.target.closest('[data-delf]');if(!b)return;p.files=p.files.filter(f=>f.id!==b.dataset.delf);p.uploads=p.uploads.filter(f=>f.id!==b.dataset.delf);refresh()};
   }
   if(curTab==='links'){
@@ -925,7 +1035,7 @@ function renderPane(){
   if(curTab==='uploads'){
     pane.innerHTML=`<label class="drop" id="drop"><input type="file" multiple id="fi" class="sr">
       <div style="margin-bottom:6px;color:var(--accent)">${icon('up')}</div><b>Drop files here</b> or click to browse<br>
-      <small>${S.drive.connected?`Uploads go to <b>${p.folder?'the linked folder':'Tenders/'+esc(p.ref||'project')}</b> on Google Drive`:'Google Drive is not connected – connect it from the top bar'}</small></label>
+      <small>${S.drive.connected?`Uploads go to <b>${p.folder?'the linked folder':'Tenders/'+esc(p.title.slice(0,30))}</b> on ${esc(driveName())}`:`${esc(driveName())} is not connected – use the ${esc(prov().short)} button at the top`}</small></label>
       <div id="ups" style="margin-top:10px">${[...p.uploads].reverse().map(upHTML).join('')}</div>`;
     const drop=$('#drop');
     ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
@@ -934,17 +1044,17 @@ function renderPane(){
     $('#fi').onchange=e=>uploadFiles(p,e.target.files);
   }
 }
-const upHTML=u=>`<div class="up ${u.done?'done':''}" data-up="${u.id}">${fileIco(u.name)}<div style="flex:1;min-width:0"><b style="font-weight:500;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.name)}</b><small style="color:var(--muted)">${esc(u.size)} · <span class="st">${u.done?'Saved to Drive':'Uploading…'}</span></small><div class="bar"><i style="width:${u.done?100:0}%"></i></div></div></div>`;
+const upHTML=u=>`<div class="up ${u.done?'done':''}" data-up="${u.id}">${fileIco(u.name)}<div style="flex:1;min-width:0"><b style="font-weight:500;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.name)}</b><small style="color:var(--muted)">${esc(u.size)} · <span class="st">${u.done?'Saved to '+driveName():'Uploading…'}</span></small><div class="bar"><i style="width:${u.done?100:0}%"></i></div></div></div>`;
 function uploadFiles(p,files){
-  if(!S.drive.connected)return toast('Connect Google Drive first','x');
-  if(!p.folder){p.folder='https://drive.google.com/drive/folders/'+uid()+uid();log(p,'Drive folder created for uploads')}
+  if(!S.drive.connected)return driveSettings();
+  if(!p.folder){p.folder=newFolderUrl();log(p,driveName()+' folder created for uploads')}
   [...files].forEach((f,i)=>{
     const kb=f.size/1024;const u={id:uid(),name:f.name,size:kb>1024?(kb/1024).toFixed(1)+' MB':Math.max(1,Math.round(kb))+' KB',done:false,at:Date.now()};
     p.uploads.push(u); $('#ups').insertAdjacentHTML('afterbegin',upHTML(u));
     const el=$(`[data-up="${u.id}"]`); let pct=0;
     const tick=setInterval(()=>{pct=Math.min(100,pct+8+Math.random()*18);$('.bar i',el).style.width=pct+'%';
-      if(pct>=100){clearInterval(tick);u.done=true;el.classList.add('done');$('.st',el).textContent='Saved to Drive';log(p,`Uploaded ${u.name} to Drive`);save();renderBoard();
-        if(i===files.length-1)toast(`${files.length} file${files.length>1?'s':''} saved to Drive`,'up')}},160+i*40);
+      if(pct>=100){clearInterval(tick);u.done=true;touch(p);el.classList.add('done');$('.st',el).textContent='Saved to '+driveName();log(p,`Uploaded ${u.name} to ${driveName()}`);save();renderBoard();
+        if(i===files.length-1)toast(`${files.length} file${files.length>1?'s':''} saved to ${esc(driveName())}`,'up')}},160+i*40);
   });
   save();
 }
@@ -957,54 +1067,74 @@ function uploadFiles(p,files){
    • every URL in the body → Links tab
    ------------------------------------------------ */
 const MAILBOX=[
-  {id:'m1',from:'procurement@nca.example',subject:'ورد الينا – مناقصة رقم 2026/118',received:-50,
-   body:'السادة / إدارة المناقصات\nورد الينا طلب تسعير للمشروع التالي:\nاسم المشروع: إنشاء مبنى إداري بالمنطقة الصناعية\nالجهة المالكة: هيئة المجتمعات العمرانية\nرقم المناقصة: 2026/118\nآخر موعد للتقديم: ٢٠٢٦-١٢-٢٠\nرابط كراسة الشروط: https://tenders.example/2026-118/specs.pdf\nوتفضلوا بقبول فائق الاحترام'},
-  {id:'m2',from:'tenders@moh.example',subject:'تأجيل موعد تقديم العطاءات – مناقصة 2026/104',received:-44,
-   body:'نحيطكم علماً بأنه تم تأجيل موعد تقديم العطاءات للمناقصة رقم 2026/104 ليصبح 2027-01-10 بدلاً من الموعد السابق.\nالإخطار الرسمي: https://tenders.example/2026-104/postponement'},
-  {id:'m3',from:'wa-procurement@water.example',subject:'الرد على الاستفسارات – مناقصة 2026/097',received:-31,
-   body:'مرفق لسيادتكم الرد على استفسارات السادة المتقدمين للمناقصة رقم 2026/097.\nملف الردود: https://tenders.example/2026-097/answers.pdf\nملحق رقم 1: https://tenders.example/2026-097/addendum-1.pdf'},
+  {id:'m1',from:'procurement@nca.example',subject:'ورد الينا – مناقصة عامة: إنشاء مبنى إداري بالمنطقة الصناعية',received:-50,
+   body:'السادة / إدارة المناقصات\nورد الينا طلب تسعير للمشروع التالي:\nاسم المشروع: إنشاء مبنى إداري بالمنطقة الصناعية\nنوع المناقصة: عامة\nالجهة المالكة: هيئة المجتمعات العمرانية\nآخر موعد للتقديم: ٢٠٢٦-١٢-٢٠\nرابط كراسة الشروط: https://tenders.example/admin-building/specs.pdf\nوتفضلوا بقبول فائق الاحترام'},
+  {id:'m2',from:'tenders@moh.example',subject:'تأجيل موعد تقديم العطاءات – توريد وتركيب أعمال الكهرباء – مبنى الإدارة',received:-44,
+   body:'نحيطكم علماً بأنه تم تأجيل موعد تقديم العطاءات لمشروع: توريد وتركيب أعمال الكهرباء – مبنى الإدارة ليصبح 2027-01-10 بدلاً من الموعد السابق.\nالإخطار الرسمي: https://tenders.example/electrical-admin/postponement'},
+  {id:'m3',from:'wa-procurement@water.example',subject:'الرد على الاستفسارات – إنشاء خزان مياه أرضي سعة 5000 م³',received:-31,
+   body:'مرفق لسيادتكم الرد على استفسارات السادة المتقدمين لمشروع إنشاء خزان مياه أرضي سعة 5000 م³.\nملف الردود: https://tenders.example/water-tank/answers.pdf\nملحق رقم 1: https://tenders.example/water-tank/addendum-1.pdf'},
   {id:'m4',from:'newsletter@supplier.example',subject:'النشرة الشهرية – عروض نوفمبر',received:-20,
    body:'تعرف على أحدث عروضنا لمواد البناء لهذا الشهر.'},
-  {id:'m5',from:'procurement@city.example',subject:'ورد إلينا – أعمال تطوير شبكة الطرق الداخلية',received:-12,
-   body:'ورد إلينا من الجهة التالية طلب تقديم عطاء:\nاسم المشروع: تطوير شبكة الطرق الداخلية – المرحلة الثالثة\nالجهة المالكة: محافظة المدينة\nرقم المناقصة: 2026/125\nآخر موعد للتقديم: 28/12/2026\nالمستندات: https://tenders.example/2026-125/docs'},
-  {id:'m6',from:'procurement@nca.example',subject:'ورد الينا – مناقصة رقم 2026/118 (ملحق)',received:-5,
-   body:'ورد الينا ملحق جديد للمناقصة رقم 2026/118 يتضمن جداول كميات معدلة.\nالملحق: https://tenders.example/2026-118/boq-rev1.xlsx'},
+  {id:'m5',from:'procurement@city.example',subject:'ورد إلينا – ممارسة محدودة: تطوير شبكة الطرق الداخلية',received:-12,
+   body:'ورد إلينا من الجهة التالية دعوة لتقديم عطاء:\nاسم المشروع: تطوير شبكة الطرق الداخلية – المرحلة الثالثة\nنوع المناقصة: محدودة\nالجهة المالكة: محافظة المدينة\nآخر موعد للتقديم: 28/12/2026\nالمستندات: https://tenders.example/roads-phase-3/docs'},
+  {id:'m6',from:'procurement@nca.example',subject:'ورد الينا – ملحق: إنشاء مبنى إداري بالمنطقة الصناعية',received:-5,
+   body:'ورد الينا ملحق جديد لمشروع إنشاء مبنى إداري بالمنطقة الصناعية يتضمن جداول كميات معدلة، وتم تعديل آخر موعد للتقديم ليصبح 2026-12-27.\nالملحق: https://tenders.example/admin-building/boq-rev1.xlsx'},
 ];
 const digits=s=>s.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-const norm=s=>digits(s).replace(/[إأآ]/g,'ا').replace(/ى/g,'ي');
+const norm=s=>digits(s).replace(/[إأآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').toLowerCase();
 const field=(b,labels)=>{for(const l of labels){const m=b.match(new RegExp(l+'\\s*[:：]\\s*(.+)'));if(m)return m[1].trim()}return''};
 const findDate=s=>{let m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
   m=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m)return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;return''};
+/* match an email to a project by its name: exact phrase first, then 75% of the name's words */
+function findProject(txt){
+  const words=s=>norm(s).split(/[\s–\-:،,.()]+/).filter(w=>w.length>2);
+  let best=null,score=0;
+  S.projects.forEach(p=>{
+    const t=norm(p.title);if(t.length>6&&txt.includes(t)){if(score<2){best=p;score=2}return}
+    const w=words(p.title);if(!w.length)return;
+    const hit=w.filter(x=>txt.includes(x)).length/w.length;
+    if(hit>=.75&&hit>score&&score<2){best=p;score=hit}
+  });
+  return best;
+}
 function parseMail(m){
   const txt=norm(m.subject+'\n'+m.body);
-  const tender=(txt.match(/(\d{4}\/\d{2,4})/)||[])[1]||'';
   const urls=(m.body.match(/https?:\/\/[^\s)،]+/g)||[]);
   let kind='ignore';
   if(/تاجيل|مؤجل|موجل/.test(txt))kind='postpone';
   else if(/استفسار/.test(txt))kind='queries';
   else if(/ورد\s*الينا/.test(txt))kind='new';
-  return {kind,tender,urls,txt,
+  const typeTxt=norm(field(digits(m.body),['نوع المناقصة','نوع الطرح'])||m.subject);
+  const type=/محدود|خاص|ممارس/.test(typeTxt)?'private':/عام/.test(typeTxt)?'public':'';
+  const dueField=field(digits(m.body),['[اأإآ]خر موعد للتقديم','موعد التقديم']);
+  return {kind,urls,txt,type,
     title:field(digits(m.body),['اسم المشروع']),client:field(digits(m.body),['الجهة المالكة','الجهة']),
-    due:findDate(field(digits(m.body),['[اأإآ]خر موعد للتقديم'])||txt)};
+    due:findDate(dueField||digits(m.subject+'\n'+m.body))};
 }
 function applyMail(m){
-  const r=parseMail(m); const existing=r.tender&&S.projects.find(p=>p.ref===r.tender);
-  const addLinks=p=>r.urls.forEach((u,i)=>{if(!p.links.some(l=>l.url===u))p.links.push({id:uid(),title:(u.split('/').pop()||'Link'),url:u,src:true})});
+  const r=parseMail(m); const existing=findProject(r.txt);
+  const addLinks=p=>r.urls.forEach(u=>{if(!p.links.some(l=>l.url===u))p.links.push({id:uid(),title:(u.split('/').pop()||'Link'),url:u,src:true})});
+  const short=p=>p.title.length>38?p.title.slice(0,36)+'…':p.title;
+  const dateNote=p=>{const ch=r.due&&setDue(p,r.due,'email');return ch?' · submission date now '+fmtDate(p.due):''};
   let res={kind:r.kind,label:'Ignored – not a tender email',pid:null};
   if(r.kind==='new'){
-    if(existing){if(!existing.tags.includes('upd'))existing.tags.push('upd');existing.status='New update received by email';addLinks(existing);log(existing,'Email: '+m.subject);res={kind:'upd',label:`New update → ${existing.ref}`,pid:existing.id}}
-    else{const p=mkProject({title:r.title||m.subject.replace(/ورد\s*[اإ]لينا\s*[–-]?\s*/,''),client:r.client,ref:r.tender,due:r.due,tags:['new','un'],status:'Received by email – needs an engineer',source:'email'});
-      addLinks(p);log(p,'Created from email: '+m.subject);res={kind:'new',label:`New project created → ${p.ref||'no ref'}`,pid:p.id}}
+    if(existing){if(!existing.tags.includes('upd'))existing.tags.push('upd');existing.status='New update received by email';addLinks(existing);
+      const dn=dateNote(existing);touch(existing,'email');log(existing,'Email: '+m.subject);res={kind:'upd',label:`New update → ${short(existing)}${dn}`,pid:existing.id}}
+    else{const p=mkProject({title:r.title||m.subject.replace(/ورد\s*[اإ]لينا\s*[–-]?\s*/,''),client:r.client,type:r.type||'public',due:r.due,tags:['new','un'],status:'Received by email – needs an engineer',source:'email',updatedBy:'email'});
+      addLinks(p);log(p,'Created from email: '+m.subject);res={kind:'new',label:`New ${p.type} tender created${p.due?' · submission '+fmtDate(p.due):''}`,pid:p.id}}
   }
   if(r.kind==='postpone'){
-    if(existing){if(!existing.tags.includes('pp'))existing.tags.push('pp');const nd=findDate(r.txt);if(nd)existing.due=nd;
-      existing.status='Postponed'+(nd?' to '+fmtDate(nd):'');addLinks(existing);log(existing,'Email: '+m.subject);res={kind:'pp',label:`Postponed → ${existing.ref}${nd?' · new date '+fmtDate(nd):''}`,pid:existing.id}}
-    else res={kind:'ignore',label:'Postponement for an unknown tender – review manually',pid:null};
+    if(existing){if(!existing.tags.includes('pp'))existing.tags.push('pp');
+      const nd=findDate(digits(m.body));if(nd)setDue(existing,nd,'email');
+      existing.status='Postponed'+(nd?' to '+fmtDate(nd):'');addLinks(existing);touch(existing,'email');log(existing,'Email: '+m.subject);
+      res={kind:'pp',label:`Postponed → ${short(existing)}${nd?' · new submission date '+fmtDate(nd):''}`,pid:existing.id}}
+    else res={kind:'ignore',label:'Postponement for a project not on the board – review manually',pid:null};
   }
   if(r.kind==='queries'){
-    if(existing){if(!existing.tags.includes('qa'))existing.tags.push('qa');existing.status='Answers to queries received – review';addLinks(existing);log(existing,'Email: '+m.subject);
-      res={kind:'qa',label:`Queries answers → ${existing.ref} · ${r.urls.length} link${r.urls.length!==1?'s':''} added`,pid:existing.id}}
-    else res={kind:'ignore',label:'Queries answers for an unknown tender – review manually',pid:null};
+    if(existing){if(!existing.tags.includes('qa'))existing.tags.push('qa');existing.status='Answers to queries received – review';addLinks(existing);
+      const dn=dateNote(existing);touch(existing,'email');log(existing,'Email: '+m.subject);
+      res={kind:'qa',label:`Queries answers → ${short(existing)} · ${r.urls.length} link${r.urls.length!==1?'s':''} added${dn}`,pid:existing.id}}
+    else res={kind:'ignore',label:'Queries answers for a project not on the board – review manually',pid:null};
   }
   S.mail.processed.push(m.id); S.mail.log.unshift({id:m.id,...res,at:Date.now()});
   return res;
@@ -1014,7 +1144,7 @@ async function syncMail(auto=false){
   if(syncing)return; if(!S.mail.connected)return toast('Connect the mailbox first','x');
   syncing=true; $('#syncBtn').classList.add('spin'); const sc=$('#scanBar'); sc&&sc.classList.add('on');
   await new Promise(r=>setTimeout(r,1400));
-  const pending=MAILBOX.filter(m=>!S.mail.processed.includes(m.id)).slice(0,3);
+  const pending=MAILBOX.filter(m=>!S.mail.processed.includes(m.id));
   const results=pending.map(applyMail);
   S.mail.lastSync=Date.now(); save(); syncing=false; $('#syncBtn').classList.remove('spin');
   renderBoard(); if(cur)renderPage(); if($('#mailSheet').classList.contains('show'))renderMailSheet();
@@ -1077,7 +1207,7 @@ function renderRemSheet(){
       <div style="font-weight:600;margin-bottom:12px">New reminder</div>
       <div class="formgrid">
         <div class="full"><label class="lbl-sm" for="rMsg">Message</label><input class="in" id="rMsg" placeholder="e.g. Submit pricing for 2026/104" dir="auto"></div>
-        <div class="full"><label class="lbl-sm" for="rProj">Project</label><select class="in" id="rProj"><option value="">General (no project)</option>${S.projects.map(p=>`<option value="${p.id}">${esc((p.ref?p.ref+' · ':'')+p.title)}</option>`).join('')}</select></div>
+        <div class="full"><label class="lbl-sm" for="rProj">Project</label><select class="in" id="rProj"><option value="">General (no project)</option>${S.projects.map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('')}</select></div>
         <div><label class="lbl-sm" for="rAt">When</label><input class="in" type="datetime-local" id="rAt" value="${localDT(Date.now()+HOUR)}"></div>
         <div><label class="lbl-sm" for="rRep">Repeat</label><select class="in" id="rRep"><option value="none">Once</option><option value="hourly">Every hour</option><option value="daily">Every day</option><option value="weekly">Every week</option></select></div>
         <div class="full"><span class="lbl-sm">Send to</span>${recipPicker('rTo',['all'],true)}</div>
@@ -1115,15 +1245,48 @@ function sheet(id){
 }
 $('#mailBtn').onclick=()=>sheet('mailSheet');
 $('#remBtn').onclick=()=>sheet('remSheet');
-$('#driveBtn').onclick=()=>{
-  const d=S.drive;
-  modal(`<h3 style="display:flex;align-items:center;gap:10px"><svg class="i" viewBox="0 0 87.3 78" style="width:22px;height:22px"><use href="#i-gdrive"/></svg>Google Drive</h3>
-    <p style="margin:0 0 14px;color:var(--ink-2)">${d.connected?`Connected as <b>${esc(d.account)}</b>. Project folders are created under <b>Tenders/</b> and uploads are saved there.`:'Connect a Google account so projects can create folders and upload files to Drive.'}</p>
-    <div class="acts"><button class="btn" data-close>Close</button><button class="btn ${d.connected?'':'primary'}" id="dOk">${d.connected?'Disconnect':'Connect Google Drive'}</button></div>`,()=>{
-    $('#dOk').onclick=()=>{d.connected=!d.connected;save();closeModal();renderHeader();toast(d.connected?'Google Drive connected':'Google Drive disconnected','folder')}});
-};
+$('#driveBtn').onclick=driveSettings;
 $('#scrim').onclick=()=>{if($('#modal').classList.contains('show'))return closeModal();if($('.sheet.show'))return sheet(null);closePage()};
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#modal').classList.contains('show'))return closeModal();if($('.sheet.show'))return sheet(null);if(cur)closePage()});
+
+
+/* ---------------- Cloud storage: Google Drive or OneDrive ---------------- */
+const PROV={
+  google:{name:'Google Drive',short:'Drive',icon:'gdrive',vb:'0 0 87.3 78',hint:'https://drive.google.com/drive/folders/…',url:id=>`https://drive.google.com/drive/folders/${id}`},
+  onedrive:{name:'OneDrive',short:'OneDrive',icon:'onedrive',vb:'0 0 32 20',hint:'https://onedrive.live.com/… or https://company.sharepoint.com/…',url:id=>`https://onedrive.live.com/?id=${id}`}
+};
+if(!S.drive.provider)S.drive.provider='google';
+const prov=()=>PROV[S.drive.provider]||PROV.google;
+const driveName=()=>prov().name;
+const provIcon=(k,cls='i')=>{const P=PROV[k]||prov();return `<svg class="${cls}" viewBox="${P.vb}"><use href="#i-${P.icon}"/></svg>`};
+function folderProv(url){
+  if(/drive\.google\.com|docs\.google\.com/i.test(url))return'google';
+  if(/onedrive\.live\.com|1drv\.ms|sharepoint\.com|onedrive\.com/i.test(url))return'onedrive';
+  return null;
+}
+function newFolderUrl(){return prov().url(uid()+uid())}
+function driveSettings(){
+  const d=S.drive;let pick=d.provider;
+  const opt=k=>`<button type="button" class="prov ${pick===k?'on':''}" data-prov="${k}">${provIcon(k,'pi')}<b>${PROV[k].name}</b><small>${k==='google'?'Google Workspace or Gmail account':'Microsoft 365, SharePoint or personal'}</small></button>`;
+  modal(`<h3>Cloud storage</h3>
+    <p style="margin:-6px 0 14px;color:var(--muted);font-size:13px">Choose where project folders and uploads are kept.</p>
+    <div class="provs" id="dProv">${opt('google')}${opt('onedrive')}</div>
+    <div class="row"><label for="dAcc">Account</label><input class="in" id="dAcc" type="email" value="${esc(d.account||'')}" placeholder="tenders@rendcon.example"></div>
+    <div class="row"><label for="dRoot">Main tenders folder link</label><input class="in" id="dRoot" value="${esc(d.root||'')}" placeholder="${esc(PROV[pick].hint)}"><small style="color:var(--muted);font-size:12px">New project folders are created inside this folder.</small></div>
+    <div class="folder" style="margin-bottom:14px"><span class="dot-st ${d.connected?'on':''}"></span><span style="flex:1;font-size:13px">${d.connected?`Connected to <b>${esc(PROV[d.provider].name)}</b>${d.account?' as '+esc(d.account):''}`:'Not connected'}</span>${d.root?`<a class="btn sm" href="${esc(d.root)}" target="_blank" rel="noopener">${icon('ext')}Open folder</a>`:''}</div>
+    <div class="acts">${d.connected?'<button class="btn" id="dOff" style="margin-right:auto">Disconnect</button>':''}<button class="btn" data-close>Cancel</button><button class="btn primary" id="dOk">${d.connected?'Save':'Connect'}</button></div>`,()=>{
+    $('#modal .box').classList.add('wide');
+    $('#dProv').onclick=e=>{const b=e.target.closest('[data-prov]');if(!b)return;pick=b.dataset.prov;$$('#dProv .prov').forEach(x=>x.classList.toggle('on',x===b));$('#dRoot').placeholder=PROV[pick].hint};
+    const off=$('#dOff');if(off)off.onclick=()=>{d.connected=false;save();closeModal();renderHeader();toast(`${esc(driveName())} disconnected`,'folder')};
+    $('#dOk').onclick=()=>{
+      const root=$('#dRoot').value.trim();
+      if(root){if(!/^https?:\/\//.test(root))return toast('Paste the full folder link (https://…)','x');
+        const fp=folderProv(root);if(fp&&fp!==pick)return toast(`That link is a ${PROV[fp].name} folder – choose ${PROV[fp].name} above or paste a ${PROV[pick].name} link`,'x',5000)}
+      const changed=d.provider!==pick;
+      d.provider=pick;d.account=$('#dAcc').value.trim();d.root=root;d.connected=true;save();closeModal();renderHeader();if(cur)renderPage();
+      toast(`${changed?'Switched to':'Connected to'} <b>${esc(PROV[pick].name)}</b>`,'folder')};
+  });
+}
 
 /* ---------------- Team, invitations, profiles ---------------- */
 const APP_URL='https://planning.rendcon.example';
@@ -1278,8 +1441,8 @@ function toLabel(n,p){
 }
 function deliver(n,p){
   const users=resolveTo(n,p);
-  const title='Reminder'+(p?' · '+(p.ref||'project'):'');
-  const body=n.msg+(p&&n.msg!==p.title?' — '+p.title:'');
+  const title='Reminder'+(p?' · '+(p.title.length>40?p.title.slice(0,38)+'…':p.title):'');
+  const body=n.msg;
   const viewer=users.find(u=>u.id===S.me);
   if(viewer&&viewer.prefs.browser)notify(title,body);
   const mailTo=n.email?users.filter(u=>u.prefs.email).map(u=>u.email):[];
