@@ -32,6 +32,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 [dir=rtl],.ar{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",sans-serif}
 svg.i{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+:where([hidden]){display:none!important}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
@@ -75,58 +76,115 @@ a.btn{text-decoration:none;color:var(--ink)}
 .toolbar .spacer{flex:1}
 
 /* ---------- Board ---------- */
-.board{display:flex;gap:16px;padding:8px 20px 24px;overflow-x:auto;flex:1;min-height:0;align-items:flex-start;scroll-behavior:smooth}
+.board{display:flex;gap:20px;padding:12px 24px 28px;overflow-x:auto;flex:1;min-height:0;align-items:flex-start;scroll-behavior:smooth}
 .board::-webkit-scrollbar{height:10px}
 .board::-webkit-scrollbar-thumb{background:#C9C9C4;border-radius:9px;border:2px solid var(--bg)}
-.col{flex:0 0 300px;max-height:100%;display:flex;flex-direction:column;background:var(--surface-3);border:1px solid var(--line);border-radius:var(--r-lg);animation:colIn .45s var(--ease) both}
+.col{flex:0 0 336px;max-height:100%;display:flex;flex-direction:column;background:var(--surface-3);border:1px solid var(--line);border-radius:16px;animation:colIn .45s var(--ease) both}
 @keyframes colIn{from{opacity:0;transform:translateY(10px)}}
 .col.unassigned{background:repeating-linear-gradient(135deg,#ECECE8 0 10px,#E6E6E2 10px 20px);border-style:dashed;border-color:var(--line-2)}
-.col-head{display:flex;align-items:center;gap:10px;padding:12px 10px 8px 12px}
-.avatar{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font-size:11.5px;font-weight:600;display:grid;place-items:center;flex:none}
-.col.unassigned .avatar{background:var(--accent)}
-.col-title{font-weight:600;font-size:14px;line-height:1.2;flex:1;min-width:0}
-.col-title small{display:block;color:var(--muted);font-weight:500;font-size:11.5px}
-.col-title input{border:1px solid var(--accent);border-radius:6px;padding:2px 6px;width:100%;font-weight:600;background:#fff}
-.col-count{font:500 12px var(--mono);color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:1px 8px;border-radius:999px}
-.col-list{padding:4px 10px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:60px;flex:1;transition:background .2s}
+.col-head{display:flex;align-items:center;gap:12px;padding:16px 12px 14px 16px;border-radius:16px 16px 0 0}
+.col-who{display:flex;align-items:center;gap:12px;flex:1;min-width:0;border:0;background:none;padding:4px;margin:-4px;border-radius:10px;text-align:left;transition:background .18s}
+button.col-who:hover{background:rgba(255,255,255,.7)}
+button.col-who:hover .edit-hint{opacity:1}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;font-weight:600;display:grid;place-items:center;flex:none;letter-spacing:.02em}
+.avatar.sm{width:24px;height:24px;font-size:10px}
+.avatar.lg{width:56px;height:56px;font-size:19px}
+.avatar.ghost{background:transparent;border:1.5px dashed var(--line-2);color:var(--muted)}
+.col.unassigned .col-head .avatar{background:var(--accent)}
+.col-title{font-weight:600;font-size:14.5px;line-height:1.25;flex:1;min-width:0}
+.col-title span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.col-title small{display:flex;align-items:center;gap:6px;color:var(--muted);font-weight:500;font-size:12px;margin-top:2px}
+.edit-hint{opacity:0;color:var(--muted);transition:opacity .18s}
+.edit-hint svg.i{width:14px;height:14px}
+.col-count{font:500 12px var(--mono);color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:2px 9px;border-radius:999px}
+.col-list{padding:2px 12px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;min-height:72px;flex:1;transition:background .2s}
 .col-list.over{background:rgba(238,106,31,.06)}
-.col-foot{padding:0 10px 10px}
-.add-card{width:100%;justify-content:flex-start;color:var(--muted);background:transparent;border:1px dashed transparent}
+.col-foot{padding:0 12px 12px}
+.add-card{width:100%;height:40px;justify-content:flex-start;color:var(--muted);background:transparent;border:1px dashed transparent;border-radius:10px}
 .add-card:hover{color:var(--ink);background:var(--surface);border-color:var(--line)}
 .board::after{content:"";flex:0 0 4px}
-.add-col{flex:0 0 260px;height:52px;border:1.5px dashed var(--line-2);border-radius:var(--r-lg);background:transparent;color:var(--ink-2);font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s var(--ease)}
+.add-col{flex:0 0 280px;height:64px;border:1.5px dashed var(--line-2);border-radius:16px;background:transparent;color:var(--ink-2);font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s var(--ease)}
 .add-col:hover{border-color:var(--accent);color:var(--accent);background:rgba(238,106,31,.05)}
-.empty-col{color:var(--muted);font-size:12.5px;text-align:center;padding:18px 8px;border:1px dashed var(--line-2);border-radius:var(--r)}
+.empty-col{color:var(--muted);font-size:13px;text-align:center;padding:28px 12px;border:1.5px dashed var(--line-2);border-radius:12px}
+.pill.inv{background:#FFF3E8;color:var(--accent-2)}
 
 /* ---------- Card ---------- */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;box-shadow:var(--shadow-1);cursor:grab;user-select:none;touch-action:none;position:relative;transition:transform .18s var(--ease),box-shadow .18s var(--ease),border-color .18s;animation:cardIn .4s var(--ease) both}
+.card{flex:none;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;box-shadow:var(--shadow-1);cursor:grab;user-select:none;touch-action:none;position:relative;overflow:hidden;transition:transform .2s var(--ease),box-shadow .2s var(--ease),border-color .2s;animation:cardIn .4s var(--ease) both}
 .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-2);border-color:var(--line-2)}
-.card::before{content:"";position:absolute;left:-1px;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--accent);opacity:0;transition:opacity .2s}
-.card:hover::before{opacity:1}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);transform:scaleY(0);transform-origin:top;transition:transform .3s var(--ease)}
+.card:hover::before,.card:focus-visible::before{transform:none}
+.card.is-late::before{background:var(--danger)}
 @keyframes cardIn{from{opacity:0;transform:translateY(8px) scale(.98)}}
 .card.dropped{animation:pop .42s var(--ease)}
 @keyframes pop{0%{transform:scale(.96)}55%{transform:scale(1.025)}100%{transform:scale(1)}}
 .card.fresh{animation:fresh 2.4s var(--ease)}
 @keyframes fresh{0%,40%{box-shadow:0 0 0 3px var(--accent-line),var(--shadow-2)}100%{box-shadow:var(--shadow-1)}}
 .card.ghost{position:fixed;z-index:1000;pointer-events:none;box-shadow:var(--shadow-3);transform:scale(1.03);cursor:grabbing;transition:none;animation:none;border-color:var(--accent-line)}
-.placeholder{border:2px dashed var(--accent-line);background:rgba(238,106,31,.07);border-radius:var(--r);flex:none;animation:ph .2s var(--ease)}
+.placeholder{border:2px dashed var(--accent-line);background:rgba(238,106,31,.07);border-radius:14px;flex:none;animation:ph .2s var(--ease)}
 @keyframes ph{from{opacity:0}}
-.card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 8px 2px 7px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
-.card h3{margin:0 0 4px;font-size:14px;font-weight:600;line-height:1.35;letter-spacing:-.005em}
-.card .ref{font:500 11.5px var(--mono);color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.card .status{margin-top:8px;font-size:12.5px;color:var(--ink-2);display:flex;gap:7px;align-items:flex-start;background:var(--surface-2);border-radius:6px;padding:6px 8px}
-.card .status::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:6px;flex:none}
+.c-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.c-ref{font:500 11.5px var(--mono);color:var(--muted);display:flex;gap:6px;align-items:center;min-width:0;white-space:nowrap}
+.duepill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap;flex:none}
+.duepill svg.i{width:13px;height:13px}
+.duepill.soon{background:var(--accent-soft);color:var(--accent-2)}
+.duepill.late{background:#FBE3DF;color:var(--danger)}
+.card h3{margin:0;font-size:15px;font-weight:600;line-height:1.42;letter-spacing:-.008em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.c-client{margin-top:4px;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-status{margin-top:14px;padding:9px 12px;border-left:3px solid var(--accent);background:var(--surface-2);border-radius:0 8px 8px 0;font-size:13px;line-height:1.5;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 10px 3px 8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.c-foot{display:flex;align-items:center;gap:14px;margin-top:16px;padding-top:12px;border-top:1px solid var(--surface-3);color:var(--muted);font-size:12px}
+.c-foot span{display:inline-flex;align-items:center;gap:4px}
+.c-foot .avatar{display:grid;gap:0}
+.c-foot .na{font-size:12px;color:var(--muted);font-style:italic}
+.c-foot svg.i{width:14px;height:14px}
+.c-foot .bell{color:var(--accent)}
+.c-tasks{gap:8px!important;font:500 11.5px var(--mono);color:var(--ink-2)}
+.c-bar{width:44px;height:5px;border-radius:5px;background:var(--surface-3);overflow:hidden;display:block}
+.c-bar i{display:block;height:100%;background:var(--accent);border-radius:5px;transition:width .5s var(--ease)}
+.c-foot .grow{flex:1}
 .prog{height:4px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-top:12px}
 .prog i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .5s var(--ease)}
-.meta{display:flex;align-items:center;gap:10px;margin-top:10px;color:var(--muted);font-size:12px}
-.meta span{display:inline-flex;align-items:center;gap:4px}
-.meta svg.i{width:14px;height:14px}
-.meta .due{margin-right:auto;font-weight:500;color:var(--ink-2)}
-.meta .due.soon{color:var(--accent-2)}
-.meta .due.late{color:var(--danger)}
-.meta .bell{color:var(--accent)}
 .src{font:600 10px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--accent-2);background:var(--accent-soft);padding:1px 6px;border-radius:4px}
+
+/* ---------- Team, profile, reminders ---------- */
+.me-btn{border:0;background:none;padding:0;border-radius:50%;display:grid;place-items:center;transition:transform .15s}
+.me-btn:hover{transform:scale(1.05)}
+.me-btn .avatar{box-shadow:0 0 0 2px var(--dark),0 0 0 3.5px var(--accent)}
+.member{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--surface-3);animation:cardIn .3s var(--ease) both}
+.member .b{flex:1;min-width:0}
+.member .b b{display:flex;align-items:center;gap:8px;font-weight:600}
+.member .b small{display:block;color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.member .acts{display:flex;gap:4px}
+.invite-box{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--surface-2)}
+.invite-box .formgrid{margin-bottom:12px}
+.lbl-sm{font-size:12px;color:var(--muted);font-weight:500;display:block;margin-bottom:6px}
+.prof-head{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.prof-head h3{margin:0}
+.prof-head small{color:var(--muted)}
+.swatches{display:flex;gap:8px}
+.swatches button{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);padding:0;transition:transform .15s}
+.swatches button.on{box-shadow:0 0 0 2px var(--ink)}
+.swatches button:hover{transform:scale(1.1)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stats div{background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.stats b{display:block;font-size:20px;font-weight:600}
+.stats small{color:var(--muted);font-size:12px}
+.chk-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13.5px}
+.chk-row input{accent-color:var(--accent);width:16px;height:16px}
+.recips{display:flex;flex-wrap:wrap;gap:6px}
+.recips button{height:30px;padding:0 10px 0 4px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .18s var(--ease)}
+.recips button.txt{padding:0 12px}
+.recips button:hover{border-color:var(--line-2)}
+.recips button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.recips .avatar.sm{width:22px;height:22px;font-size:9.5px}
+.sent{display:flex;gap:10px;padding:10px 4px;border-bottom:1px solid var(--surface-3);font-size:13px}
+.sent .b{flex:1;min-width:0}
+.sent small{color:var(--muted);display:block}
+.modal .box.wide{width:min(560px,calc(100vw - 32px))}
+.sheet.wide{width:min(600px,100vw)}
+.view-banner{background:var(--accent);color:#fff;font-size:12.5px;font-weight:500;text-align:center;padding:6px 12px;flex:none}
+.view-banner button{background:rgba(0,0,0,.18);border:0;color:#fff;border-radius:6px;padding:2px 8px;margin-left:8px;font-size:12px}
 
 /* ---------- Project page ---------- */
 .scrim{position:fixed;inset:0;background:rgba(17,17,17,.38);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40;backdrop-filter:blur(2px)}
@@ -302,8 +360,8 @@ textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
   .brand small,.sync-meta,.chip-btn .lbl{display:none}
   .toolbar{padding:12px 12px 4px}
   .search{min-width:0;flex:1}
-  .board{padding:10px 12px 20px}
-  .col{flex-basis:84vw}
+  .col{flex-basis:86vw}
+  .board{gap:14px;padding:10px 12px 20px}
   .field{grid-template-columns:88px 1fr;gap:8px}
   .addrow{flex-wrap:wrap}
   #subIn{flex:1 1 100%}
@@ -311,6 +369,10 @@ textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
   .formgrid{grid-template-columns:1fr}
   .sub-more{grid-template-columns:1fr;padding-left:10px}
   .brand>div:last-child{display:none}
+  .appbar{gap:6px}
+  .chip-btn{padding:0 9px;gap:6px}
+  .chip-btn .dot{display:none}
+  .view-banner button{display:block;margin:4px auto 0}
   .filters{flex-wrap:nowrap;overflow-x:auto;width:100%;order:3;padding-bottom:2px}
   .fchip{flex:none}
   #resetBtn{display:none}
@@ -341,11 +403,16 @@ textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
   <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
   <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m14 6 4 4"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 10 14"/><path d="m21 3-7 18-4-7-7-4z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
   <symbol id="i-gdrive" viewBox="0 0 87.3 78"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da" stroke="none"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47" stroke="none"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335" stroke="none"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d" stroke="none"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc" stroke="none"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00" stroke="none"/></symbol>
 </svg>
 
 <a class="sr" href="#board">Skip to board</a>
+<div class="view-banner" id="viewBanner" hidden></div>
 <header class="appbar">
   <div class="brand"><div class="mark">R</div><div>Rendcon Tender Planning<small>Tenders board · Engineering</small></div></div>
   <div class="grow"></div>
@@ -354,6 +421,8 @@ textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
   <button class="chip-btn" id="mailBtn" title="Email intake settings and log"><span class="dot" id="mailDot"></span><svg class="i"><use href="#i-mail"/></svg><span class="lbl">Inbox</span></button>
   <button class="chip-btn" id="driveBtn" title="Google Drive connection"><span class="dot" id="driveDot"></span><svg class="i" viewBox="0 0 87.3 78"><use href="#i-gdrive"/></svg><span class="lbl">Drive</span></button>
   <button class="chip-btn" id="remBtn" title="All reminders"><svg class="i"><use href="#i-bell"/></svg><span class="lbl">Reminders</span><span class="count" id="remCount">0</span></button>
+  <button class="chip-btn" id="teamBtn" title="Team and invitations"><svg class="i"><use href="#i-users"/></svg><span class="lbl">Team</span></button>
+  <button class="me-btn" id="meBtn" aria-label="Your profile"></button>
 </header>
 
 <div class="toolbar">
@@ -369,7 +438,8 @@ textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
 <div class="scrim" id="scrim"></div>
 <section class="page" id="page" aria-label="Project details"></section>
 <aside class="sheet" id="mailSheet" aria-label="Email intake"></aside>
-<aside class="sheet" id="remSheet" aria-label="Reminders"></aside>
+<aside class="sheet wide" id="remSheet" aria-label="Reminders"></aside>
+<aside class="sheet wide" id="teamSheet" aria-label="Team and invitations"></aside>
 <div class="modal" id="modal"><div class="box" role="dialog" aria-modal="true"></div></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
@@ -384,7 +454,7 @@ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelect
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,9);
 const icon=(n,c='')=>`<svg class="i ${c}"><use href="#i-${n}"/></svg>`;
-const KEY='rendcon-tp-v1';
+const KEY='rendcon-tp-v2';
 const HOUR=3600000;
 const fmtDate=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';
 const fmtShort=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'';
@@ -403,12 +473,21 @@ const TAGS=[
   {id:'sub',name:'Submitted',color:'#2E7D4F'},
 ];
 
+const COLORS=['#111111','#EE6A1F','#5B5B57','#9C4A12','#2F7D7A','#B8860B'];
 function seed(){
-  const c1=uid(),c2=uid(),c3=uid();
+  const c1=uid(),c2=uid(),c3=uid(),u0=uid(),u1=uid(),u2=uid(),u3=uid();
   const P=(o)=>Object.assign({id:uid(),columnId:null,pos:0,tags:[],status:'',received:isoIn(-3),due:isoIn(14),folder:'',client:'',ref:'',subtasks:[],links:[],comments:[],notifications:[],files:[],uploads:[],source:'manual',subOpen:true},o);
   return {
-    me:'Mohamed Ibrahim',
-    columns:[{id:c1,name:'Eng. Ahmed Hassan',role:'Civil & structure'},{id:c2,name:'Eng. Sara Mostafa',role:'MEP'},{id:c3,name:'Eng. Omar Khaled',role:'Infrastructure'}],
+    me:u0, adminId:u0,
+    users:[
+      {id:u0,name:'Mohamed Ibrahim',email:'mohamed@rendcon.example',role:'admin',discipline:'Tender manager',color:'#EE6A1F',status:'active',prefs:{browser:true,email:true,digest:true}},
+      {id:u1,name:'Eng. Ahmed Hassan',email:'ahmed@rendcon.example',role:'engineer',discipline:'Civil & structure',color:'#111111',status:'active',prefs:{browser:true,email:true,digest:false}},
+      {id:u2,name:'Eng. Sara Mostafa',email:'sara@rendcon.example',role:'engineer',discipline:'MEP',color:'#2F7D7A',status:'active',prefs:{browser:true,email:true,digest:true}},
+      {id:u3,name:'Eng. Omar Khaled',email:'omar@rendcon.example',role:'engineer',discipline:'Infrastructure',color:'#9C4A12',status:'invited',invitedAt:Date.now()-2*24*HOUR,prefs:{browser:true,email:true,digest:false}},
+    ],
+    columns:[{id:c1,userId:u1},{id:c2,userId:u2},{id:c3,userId:u3}],
+    reminders:[{id:uid(),at:Date.now()+26*HOUR,msg:'Weekly tender review meeting',repeat:'weekly',fired:false,to:['all'],email:true}],
+    outbox:[],sentLog:[],
     tags:TAGS.slice(),
     drive:{connected:true,account:'tenders@rendcon.example'},
     mail:{connected:true,address:'tenders@rendcon.example',subject:'ورد الينا',hourly:true,lastSync:Date.now()-38*60000,processed:[],log:[]},
@@ -418,7 +497,7 @@ function seed(){
         links:[{id:uid(),title:'Tender portal',url:'https://tenders.example/2026-104'}],
         files:[{id:uid(),name:'Specs_Electrical.pdf',size:'4.2 MB'},{id:uid(),name:'SLD_Rev02.dwg',size:'1.1 MB'},{id:uid(),name:'BOQ_Electrical.xlsx',size:'380 KB'}],
         comments:[{id:uid(),who:'Eng. Sara Mostafa',text:'Lighting quote expected Thursday.',at:Date.now()-26*HOUR}],
-        notifications:[{id:uid(),at:Date.now()+20*HOUR,msg:'Chase lighting supplier quote',repeat:'none',fired:false}]}),
+        notifications:[{id:uid(),at:Date.now()+20*HOUR,msg:'Chase lighting supplier quote',repeat:'none',fired:false,to:['assignee','me'],email:true}]}),
       P({title:'إنشاء خزان مياه أرضي سعة 5000 م³',client:'Water Authority',ref:'2026/097',tags:['new'],columnId:c1,pos:0,status:'Site visit done – structural take-off in progress',due:isoIn(9),folder:'https://drive.google.com/drive/folders/1aEl097',
         subtasks:[{id:uid(),text:'Site visit',done:true,note:'',due:''},{id:uid(),text:'Structural take-off',done:false,note:'',due:isoIn(3)},{id:uid(),text:'Send queries to client',done:true,note:'Sent 12 queries',due:''}],
         files:[{id:uid(),name:'Tank_GA.pdf',size:'2.7 MB'}]}),
@@ -438,6 +517,13 @@ load();
 
 const tagById=id=>S.tags.find(t=>t.id===id);
 const colById=id=>S.columns.find(c=>c.id===id);
+const userById=id=>S.users.find(u=>u.id===id);
+const me=()=>userById(S.me)||S.users[0];
+const isAdmin=()=>me().role==='admin';
+const colUser=c=>c&&userById(c.userId);
+const colName=id=>{const u=colUser(colById(id));return u?u.name:'Engineer'};
+const colOfUser=uid_=>S.columns.find(c=>c.userId===uid_);
+const avatar=(u,cls='')=>u?`<span class="avatar ${cls}" style="background:${u.color}" title="${esc(u.name)}">${esc(initials(u.name))}</span>`:`<span class="avatar ghost ${cls}" title="Unassigned">${icon('user')}</span>`;
 const proj=id=>S.projects.find(p=>p.id===id);
 let filterTags=new Set(), query='';
 
@@ -455,35 +541,48 @@ function matches(p){
   if(query){const h=(p.title+' '+p.ref+' '+p.client+' '+p.status).toLowerCase();if(!h.includes(query))return false}
   return true;
 }
-function dueClass(d){if(!d)return'';const diff=(new Date(d)-new Date(new Date().toDateString()))/864e5;return diff<0?'late':diff<=3?'soon':''}
+function dueInfo(d){
+  if(!d)return{cls:'',txt:'No date'};
+  const diff=Math.round((new Date(d)-new Date(new Date().toDateString()))/864e5);
+  if(diff<0)return{cls:'late',txt:`Overdue ${-diff}d`};
+  if(diff===0)return{cls:'late',txt:'Due today'};
+  if(diff<=3)return{cls:'soon',txt:diff===1?'Due tomorrow':`Due in ${diff}d`};
+  return{cls:'',txt:fmtShort(d)};
+}
 function cardHTML(p){
   const done=p.subtasks.filter(s=>s.done).length, tot=p.subtasks.length;
   const rem=p.notifications.filter(n=>!n.fired).length;
-  return `<article class="card" data-id="${p.id}" tabindex="0" aria-label="${esc(p.title)}">
-    ${p.tags.length?`<div class="card-tags">${p.tags.map(id=>{const t=tagById(id);return t?`<span class="tag"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</span>`:''}).join('')}</div>`:''}
+  const com=p.comments.filter(c=>!c.sys).length, fil=p.files.length+p.uploads.length;
+  const du=dueInfo(p.due), u=colUser(colById(p.columnId));
+  return `<article class="card ${du.cls==='late'?'is-late':''}" data-id="${p.id}" tabindex="0" aria-label="${esc(p.title)}">
+    <div class="c-top"><span class="c-ref">${esc(p.ref||'No ref')}${p.source==='email'?'<span class="src">email</span>':''}</span>
+      <span class="duepill ${du.cls}" title="Submission ${fmtDate(p.due)}">${icon(du.cls?'clock':'cal')}${du.txt}</span></div>
     <h3 dir="auto">${esc(p.title)}</h3>
-    <div class="ref">${esc(p.ref||'No ref')}${p.client?` · <span dir="auto">${esc(p.client)}</span>`:''}${p.source==='email'?' <span class="src">email</span>':''}</div>
-    ${p.status?`<div class="status" dir="auto">${esc(p.status)}</div>`:''}
-    ${tot?`<div class="prog" title="${done}/${tot} sub-tasks"><i style="width:${tot?done/tot*100:0}%"></i></div>`:''}
-    <div class="meta">
-      <span class="due ${dueClass(p.due)}">${icon('cal')}${p.due?fmtShort(p.due):'No date'}</span>
-      ${tot?`<span title="Sub-tasks">${icon('check')}${done}/${tot}</span>`:''}
+    ${p.client?`<div class="c-client" dir="auto">${esc(p.client)}</div>`:''}
+    ${p.status?`<div class="c-status" dir="auto">${esc(p.status)}</div>`:''}
+    ${p.tags.length?`<div class="card-tags">${p.tags.map(id=>{const t=tagById(id);return t?`<span class="tag"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</span>`:''}).join('')}</div>`:''}
+    <div class="c-foot">
+      ${tot?`<span class="c-tasks" title="${done} of ${tot} sub-tasks done"><span class="c-bar"><i style="width:${done/tot*100}%"></i></span>${done}/${tot}</span>`:''}
       ${p.links.length?`<span title="Links">${icon('link')}${p.links.length}</span>`:''}
-      ${p.comments.filter(c=>!c.sys).length?`<span title="Comments">${icon('msg')}${p.comments.filter(c=>!c.sys).length}</span>`:''}
-      ${(p.files.length+p.uploads.length)?`<span title="Files">${icon('file')}${p.files.length+p.uploads.length}</span>`:''}
+      ${com?`<span title="Comments">${icon('msg')}${com}</span>`:''}
+      ${fil?`<span title="Files">${icon('file')}${fil}</span>`:''}
       ${rem?`<span class="bell" title="Reminders set">${icon('bell')}${rem}</span>`:''}
+      <span class="grow"></span>
+      ${u?avatar(u,'sm'):'<span class="na">Not assigned yet</span>'}
     </div>
   </article>`;
 }
 function colHTML(col,unassigned){
   const items=S.projects.filter(p=>(p.columnId||null)===(col?col.id:null)).sort((a,b)=>a.pos-b.pos);
   const shown=items.filter(matches);
+  const u=colUser(col);
+  const canEdit=!unassigned&&(isAdmin()||u.id===S.me);
   return `<section class="col ${unassigned?'unassigned':''}" data-col="${col?col.id:''}">
     <div class="col-head">
-      <div class="avatar">${unassigned?icon('mail'):esc(initials(col.name))}</div>
-      <div class="col-title" data-rename="${col?col.id:''}">${unassigned?'Unassigned projects<small>New jobs land here</small>':`${esc(col.name)}<small>${esc(col.role||'Engineer')}</small>`}</div>
+      ${unassigned?`<div class="col-who"><div class="avatar">${icon('mail')}</div><div class="col-title"><span>Unassigned projects</span><small>New jobs land here</small></div></div>`
+      :`<${canEdit?'button':'div'} class="col-who" ${canEdit?`data-profile="${u.id}" title="Edit ${esc(u.name)}'s profile"`:''}>${avatar(u)}<div class="col-title"><span dir="auto">${esc(u.name)}</span><small>${esc(u.discipline||'Engineer')}${u.status==='invited'?' <span class="pill inv">invited</span>':''}${canEdit?`<span class="edit-hint">${icon('edit')}</span>`:''}</small></div></${canEdit?'button':'div'}>`}
       <span class="col-count">${shown.length}</span>
-      ${unassigned?'':`<button class="btn ghost icon sm" data-colmenu="${col.id}" aria-label="Column options">${icon('dots')}</button>`}
+      ${unassigned||!isAdmin()?'':`<button class="btn ghost icon sm" data-colmenu="${col.id}" aria-label="Column options">${icon('dots')}</button>`}
     </div>
     <div class="col-list" data-list="${col?col.id:''}">${shown.map(cardHTML).join('')||`<div class="empty-col">${unassigned?'No unassigned projects':'Drag a project here to assign it'}</div>`}</div>
     <div class="col-foot"><button class="btn sm add-card" data-add="${col?col.id:''}">${icon('plus')}Add project</button></div>
@@ -491,18 +590,23 @@ function colHTML(col,unassigned){
 }
 function renderBoard(){
   const b=$('#board'), sl=b.scrollLeft;
-  b.innerHTML=colHTML(null,true)+S.columns.map(c=>colHTML(c,false)).join('')+`<button class="add-col" id="addCol">${icon('plus')}Add engineer column</button>`;
+  b.innerHTML=colHTML(null,true)+S.columns.filter(c=>colUser(c)).map(c=>colHTML(c,false)).join('')+(isAdmin()?`<button class="add-col" id="addCol">${icon('plus')}Add engineer</button>`:'');
   b.scrollLeft=sl;
   renderFilters(); renderHeader();
 }
 function renderFilters(){
   $('#filters').innerHTML=S.tags.map(t=>`<button class="fchip ${filterTags.has(t.id)?'on':''}" data-filter="${t.id}"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</button>`).join('');
 }
+function upcomingCount(){return S.projects.reduce((a,p)=>a+p.notifications.filter(n=>!n.fired).length,0)+S.reminders.filter(n=>!n.fired).length}
 function renderHeader(){
   $('#driveDot').parentElement.classList.toggle('on',S.drive.connected);
   $('#mailDot').parentElement.classList.toggle('on',S.mail.connected);
-  const up=S.projects.reduce((a,p)=>a+p.notifications.filter(n=>!n.fired).length,0);
-  $('#remCount').textContent=up;
+  $('#remCount').textContent=upcomingCount();
+  $('#teamBtn').hidden=!isAdmin();
+  $('#meBtn').innerHTML=avatar(me());
+  const vb=$('#viewBanner');
+  if(S.me!==S.adminId){vb.hidden=false;vb.innerHTML=`Preview: you are seeing the app as <b>${esc(me().name)}</b> (engineer) <button id="backAdmin">Back to admin</button>`;$('#backAdmin').onclick=()=>switchUser(S.adminId)}
+  else vb.hidden=true;
   updateSyncMeta();
 }
 function updateSyncMeta(){
@@ -555,8 +659,8 @@ document.addEventListener('pointerup',()=>{
   p.columnId=target;
   ids.forEach((id,i)=>{const x=proj(id);if(x)x.pos=i});
   if(prev!==target){
-    if(target){p.tags=p.tags.filter(t=>t!=='un'); const c=colById(target);
-      log(p,`Assigned to ${c.name}`); toast(`<b dir="auto">${esc(p.title)}</b> assigned to <b>${esc(c.name)}</b>`,'user');}
+    if(target){p.tags=p.tags.filter(t=>t!=='un'); const n=colName(target);
+      log(p,`Assigned to ${n}`); toast(`<b dir="auto">${esc(p.title)}</b> assigned to <b>${esc(n)}</b>`,'user');}
     else{if(!p.tags.includes('un'))p.tags.push('un'); log(p,'Moved back to unassigned'); toast('Moved to <b>Unassigned</b>','user')}
   }
   d.ghost.remove(); save(); renderBoard();
@@ -571,37 +675,31 @@ $('#board').addEventListener('click',e=>{
   const a=e.target.closest('[data-add]'); if(a){newProject(a.dataset.add||null);return}
   if(e.target.closest('#addCol')){addColumn();return}
   const m=e.target.closest('[data-colmenu]'); if(m){colMenu(m,m.dataset.colmenu);return}
+  const pr=e.target.closest('[data-profile]'); if(pr){editProfile(pr.dataset.profile);return}
 });
 $('#board').addEventListener('keydown',e=>{const c=e.target.closest('.card');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openProject(c.dataset.id)}});
-$('#board').addEventListener('dblclick',e=>{const t=e.target.closest('[data-rename]');if(t&&t.dataset.rename)renameCol(t.dataset.rename)});
+
 $('#filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;const id=b.dataset.filter;filterTags.has(id)?filterTags.delete(id):filterTags.add(id);renderBoard()});
 $('#q').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();renderBoard()});
 $('#newBtn').onclick=()=>newProject(null);
 $('#resetBtn').onclick=()=>{if(confirm('Reset the board to the demo data?')){S=seed();save();renderBoard();toast('Demo data restored')}};
 
 function addColumn(){
-  modal(`<h3>Add engineer column</h3>
-    <div class="row"><label for="mName">Engineer name</label><input class="in" id="mName" placeholder="Eng. Name Surname" dir="auto"></div>
-    <div class="row"><label for="mRole">Discipline</label><input class="in" id="mRole" placeholder="e.g. Architecture"></div>
-    <div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="mOk">Add column</button></div>`,()=>{
-    $('#mOk').onclick=()=>{const n=$('#mName').value.trim();if(!n)return $('#mName').focus();
-      S.columns.push({id:uid(),name:n,role:$('#mRole').value.trim()});save();closeModal();renderBoard();
-      $('#board').scrollLeft=$('#board').scrollWidth;toast(`Column <b>${esc(n)}</b> added`)};
+  const free=S.users.filter(u=>u.role==='engineer'&&!colOfUser(u.id));
+  modal(`<h3>Add engineer</h3>
+    ${free.length?`<span class="lbl-sm">Team members without a column</span><div class="recips" style="margin-bottom:16px">${free.map(u=>`<button data-existing="${u.id}">${avatar(u,'sm')}${esc(u.name)}</button>`).join('')}</div><span class="lbl-sm">Or invite someone new</span>`:''}
+    ${inviteFormHTML('m')}
+    <div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="mOk">${icon('send')}Send invitation</button></div>`,()=>{
+    $$('[data-existing]').forEach(b=>b.onclick=()=>{S.columns.push({id:uid(),userId:b.dataset.existing});save();closeModal();renderBoard();$('#board').scrollLeft=$('#board').scrollWidth;toast(`Column added for <b>${esc(userById(b.dataset.existing).name)}</b>`)});
+    $('#mOk').onclick=()=>{if(sendInvite('m',true)){closeModal();$('#board').scrollLeft=$('#board').scrollWidth}};
   });
 }
-function renameCol(id){
-  const c=colById(id); const host=$(`[data-rename="${id}"]`);
-  host.innerHTML=`<input value="${esc(c.name)}" dir="auto" aria-label="Column name">`;
-  const i=$('input',host); i.focus(); i.select();
-  const done=()=>{const v=i.value.trim();if(v)c.name=v;save();renderBoard()};
-  i.onblur=done; i.onkeydown=e=>{if(e.key==='Enter')i.blur();if(e.key==='Escape'){i.value=c.name;i.blur()}};
-}
 function colMenu(btn,id){
-  const r=btn.getBoundingClientRect();
-  menu(r.right-190,r.bottom+4,[
-    ['Rename column','user',()=>renameCol(id)],
+  const r=btn.getBoundingClientRect(), u=colUser(colById(id));
+  menu(r.right-200,r.bottom+4,[
+    ['Edit profile','edit',()=>editProfile(u.id)],
     ['Add project here','plus',()=>newProject(id)],
-    ['Remove column','trash',()=>{const c=colById(id);if(!confirm(`Remove ${c.name}? Their projects move to Unassigned.`))return;
+    ['Remove column','trash',()=>{if(!confirm(`Remove ${u.name}'s column? Their projects move to Unassigned. They stay on the team.`))return;
       S.projects.filter(p=>p.columnId===id).forEach(p=>{p.columnId=null;if(!p.tags.includes('un'))p.tags.push('un')});
       S.columns=S.columns.filter(x=>x.id!==id);save();renderBoard();toast('Column removed – projects moved to Unassigned')},'danger'],
   ]);
@@ -617,7 +715,7 @@ function menu(x,y,items){
 function closeMenu(){const m=$('#menu');if(m)m.remove()}
 
 /* ---------------- Modal ---------------- */
-function modal(html,after){const m=$('#modal');$('.box',m).innerHTML=html;m.classList.add('show');$('#scrim').classList.add('show');
+function modal(html,after){const m=$('#modal');$('.box',m).className='box';$('.box',m).innerHTML=html;m.classList.add('show');$('#scrim').classList.add('show');
   $$('[data-close]',m).forEach(b=>b.onclick=closeModal);after&&after();const f=$('input,textarea,select',m);f&&f.focus()}
 function closeModal(){$('#modal').classList.remove('show');if(!$('#page').classList.contains('show')&&!$('.sheet.show'))$('#scrim').classList.remove('show')}
 
@@ -667,7 +765,7 @@ function renderPage(){
     <div>
       <div class="panel">
         <h4>Details</h4>
-        <div class="field"><label for="pCol">Assigned to</label><select class="in" id="pCol"><option value="">— Unassigned —</option>${S.columns.map(c=>`<option value="${c.id}" ${c.id===p.columnId?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>
+        <div class="field"><label for="pCol">Assigned to</label><select class="in" id="pCol"><option value="">— Unassigned —</option>${S.columns.filter(c=>colUser(c)).map(c=>`<option value="${c.id}" ${c.id===p.columnId?'selected':''}>${esc(colName(c.id))}</option>`).join('')}</select></div>
         <div class="field"><label for="pStatus">Status</label><input class="in" id="pStatus" value="${esc(p.status)}" dir="auto" placeholder="Write the current status…" list="statusList"></div>
         <datalist id="statusList"><option>Reviewing documents</option><option>Site visit scheduled</option><option>Queries sent to client</option><option>Pricing in progress</option><option>Waiting supplier quotes</option><option>Ready for submission</option><option>Submitted</option></datalist>
         <div class="field"><label for="pRef">Tender no.</label><input class="in" id="pRef" value="${esc(p.ref)}"></div>
@@ -734,7 +832,7 @@ function bindPage(p){
   $('#pRec').onchange=e=>{p.received=e.target.value;upd()};
   $('#pDue').onchange=e=>{p.due=e.target.value;upd()};
   $('#pCol').onchange=e=>{const v=e.target.value||null;p.columnId=v;p.pos=-1;
-    if(v){p.tags=p.tags.filter(t=>t!=='un');log(p,'Assigned to '+colById(v).name);toast(`Assigned to <b>${esc(colById(v).name)}</b>`,'user')}else{if(!p.tags.includes('un'))p.tags.push('un')}
+    if(v){p.tags=p.tags.filter(t=>t!=='un');log(p,'Assigned to '+colName(v));toast(`Assigned to <b>${esc(colName(v))}</b>`,'user')}else{if(!p.tags.includes('un'))p.tags.push('un')}
     upd();renderPage()};
   $('#tagpick').onclick=e=>{const b=e.target.closest('[data-tag]');if(!b)return;const id=b.dataset.tag;
     p.tags.includes(id)?p.tags=p.tags.filter(t=>t!==id):p.tags.push(id);b.classList.toggle('on');upd()};
@@ -786,9 +884,9 @@ function renderPane(){
   }
   if(curTab==='comments'){
     const list=[...p.comments].sort((a,b)=>b.at-a.at);
-    pane.innerHTML=`<form id="cf"><textarea class="in" id="ct" placeholder="Write a comment…" dir="auto"></textarea><div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 6px"><small style="color:var(--muted)">Posting as ${esc(S.me)}</small><button class="btn primary sm">Post comment</button></div></form>
+    pane.innerHTML=`<form id="cf"><textarea class="in" id="ct" placeholder="Write a comment…" dir="auto"></textarea><div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 6px"><small style="color:var(--muted)">Posting as ${esc(me().name)}</small><button class="btn primary sm">Post comment</button></div></form>
       ${list.map(c=>`<div class="comment ${c.sys?'sys':''}"><div class="avatar">${c.sys?icon('clock'):esc(initials(c.who))}</div><div class="b"><div class="who">${esc(c.who)}<time>${fmtDT(c.at)}</time></div><p dir="auto">${esc(c.text)}</p></div></div>`).join('')||'<div class="empty">No comments yet.</div>'}`;
-    $('#cf').onsubmit=e=>{e.preventDefault();const t=$('#ct').value.trim();if(!t)return;p.comments.push({id:uid(),who:S.me,text:t,at:Date.now()});refresh()};
+    $('#cf').onsubmit=e=>{e.preventDefault();const t=$('#ct').value.trim();if(!t)return;p.comments.push({id:uid(),who:me().name,text:t,at:Date.now()});refresh()};
   }
   if(curTab==='notifications'){
     const perm=('Notification' in window)?Notification.permission:'unsupported';
@@ -804,9 +902,11 @@ function renderPane(){
         <input class="in full" id="nm" placeholder="Reminder message" dir="auto" value="${esc(p.title.slice(0,60))}">
         <input class="in" type="datetime-local" id="nat" value="${localDT(Date.now()+HOUR)}" required aria-label="Date and time">
         <select class="in" id="nrep" aria-label="Repeat"><option value="none">Once</option><option value="hourly">Every hour</option><option value="daily">Every day</option><option value="weekly">Every week</option></select>
+        <div class="full"><span class="lbl-sm">Send to</span>${recipPicker('nto',['assignee'],true)}</div>
+        <label class="chk-row full"><input type="checkbox" id="nemail" checked>Also send by email</label>
         <button class="btn primary full">${icon('bell')}Set reminder</button>
       </form>
-      ${list.length?list.map(n=>`<div class="rem ${n.fired?'fired':''}"><span class="ico" style="width:34px;height:34px;border-radius:8px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-2)">${icon('bell')}</span><div style="flex:1;min-width:0"><div dir="auto" style="font-weight:500">${esc(n.msg)}</div><span class="when">${fmtDT(n.at)}</span> ${n.repeat!=='none'?`<span class="pill o">${n.repeat}</span>`:''} ${n.fired?'<span class="pill">sent</span>':''}</div><button class="btn ghost icon sm" data-deln="${n.id}" aria-label="Delete">${icon('x')}</button></div>`).join('')
+      ${list.length?list.map(n=>remRow(n,p,`data-deln="${n.id}"`,true)).join('')
       :'<div class="empty">No reminders for this project.</div>'}`;
     const pb=$('#perm'); if(pb)pb.onclick=async()=>{await Notification.requestPermission();renderPane()};
     $('.presets',pane).onclick=e=>{const b=e.target.closest('[data-pre]');if(!b)return;const k=b.dataset.pre;let t;
@@ -814,8 +914,10 @@ function renderPane(){
       if(k==='tom9'){const d=new Date();d.setDate(d.getDate()+1);d.setHours(9,0,0,0);t=+d}
       if(k.startsWith('due')){const d=new Date(p.due);d.setDate(d.getDate()-(k==='due1'?1:3));d.setHours(9,0,0,0);t=+d;$('#nm').value=`Submission ${k==='due1'?'tomorrow':'in 3 days'}: ${p.title}`}
       $('#nat').value=localDT(t)};
-    $('#nf').onsubmit=e=>{e.preventDefault();const at=new Date($('#nat').value).getTime();
-      p.notifications.push({id:uid(),at,msg:$('#nm').value.trim()||p.title,repeat:$('#nrep').value,fired:false});
+    const npick=bindPicker('nto');
+    $('#nf').onsubmit=e=>{e.preventDefault();const at=new Date($('#nat').value).getTime();const to=npick();
+      if(!to.length)return toast('Choose who gets the reminder','x');
+      p.notifications.push({id:uid(),at,msg:$('#nm').value.trim()||p.title,repeat:$('#nrep').value,fired:false,to,email:$('#nemail').checked});
       refresh();toast(`Reminder set for <b>${fmtDT(at)}</b>`,'bell');
       if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()};
     pane.onclick=e=>{const b=e.target.closest('[data-deln]');if(!b)return;p.notifications=p.notifications.filter(n=>n.id!==b.dataset.deln);refresh()};
@@ -954,24 +1056,61 @@ function renderMailSheet(){
   $('#mConn').onclick=()=>{m.connected=!m.connected;save();renderMailSheet();renderHeader();toast(m.connected?'Mailbox connected':'Mailbox disconnected','mail')};
   sh.onclick=e=>{const o=e.target.closest('[data-open]');if(o){sheet(null);openProject(o.dataset.open)}};
 }
+function remRow(n,p,del,inProject=false){
+  const who=resolveTo(n,p);
+  return `<div class="rem ${n.fired?'fired':''}"><span class="ico" style="background:var(--accent-soft);color:var(--accent-2)">${icon('bell')}</span>
+    <div style="flex:1;min-width:0"><div dir="auto" style="font-weight:500">${esc(n.msg)}</div>
+      ${p&&!inProject?`<small dir="auto" style="color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.title)}</small>`:''}
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px"><span class="when">${fmtDT(n.at)}</span>${n.repeat!=='none'?`<span class="pill o">${n.repeat}</span>`:''}${n.email?'<span class="pill">+ email</span>':''}${n.fired?'<span class="pill">sent</span>':''}<span style="color:var(--muted);font-size:12px">→ ${esc(toLabel(n,p))}</span></div></div>
+    <span style="display:flex">${who.slice(0,3).map(u=>avatar(u,'sm')).join('')}</span>
+    ${p&&!inProject?`<button class="btn sm ghost" data-open="${p.id}">Open</button>`:''}
+    <button class="btn ghost icon sm" ${del} aria-label="Delete reminder">${icon('x')}</button></div>`;
+}
 function renderRemSheet(){
   const sh=$('#remSheet');
-  const all=S.projects.flatMap(p=>p.notifications.map(n=>({...n,p}))).sort((a,b)=>(a.fired-b.fired)||(a.at-b.at));
   const perm=('Notification' in window)?Notification.permission:'unsupported';
+  const up=[...S.projects.flatMap(p=>p.notifications.filter(n=>!n.fired).map(n=>({n,p}))),...S.reminders.filter(n=>!n.fired).map(n=>({n,p:null}))].sort((a,b)=>a.n.at-b.n.at);
   sh.innerHTML=`<div class="sheet-head"><span style="color:var(--accent)">${icon('bell')}</span><h2>Reminders</h2><button class="btn icon" data-x aria-label="Close">${icon('x')}</button></div>
   <div class="sheet-body">
-    <div class="folder" style="margin-bottom:14px"><span style="flex:1;font-size:13px">Desktop notifications: <b>${perm}</b></span>${perm==='default'?'<button class="btn sm primary" id="rPerm">Allow</button>':''}<button class="btn sm" id="rTest">Send test</button></div>
-    ${all.length?all.map(n=>`<div class="rem ${n.fired?'fired':''}"><div style="flex:1;min-width:0"><div dir="auto" style="font-weight:500">${esc(n.msg)}</div><small dir="auto" style="color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.p.title)}</small><span class="when">${fmtDT(n.at)}</span> ${n.repeat!=='none'?`<span class="pill o">${n.repeat}</span>`:''} ${n.fired?'<span class="pill">sent</span>':''}</div><button class="btn sm ghost" data-open="${n.p.id}">Open ${icon('ext')}</button></div>`).join('')
-    :'<div class="empty">No reminders yet. Open a project → Notifications to set one.</div>'}
+    <div class="folder" style="margin-bottom:16px"><span style="flex:1;font-size:13px">Desktop notifications on this computer: <b>${perm==='granted'?'allowed':perm==='denied'?'blocked in browser settings':perm==='default'?'not allowed yet':'not supported'}</b></span>${perm==='default'?'<button class="btn sm primary" id="rPerm">Allow</button>':''}<button class="btn sm" id="rTest">Test</button></div>
+    <div class="invite-box">
+      <div style="font-weight:600;margin-bottom:12px">New reminder</div>
+      <div class="formgrid">
+        <div class="full"><label class="lbl-sm" for="rMsg">Message</label><input class="in" id="rMsg" placeholder="e.g. Submit pricing for 2026/104" dir="auto"></div>
+        <div class="full"><label class="lbl-sm" for="rProj">Project</label><select class="in" id="rProj"><option value="">General (no project)</option>${S.projects.map(p=>`<option value="${p.id}">${esc((p.ref?p.ref+' · ':'')+p.title)}</option>`).join('')}</select></div>
+        <div><label class="lbl-sm" for="rAt">When</label><input class="in" type="datetime-local" id="rAt" value="${localDT(Date.now()+HOUR)}"></div>
+        <div><label class="lbl-sm" for="rRep">Repeat</label><select class="in" id="rRep"><option value="none">Once</option><option value="hourly">Every hour</option><option value="daily">Every day</option><option value="weekly">Every week</option></select></div>
+        <div class="full"><span class="lbl-sm">Send to</span>${recipPicker('rTo',['all'],true)}</div>
+        <label class="chk-row full"><input type="checkbox" id="rEmail" checked>Also send by email</label>
+      </div>
+      <div style="display:flex;gap:8px"><button class="btn" id="rNow" style="flex:1;justify-content:center">${icon('send')}Send now</button><button class="btn primary" id="rAdd" style="flex:1;justify-content:center">${icon('bell')}Schedule reminder</button></div>
+    </div>
+    <div class="section-label">Upcoming · ${up.length}</div>
+    ${up.length?up.map(({n,p})=>remRow(n,p,p?`data-delp="${p.id}" data-n="${n.id}"`:`data-delg="${n.id}"`)).join(''):'<div class="empty">Nothing scheduled.</div>'}
+    <div class="section-label">Recently sent</div>
+    ${S.sentLog.length?S.sentLog.slice(0,10).map(l=>`<div class="sent"><span style="color:var(--accent)">${icon('check')}</span><div class="b"><b style="font-weight:500" dir="auto">${esc(l.msg)}</b><small>to ${esc(l.names.join(', '))}${l.email?' · '+l.email+' email'+(l.email>1?'s':''):''} · ${fmtDT(l.at)}</small></div></div>`).join(''):'<div class="empty">No reminders sent yet.</div>'}
   </div>`;
   $('[data-x]',sh).onclick=()=>sheet(null);
   const rp=$('#rPerm'); if(rp)rp.onclick=async()=>{await Notification.requestPermission();renderRemSheet()};
   $('#rTest').onclick=()=>notify('Test reminder','Notifications are working for Rendcon Tender Planning.');
-  sh.onclick=e=>{const o=e.target.closest('[data-open]');if(o){sheet(null);curTab='notifications';openProject(o.dataset.open)}};
+  const picks=bindPicker('rTo');
+  $('#rProj').onchange=e=>{const p=proj(e.target.value);if(p&&!$('#rMsg').value)$('#rMsg').value=p.title.slice(0,70)};
+  const build=()=>{const msg=$('#rMsg').value.trim();if(!msg){toast('Write a reminder message','x');$('#rMsg').focus();return null}
+    const to=picks();if(!to.length){toast('Choose who gets the reminder','x');return null}
+    return{n:{id:uid(),msg,at:new Date($('#rAt').value).getTime(),repeat:$('#rRep').value,fired:false,to,email:$('#rEmail').checked},p:proj($('#rProj').value)}};
+  $('#rNow').onclick=()=>{const r=build();if(!r)return;deliver(r.n,r.p);save();renderRemSheet()};
+  $('#rAdd').onclick=()=>{const r=build();if(!r)return;(r.p?r.p.notifications:S.reminders).push(r.n);save();renderBoard();renderRemSheet();toast(`Reminder scheduled for <b>${fmtDT(r.n.at)}</b>`,'bell');
+    if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()};
+  sh.onclick=e=>{
+    const o=e.target.closest('[data-open]');if(o){sheet(null);curTab='notifications';openProject(o.dataset.open);return}
+    const d=e.target.closest('[data-delp],[data-delg]');if(!d)return;
+    if(d.dataset.delg)S.reminders=S.reminders.filter(n=>n.id!==d.dataset.delg);
+    else{const p=proj(d.dataset.delp);p.notifications=p.notifications.filter(n=>n.id!==d.dataset.n)}
+    save();renderBoard();renderRemSheet()};
 }
 function sheet(id){
   $$('.sheet').forEach(s=>s.classList.toggle('show',s.id===id));
-  if(id==='mailSheet')renderMailSheet(); if(id==='remSheet')renderRemSheet();
+  if(id==='mailSheet')renderMailSheet(); if(id==='remSheet')renderRemSheet(); if(id==='teamSheet')renderTeamSheet();
   $('#scrim').classList.toggle('show',!!id||!!cur);
 }
 $('#mailBtn').onclick=()=>sheet('mailSheet');
@@ -986,21 +1125,185 @@ $('#driveBtn').onclick=()=>{
 $('#scrim').onclick=()=>{if($('#modal').classList.contains('show'))return closeModal();if($('.sheet.show'))return sheet(null);closePage()};
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#modal').classList.contains('show'))return closeModal();if($('.sheet.show'))return sheet(null);if(cur)closePage()});
 
+/* ---------------- Team, invitations, profiles ---------------- */
+const APP_URL='https://planning.rendcon.example';
+function sendEmail(to,subject,body,kind){S.outbox.unshift({id:uid(),to,subject,body,kind,at:Date.now()});S.outbox=S.outbox.slice(0,60)}
+function inviteFormHTML(pre){
+  return `<div class="formgrid">
+    <div class="full"><label class="lbl-sm" for="${pre}Email">Email address</label><input class="in" id="${pre}Email" type="email" placeholder="name@rendcon.example" autocomplete="off"></div>
+    <div><label class="lbl-sm" for="${pre}Name">Full name</label><input class="in" id="${pre}Name" placeholder="Eng. Name Surname" dir="auto"></div>
+    <div><label class="lbl-sm" for="${pre}Disc">Discipline</label><input class="in" id="${pre}Disc" placeholder="e.g. Architecture" list="discList"></div>
+    <div><label class="lbl-sm" for="${pre}Role">Access</label><select class="in" id="${pre}Role"><option value="engineer">Engineer</option><option value="admin">Admin</option></select></div>
+    <label class="chk-row" style="align-self:end"><input type="checkbox" id="${pre}Col" checked>Give them a board column</label>
+  </div>
+  <datalist id="discList"><option>Civil & structure</option><option>MEP</option><option>Infrastructure</option><option>Architecture</option><option>Quantity surveying</option></datalist>`;
+}
+function sendInvite(pre){
+  const email=$('#'+pre+'Email').value.trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Enter a valid email address','x');$('#'+pre+'Email').focus();return false}
+  if(S.users.some(u=>u.email.toLowerCase()===email)){toast('That email is already on the team','x');return false}
+  const name=$('#'+pre+'Name').value.trim()||email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  const u={id:uid(),name,email,role:$('#'+pre+'Role').value,discipline:$('#'+pre+'Disc').value.trim(),color:COLORS[S.users.length%COLORS.length],status:'invited',invitedAt:Date.now(),token:uid()+uid(),prefs:{browser:true,email:true,digest:false}};
+  S.users.push(u);
+  if($('#'+pre+'Col').checked)S.columns.push({id:uid(),userId:u.id});
+  inviteEmail(u);save();renderBoard();
+  toast(`Invitation sent to <b>${esc(email)}</b>`,'send');
+  return true;
+}
+function inviteLink(u){if(!u.token)u.token=uid()+uid();return `${APP_URL}/invite/${u.token}`}
+function inviteEmail(u){
+  sendEmail(u.email,'You are invited to Rendcon Tender Planning',
+    `Hello ${u.name},\n\n${me().name} invited you to join Rendcon Tender Planning as ${u.role==='admin'?'an admin':'an engineer'}.\nAccept the invitation and set up your profile:\n${inviteLink(u)}\n\nThis link expires in 7 days.`,'invite');
+  u.invitedAt=Date.now();
+}
+function removeMember(id){
+  const u=userById(id);if(!u||id===S.adminId)return;
+  if(!confirm(`Remove ${u.name} from the team? Their projects move to Unassigned.`))return;
+  const c=colOfUser(id);
+  if(c){S.projects.filter(p=>p.columnId===c.id).forEach(p=>{p.columnId=null;if(!p.tags.includes('un'))p.tags.push('un')});S.columns=S.columns.filter(x=>x!==c)}
+  S.users=S.users.filter(x=>x.id!==id);save();renderBoard();renderTeamSheet();toast(`${esc(u.name)} removed`);
+}
+function memberStats(u){
+  const c=colOfUser(u.id);const ps=c?S.projects.filter(p=>p.columnId===c.id):[];
+  const today=new Date(new Date().toDateString());
+  return{active:ps.length,week:ps.filter(p=>p.due&&(new Date(p.due)-today)/864e5>=0&&(new Date(p.due)-today)/864e5<=7).length,late:ps.filter(p=>p.due&&new Date(p.due)<today).length};
+}
+function renderTeamSheet(){
+  const sh=$('#teamSheet');if(!sh.classList.contains('show'))return;
+  const order=[...S.users].sort((a,b)=>(a.role==='admin'?-1:0)-(b.role==='admin'?-1:0)||(a.status==='invited')-(b.status==='invited'));
+  sh.innerHTML=`<div class="sheet-head"><span style="color:var(--accent)">${icon('users')}</span><h2>Team &amp; invitations</h2><button class="btn icon" data-x aria-label="Close">${icon('x')}</button></div>
+  <div class="sheet-body">
+    <div class="invite-box">
+      <div style="font-weight:600;margin-bottom:12px">Invite an engineer by email</div>
+      ${inviteFormHTML('t')}
+      <button class="btn primary" id="tSend" style="width:100%;justify-content:center">${icon('send')}Send invitation</button>
+    </div>
+    <div class="section-label">Members · ${S.users.length}</div>
+    ${order.map(u=>{const st=memberStats(u);return `<div class="member">${avatar(u)}
+      <div class="b"><b dir="auto">${esc(u.name)} ${u.role==='admin'?'<span class="pill o">admin</span>':''}${u.status==='invited'?'<span class="pill inv">invited</span>':''}${u.id===S.adminId?'<span class="pill">you</span>':''}</b>
+        <small>${esc(u.email)}${u.discipline?' · '+esc(u.discipline):''}</small>
+        <small>${u.status==='invited'?'Invited '+fmtDT(u.invitedAt):`${st.active} project${st.active!==1?'s':''}${st.late?` · <span style="color:var(--danger)">${st.late} overdue</span>`:''}${colOfUser(u.id)?'':' · no board column'}`}</small></div>
+      <div class="acts">
+        ${u.status==='invited'?`<button class="btn sm" data-resend="${u.id}" title="Send the invitation again">Resend</button><button class="btn ghost icon sm" data-copy="${u.id}" aria-label="Copy invite link" title="Copy invite link">${icon('copy')}</button><button class="btn ghost sm" data-accept="${u.id}" title="Prototype only: pretend they accepted">Mark joined</button>`:''}
+        <button class="btn ghost icon sm" data-edit="${u.id}" aria-label="Edit profile" title="Edit profile">${icon('edit')}</button>
+        ${u.id!==S.adminId?`<button class="btn ghost icon sm" data-rm="${u.id}" aria-label="Remove" title="Remove from team">${icon('trash')}</button>`:''}
+      </div></div>`}).join('')}
+    <div class="section-label">Emails sent</div>
+    ${S.outbox.length?S.outbox.slice(0,12).map(m=>`<div class="sent"><span style="color:var(--accent)">${icon(m.kind==='invite'?'send':'bell')}</span><div class="b"><b style="font-weight:500">${esc(m.subject)}</b><small>to ${esc(Array.isArray(m.to)?m.to.join(', '):m.to)} · ${fmtDT(m.at)}</small></div></div>`).join(''):'<div class="empty">No emails sent yet.</div>'}
+  </div>`;
+  $('[data-x]',sh).onclick=()=>sheet(null);
+  $('#tSend').onclick=()=>{if(sendInvite('t'))renderTeamSheet()};
+  sh.onclick=async e=>{
+    const t=e.target.closest('button');if(!t)return;const d=t.dataset;
+    if(d.resend){const u=userById(d.resend);inviteEmail(u);save();renderTeamSheet();toast(`Invitation sent again to <b>${esc(u.email)}</b>`,'send')}
+    if(d.copy){const l=inviteLink(userById(d.copy));save();try{await navigator.clipboard.writeText(l);toast('Invite link copied','copy')}catch(_){prompt('Copy this invite link',l)}}
+    if(d.accept){const u=userById(d.accept);u.status='active';u.joinedAt=Date.now();save();renderBoard();renderTeamSheet();toast(`<b>${esc(u.name)}</b> joined the team`,'user')}
+    if(d.edit)editProfile(d.edit);
+    if(d.rm)removeMember(d.rm);
+  };
+}
+function editProfile(id){
+  const u=userById(id);if(!u)return;
+  const canEdit=isAdmin()||id===S.me; if(!canEdit)return;
+  const st=memberStats(u), self=id===S.me;
+  let color=u.color;
+  modal(`<div class="prof-head"><span id="pfAv">${avatar(u,'lg')}</span><div><h3 dir="auto">${esc(u.name)}</h3><small>${esc(u.email)} · ${u.role==='admin'?'Admin':'Engineer'}${u.status==='invited'?' · invitation pending':''}</small></div></div>
+    <div class="stats"><div><b>${st.active}</b><small>Projects</small></div><div><b>${st.week}</b><small>Due this week</small></div><div><b style="${st.late?'color:var(--danger)':''}">${st.late}</b><small>Overdue</small></div></div>
+    <div class="formgrid">
+      <div class="full"><label class="lbl-sm" for="pfName">Full name</label><input class="in" id="pfName" value="${esc(u.name)}" dir="auto"></div>
+      <div><label class="lbl-sm" for="pfEmail">Email</label><input class="in" id="pfEmail" type="email" value="${esc(u.email)}" ${isAdmin()?'':'disabled'}></div>
+      <div><label class="lbl-sm" for="pfDisc">Discipline</label><input class="in" id="pfDisc" value="${esc(u.discipline||'')}" list="discList2"></div>
+      ${isAdmin()&&!self?`<div><label class="lbl-sm" for="pfRole">Access</label><select class="in" id="pfRole"><option value="engineer" ${u.role==='engineer'?'selected':''}>Engineer</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></div>`:''}
+      <div class="full"><span class="lbl-sm">Avatar colour</span><div class="swatches" id="pfSw">${COLORS.map(c=>`<button type="button" data-c="${c}" class="${c===u.color?'on':''}" style="background:${c}" aria-label="Colour ${c}"></button>`).join('')}</div></div>
+    </div>
+    <datalist id="discList2"><option>Civil & structure</option><option>MEP</option><option>Infrastructure</option><option>Architecture</option></datalist>
+    <span class="lbl-sm">Notifications</span>
+    <label class="chk-row"><input type="checkbox" id="pfBr" ${u.prefs.browser?'checked':''}>Desktop / browser notifications</label>
+    <label class="chk-row"><input type="checkbox" id="pfEm" ${u.prefs.email?'checked':''}>Reminders by email</label>
+    <label class="chk-row"><input type="checkbox" id="pfDg" ${u.prefs.digest?'checked':''}>Daily summary email at 08:00</label>
+    <div class="acts" style="margin-top:14px">${u.status==='invited'&&isAdmin()?`<button class="btn" id="pfResend" style="margin-right:auto">${icon('send')}Resend invite</button>`:''}<button class="btn" data-close>Cancel</button><button class="btn primary" id="pfSave">Save profile</button></div>`,()=>{
+    $('#modal .box').classList.add('wide');
+    $('#pfSw').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;color=b.dataset.c;$$('#pfSw button').forEach(x=>x.classList.toggle('on',x===b));$('#pfAv .avatar').style.background=color};
+    const rs=$('#pfResend');if(rs)rs.onclick=()=>{inviteEmail(u);save();toast(`Invitation sent again to <b>${esc(u.email)}</b>`,'send')};
+    $('#pfSave').onclick=()=>{
+      const n=$('#pfName').value.trim();if(!n)return $('#pfName').focus();
+      const em=$('#pfEmail').value.trim();
+      if(isAdmin()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return toast('Enter a valid email address','x');
+      const old=u.name;u.name=n;if(isAdmin())u.email=em;u.discipline=$('#pfDisc').value.trim();u.color=color;
+      if($('#pfRole'))u.role=$('#pfRole').value;
+      u.prefs={browser:$('#pfBr').checked,email:$('#pfEm').checked,digest:$('#pfDg').checked};
+      S.projects.forEach(p=>p.comments.forEach(c=>{if(c.who===old)c.who=n}));
+      save();closeModal();renderBoard();renderTeamSheet();if(cur)renderPage();toast('Profile saved');
+    };
+  });
+}
+function switchUser(id){S.me=id;save();if(cur)closePage();sheet(null);renderBoard();toast(id===S.adminId?'Back to your admin view':`Previewing as <b>${esc(me().name)}</b>`,'user')}
+$('#meBtn').onclick=e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  const items=[['My profile','user',()=>editProfile(S.me)]];
+  if(S.me===S.adminId){items.push(['Team & invitations','users',()=>sheet('teamSheet')]);
+    S.users.filter(u=>u.id!==S.adminId).forEach(u=>items.push(['Preview as '+u.name,'ext',()=>switchUser(u.id)]))}
+  else items.push(['Back to admin view','left',()=>switchUser(S.adminId)]);
+  menu(r.right-240,r.bottom+8,items);
+  $('#menu').style.minWidth='240px';
+};
+$('#teamBtn').onclick=()=>sheet('teamSheet');
+
+/* ---------------- Reminders: who gets them ---------------- */
+function recipPicker(id,selected,withAssignee){
+  const opt=(v,html,cls='')=>`<button type="button" class="${cls} ${selected.includes(v)?'on':''}" data-r="${v}">${html}</button>`;
+  return `<div class="recips" id="${id}">${opt('all','Everyone','txt')}${withAssignee?opt('assignee','Assigned engineer','txt'):''}${S.users.map(u=>opt(u.id,avatar(u,'sm')+esc(u.name.replace(/^Eng\.\s*/,'')))).join('')}</div>`;
+}
+function bindPicker(id){
+  const el=$('#'+id);
+  el.onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;
+    if(b.dataset.r==='all'){$$('[data-r]',el).forEach(x=>x.classList.toggle('on',x===b&&!b.classList.contains('on')))}
+    else{b.classList.toggle('on');$('[data-r="all"]',el).classList.remove('on')}};
+  return()=>$$('[data-r].on',el).map(b=>b.dataset.r);
+}
+function resolveTo(n,p){
+  const ids=new Set();
+  (n.to&&n.to.length?n.to:['me']).forEach(t=>{
+    if(t==='all')S.users.forEach(u=>ids.add(u.id));
+    else if(t==='assignee'){const u=p&&colUser(colById(p.columnId));if(u)ids.add(u.id)}
+    else if(t==='me')ids.add(S.adminId);
+    else if(userById(t))ids.add(t);
+  });
+  return[...ids].map(userById);
+}
+function toLabel(n,p){
+  if(!n.to||!n.to.length)return'Just me';
+  if(n.to.includes('all'))return'Everyone';
+  return n.to.map(t=>t==='assignee'?(p&&colUser(colById(p.columnId))?colName(p.columnId):'Assigned engineer'):t==='me'?userById(S.adminId).name:(userById(t)||{}).name).filter(Boolean).join(', ');
+}
+function deliver(n,p){
+  const users=resolveTo(n,p);
+  const title='Reminder'+(p?' · '+(p.ref||'project'):'');
+  const body=n.msg+(p&&n.msg!==p.title?' — '+p.title:'');
+  const viewer=users.find(u=>u.id===S.me);
+  if(viewer&&viewer.prefs.browser)notify(title,body);
+  const mailTo=n.email?users.filter(u=>u.prefs.email).map(u=>u.email):[];
+  if(mailTo.length)sendEmail(mailTo,title+': '+n.msg,body+(p?`\n\nOpen the project: ${APP_URL}/#p/${p.id}`:''),'reminder');
+  S.sentLog.unshift({id:uid(),msg:n.msg,project:p?p.title:'',names:users.map(u=>u.name),email:mailTo.length,at:Date.now()});S.sentLog=S.sentLog.slice(0,40);
+  if(!viewer)toast(`Reminder sent to <b>${esc(users.map(u=>u.name).join(', ')||'nobody')}</b>${mailTo.length?' · email':''}`,'bell',5000);
+}
+
 /* ---------------- Reminder engine ---------------- */
 function notify(title,body){
   toast(`<b>${esc(title)}</b><br><span dir="auto">${esc(body)}</span>`,'bell',7000);
   try{if('Notification' in window&&Notification.permission==='granted'){const n=new Notification(title,{body,tag:title+body});n.onclick=()=>window.focus()}}catch(e){}
 }
+function fire(n,p,now){
+  deliver(n,p);
+  const step={hourly:HOUR,daily:24*HOUR,weekly:168*HOUR}[n.repeat];
+  if(step){while(n.at<=now)n.at+=step}else n.fired=true;
+}
 function tick(){
   const now=Date.now(); let changed=false;
-  S.projects.forEach(p=>p.notifications.forEach(n=>{
-    if(n.fired||n.at>now)return;
-    notify('Reminder · '+(p.ref||'Rendcon'),n.msg+(n.msg===p.title?'':' — '+p.title));
-    const step={hourly:HOUR,daily:24*HOUR,weekly:168*HOUR}[n.repeat];
-    if(step){while(n.at<=now)n.at+=step}else n.fired=true; changed=true;
-  }));
+  S.projects.forEach(p=>p.notifications.forEach(n=>{if(!n.fired&&n.at<=now){fire(n,p,now);changed=true}}));
+  S.reminders.forEach(n=>{if(!n.fired&&n.at<=now){fire(n,null,now);changed=true}});
   if(S.mail.connected&&S.mail.hourly&&now-S.mail.lastSync>=HOUR)syncMail(true);
-  if(changed){save();renderBoard();if(cur&&curTab==='notifications')renderPane()}
+  if(changed){save();renderBoard();if(cur&&curTab==='notifications')renderPane();if($('#remSheet').classList.contains('show'))renderRemSheet()}
   updateSyncMeta();
 }
 setInterval(tick,15000);
