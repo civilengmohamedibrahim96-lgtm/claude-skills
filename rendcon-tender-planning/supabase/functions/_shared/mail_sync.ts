@@ -149,9 +149,12 @@ async function execute(
 
   // 4. list both folders; any failure ends the run without moving lastRunAt
   const raws: { raw: unknown; folder: Folder }[] = [];
+  const capped: Folder[] = [];
   for (const folder of ['inbox', 'sent'] as Folder[]) {
     try {
       const items = await mail.listMessages(folder, since, config.maxPerRun);
+      // a full page means older-than-newest messages may be waiting beyond the cap
+      if (items.length >= config.maxPerRun) capped.push(folder);
       for (const raw of items) raws.push({ raw, folder });
     } catch (err) {
       summary.errors += 1;
@@ -162,14 +165,15 @@ async function execute(
   }
   summary.fetched = raws.length;
 
-  // 5. normalise, fetch bodies when missing, dedupe by id, oldest first
+  // 5. normalise, dedupe by id, oldest first; bodies are fetched later, per message
+  const newestByFolder = new Map<Folder, number>();
   const byId = new Map<string, MailMessage>();
   for (const { raw, folder } of raws) {
-    let m = deps.normalize(raw, folder);
+    const m = deps.normalize(raw, folder);
     if (m === null) continue;
-    if (m.bodyText === '' && m.bodyHtml === null) {
-      const full = await mail.getMessage(m.id);
-      m = deps.normalize(full, folder) ?? m;
+    const t = Date.parse(m.date);
+    if (!Number.isNaN(t) && t > (newestByFolder.get(folder) ?? Number.NEGATIVE_INFINITY)) {
+      newestByFolder.set(folder, t);
     }
     if (!byId.has(m.id)) byId.set(m.id, m);
   }
@@ -201,31 +205,52 @@ async function execute(
       const text = errorText(err);
       deps.log?.('message failed', { id: m.id, error: text });
       const attempts = (processed.get(m.id)?.attempts ?? 0) + 1;
-      await repo.markProcessed(record(m, { outcome: 'error', attempts, lastError: text }));
+      try {
+        await repo.markProcessed(record(m, { outcome: 'error', attempts, lastError: text }));
+      } catch (recordErr) {
+        deps.log?.('could not record failure', errorText(recordErr));
+      }
       summary.errors += 1;
       failureDates.push(m.date);
     }
   }
 
-  // 8. move lastRunAt, never past a deferred or failed message
-  let nextSince: IsoDateTime = started.toISOString();
-  if (failureDates.length > 0) {
-    const earliest = Math.min(...failureDates.map((d) => Date.parse(d)));
-    nextSince = new Date(earliest - 1000).toISOString();
+  // 8. move lastRunAt, never past a deferred or failed message, nor past the newest
+  //    message of a folder that hit the per-run cap (its older messages were listed, its
+  //    newer ones were not)
+  let nextMs = started.getTime();
+  for (const d of failureDates) {
+    const t = Date.parse(d);
+    if (!Number.isNaN(t)) nextMs = Math.min(nextMs, t - 1000);
   }
-  await repo.setLastRunAt(nextSince);
+  for (const folder of capped) {
+    const newest = newestByFolder.get(folder);
+    if (newest !== undefined) nextMs = Math.min(nextMs, newest);
+  }
+  await repo.setLastRunAt(new Date(nextMs).toISOString());
   return null;
+}
+
+// Bodies are missing from the listing; fetch the full message only when it is about to be
+// processed (already processed messages never get here). Called inside the per-message try.
+async function withBody(deps: MailSyncDeps, m: MailMessage): Promise<MailMessage> {
+  if (m.bodyText === '' && m.bodyHtml === null) {
+    const full = await deps.mail.getMessage(m.id);
+    return deps.normalize(full, m.folder) ?? m;
+  }
+  return m;
 }
 
 async function processOne(
   deps: MailSyncDeps,
   summary: MailRunSummary,
-  m: MailMessage,
+  listed: MailMessage,
   prev: ProcessedRecord | undefined,
   failureDates: string[],
 ): Promise<void> {
   const { repo } = deps;
 
+  const m = await withBody(deps, listed);
   const pre = deps.prefilter(m);
   if (pre.skip) {
     await repo.markProcessed(record(m, { outcome: 'prefiltered', prefilterReason: pre.reason }));

@@ -19,6 +19,7 @@ import type {
   TagId,
   TenderMember,
 } from './types.ts';
+import type { MailEventLookup } from './applier.ts';
 
 type Result = { data?: any; error?: { message: string } | null };
 
@@ -80,7 +81,7 @@ function chunks<T>(items: T[], size: number): T[][] {
   return out;
 }
 
-export function createSupabaseMailRepository(client: SupabaseLike): MailRepository {
+export function createSupabaseMailRepository(client: SupabaseLike): MailRepository & MailEventLookup {
   const from = (table: string) => client.from(table);
 
   return {
@@ -131,7 +132,7 @@ export function createSupabaseMailRepository(client: SupabaseLike): MailReposito
         folder: rec.folder,
         subject: rec.subject,
         from_address: rec.fromAddress,
-        received_at: rec.receivedAt,
+        received_at: rec.receivedAt || null,
         outcome: rec.outcome,
         attempts: rec.attempts,
         last_error: rec.lastError,
@@ -245,8 +246,17 @@ export function createSupabaseMailRepository(client: SupabaseLike): MailReposito
       return (rows ?? []).length;
     },
 
+    async findMailEventByMessageId(messageId: string) {
+      const row = check(await from('mail_events')
+        .select('id, project_id')
+        .eq('message_id', messageId)
+        .maybeSingle());
+      return row ? { id: row.id as string, projectId: row.project_id as string } : null;
+    },
+
     async addMailEvent(input: MailEventInput) {
-      const row = check(await from('mail_events').insert({
+      // one event per message: a retried apply reuses the event instead of hitting the unique key
+      const row = check(await from('mail_events').upsert({
         project_id: input.projectId,
         message_id: input.messageId,
         folder: input.folder,
@@ -262,7 +272,7 @@ export function createSupabaseMailRepository(client: SupabaseLike): MailReposito
         ai_form: input.aiForm,
         match_reason: input.matchReason,
         confidence: input.confidence,
-      }).select('id').single());
+      }, { onConflict: 'message_id' }).select('id').single());
       return row.id as string;
     },
 

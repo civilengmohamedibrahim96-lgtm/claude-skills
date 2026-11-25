@@ -251,6 +251,30 @@ describe('applyForm', () => {
     assert.equal(memory.dump().projects[0].supervisor, 'شيرين');
   });
 
+  test('re-applying a new-project message after a partial failure does not create a second project', async () => {
+    const memory = createMemoryMailRepository({ projects: [], tenderTeam: [] });
+    const f = form({ kind: 'new_project', projectId: null, projectName: 'Admin building' });
+    const first = await applyForm(memory, f, message(), NOW, 'Africa/Cairo');
+    const second = await applyForm(memory, f, message(), NOW, 'Africa/Cairo');
+    const dump = memory.dump();
+    assert.equal(dump.projects.length, 1);
+    assert.equal(dump.mailEvents.length, 1);
+    assert.equal(second.projectId, first.projectId);
+    assert.equal(second.mailEventId, first.mailEventId);
+  });
+
+  test('re-applying an update after a partial failure does not duplicate the event or the date change', async () => {
+    const memory = createMemoryMailRepository({ projects: [existing()], tenderTeam: [] });
+    const f = form({ kind: 'postponed', submissionDate: '2027-01-10' });
+    const first = await applyForm(memory, f, message(), NOW, 'Africa/Cairo');
+    const second = await applyForm(memory, f, message(), NOW, 'Africa/Cairo');
+    const dump = memory.dump();
+    assert.equal(dump.mailEvents.length, 1);
+    assert.equal(second.mailEventId, first.mailEventId);
+    assert.equal(dump.dateChanges.length, 1);
+    assert.equal(dump.projects.length, 1);
+  });
+
   test('missing project throws', async () => {
     const { repo } = spyRepo([]);
     await assert.rejects(

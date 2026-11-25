@@ -67,6 +67,12 @@ export function defaultStatus(form: ValidatedForm): string | null {
 
 const DATE_KINDS: ActionKind[] = ['update', 'postponed', 'queries_answers'];
 
+// Optional repository capability: lets a retried create find the event a failed earlier
+// attempt already wrote, so it does not create a second project.
+export type MailEventLookup = {
+  findMailEventByMessageId(messageId: string): Promise<{ id: string; projectId: string } | null>;
+};
+
 export async function applyForm(
   repo: MailRepository,
   form: ValidatedForm,
@@ -80,6 +86,19 @@ export async function applyForm(
   const linkInputs = form.links.map((l) => ({ url: l.url, title: l.label }));
 
   if (form.projectId === null) {
+    const lookup = repo as Partial<MailEventLookup>;
+    const prior = lookup.findMailEventByMessageId ? await lookup.findMailEventByMessageId(m.id) : null;
+    if (prior !== null) {
+      // an earlier attempt already created this project and its event; re-add links only (idempotent)
+      const added = await repo.addLinks(prior.projectId, linkInputs, prior.id);
+      return {
+        projectId: prior.projectId,
+        created: true,
+        mailEventId: prior.id,
+        changes: added > 0 ? [`links:${added}`] : [],
+      };
+    }
+
     const status = defaultStatus({ ...form, kind }) ?? '';
     const projectId = await repo.createProject({
       title: (form.projectName ?? '').trim() || m.subject,
@@ -106,7 +125,6 @@ export async function applyForm(
   const project = await repo.getProject(form.projectId);
   if (!project) throw new Error('project not found');
   const projectId = project.id;
-  const mailEventId = await repo.addMailEvent(mailEventInput(projectId, kind, form, m));
 
   const patch: ProjectPatch = { updatedBy: 'email' };
   const status = defaultStatus({ ...form, kind });
@@ -131,7 +149,18 @@ export async function applyForm(
     changes.push(`due:${newDate}`);
   }
 
+  // Project writes come first and the event after them, so a retry after a partial failure
+  // repeats only idempotent writes. The event upserts on message_id; the date change needs
+  // the event id, so it is written right after the event.
   await repo.updateProject(projectId, patch);
+
+  const tags = KIND_TAGS[kind];
+  if (tags.length > 0) {
+    await repo.addTags(projectId, tags);
+    changes.push(`tags:${tags.join(',')}`);
+  }
+
+  const mailEventId = await repo.addMailEvent(mailEventInput(projectId, kind, form, m));
 
   if (dateChanged) {
     await repo.addDateChange({
@@ -141,12 +170,6 @@ export async function applyForm(
       changedBy: 'email',
       mailEventId,
     });
-  }
-
-  const tags = KIND_TAGS[kind];
-  if (tags.length > 0) {
-    await repo.addTags(projectId, tags);
-    changes.push(`tags:${tags.join(',')}`);
   }
 
   await repo.addSystemComment(projectId, `Email: ${m.subject}`);

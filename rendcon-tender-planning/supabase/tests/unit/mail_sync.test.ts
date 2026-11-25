@@ -60,6 +60,7 @@ function harness(opts: {
   hourlyEnabled?: boolean;
   listError?: Error;
   fullBodies?: Record<string, MailMessage>;
+  fullBodyErrors?: Record<string, Error>;
   timeBudgetMs?: number;
 } = {}): Harness {
   const memory = createMemoryMailRepository({
@@ -89,6 +90,8 @@ function harness(opts: {
       },
       async getMessage(id) {
         getCalls.push(id);
+        const err = opts.fullBodyErrors?.[id];
+        if (err) throw err;
         return opts.fullBodies?.[id] ?? null;
       },
       async sendMail() {
@@ -352,6 +355,67 @@ describe('runMailSync', () => {
     await runMailSync(h.deps, 'manual');
     assert.deepEqual(h.getCalls, ['thin']);
     assert.equal(h.aiCalls.length, 1);
+  });
+
+  test('already processed body-less message is not fetched again', async () => {
+    const h = harness({ inbox: [msg('done', '2026-11-25T07:00:00Z', { bodyText: '', bodyHtml: null })] });
+    await h.memory.markProcessed(processedRec('done'));
+    const s = await runMailSync(h.deps, 'manual');
+    assert.equal(s.alreadyProcessed, 1);
+    assert.deepEqual(h.getCalls, []);
+  });
+
+  test('getMessage failure is a per-message error; other messages still apply and the run completes', async () => {
+    const h = harness({
+      inbox: [
+        msg('bad', '2026-11-25T07:00:00Z', { bodyText: '', bodyHtml: null }),
+        msg('good', '2026-11-25T07:01:00Z', { bodyText: '', bodyHtml: null }),
+        msg('plain', '2026-11-25T07:02:00Z'),
+      ],
+      fullBodies: { good: msg('good', '2026-11-25T07:01:00Z', { bodyText: 'Full body' }) },
+      fullBodyErrors: { bad: new Error('graph 500') },
+    });
+    const s = await runMailSync(h.deps, 'manual');
+    assert.equal(s.errors, 1);
+    assert.equal(s.applied, 2);
+    const dump = h.memory.dump();
+    assert.equal(dump.processed.get('bad')?.outcome, 'error');
+    assert.equal(dump.processed.get('bad')?.attempts, 1);
+    assert.equal(dump.processed.get('bad')?.lastError, 'graph 500');
+    assert.equal(dump.runs[0].error, null);
+    assert.equal(dump.lastRunAt, '2026-11-25T06:59:59.000Z');
+  });
+
+  test('a folder that hit maxPerRun holds lastRunAt back to its newest fetched message', async () => {
+    const base = Date.parse('2026-11-25T06:00:00Z');
+    const batch = Array.from({ length: 60 }, (_, i) => msg(`m${i}`, new Date(base + i * 60_000).toISOString()));
+    const h = harness({ inbox: batch });
+    const s = await runMailSync(h.deps, 'manual');
+    assert.equal(s.applied, 60);
+    assert.equal(h.memory.dump().lastRunAt, '2026-11-25T06:59:00.000Z');
+  });
+
+  test('a failure to record a failed message is logged and the run still completes', async () => {
+    const h = harness({
+      inbox: [msg('boom', '2026-11-25T07:00:00Z'), msg('after', '2026-11-25T07:01:00Z')],
+    });
+    h.setApplyError('boom', new Error('database exploded'));
+    const inner = h.memory;
+    h.deps.repo = {
+      ...inner,
+      markProcessed: async (rec) => {
+        if (rec.messageId === 'boom' && rec.outcome === 'error') throw new Error('record store down');
+        return inner.markProcessed(rec);
+      },
+    };
+    const logs: string[] = [];
+    h.deps.log = (text) => logs.push(text);
+    const s = await runMailSync(h.deps, 'manual');
+    assert.equal(s.errors, 1);
+    assert.equal(s.applied, 1);
+    assert.ok(logs.includes('could not record failure'));
+    assert.equal(inner.dump().processed.get('after')?.outcome, 'applied');
+    assert.equal(inner.dump().runs[0].summary?.applied, 1);
   });
 
   test('created and updated are counted separately', async () => {

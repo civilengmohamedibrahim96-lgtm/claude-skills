@@ -34,7 +34,8 @@ Deno.serve(async (req) => {
     }, { cron: true, user: true });
     if (auth.kind === 'denied') return json(auth.status, { error: auth.status === 401 ? 'unauthorized' : 'forbidden' }, cors);
 
-    const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY }) as unknown as AnthropicLike;
+    // short timeout and no SDK retries: the whole run must finish inside the function's time limit
+    const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: 35_000, maxRetries: 0 }) as unknown as AnthropicLike;
     const mail = createComposioMailClient(composioConfigFromEnv(env), fetchTransport);
     const aiOptions = aiOptionsFromEnv(env);
     const timeZone = env.APP_TIMEZONE || 'Africa/Cairo';

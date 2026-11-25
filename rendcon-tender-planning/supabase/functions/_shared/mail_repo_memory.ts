@@ -16,6 +16,7 @@ import type {
   TenderMember,
   IsoDateTime,
 } from './types.ts';
+import type { MailEventLookup } from './applier.ts';
 
 export type MemorySeed = {
   projects: BoardProject[];
@@ -43,7 +44,7 @@ function copyProject(p: BoardProject): BoardProject {
   return { ...p, tags: [...p.tags] };
 }
 
-export function createMemoryMailRepository(seed: MemorySeed): MailRepository & { dump(): MemoryState } {
+export function createMemoryMailRepository(seed: MemorySeed): MailRepository & MailEventLookup & { dump(): MemoryState } {
   const projects: BoardProject[] = seed.projects.map(copyProject);
   const tenderTeam: TenderMember[] = seed.tenderTeam.map((t) => ({ ...t }));
   const conversations = new Map<string, Set<string>>();
@@ -181,7 +182,15 @@ export function createMemoryMailRepository(seed: MemorySeed): MailRepository & {
       return added;
     },
 
+    async findMailEventByMessageId(messageId) {
+      const e = mailEvents.find((x) => x.messageId === messageId);
+      return e ? { id: e.id, projectId: e.projectId } : null;
+    },
+
     async addMailEvent(input) {
+      // one event per message, mirroring the unique key on mail_events.message_id
+      const existing = mailEvents.find((x) => x.messageId === input.messageId);
+      if (existing) return existing.id;
       counters.event += 1;
       const id = `mem-e-${counters.event}`;
       mailEvents.push({ ...input, id });

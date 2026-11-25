@@ -134,6 +134,40 @@ describe('createSupabaseMailRepository', () => {
     assert.equal(opts.onConflict, 'message_id');
   });
 
+  test('markProcessed writes a missing receivedAt as null, not an empty string', async () => {
+    const { client, calls } = fakeClient();
+    await createSupabaseMailRepository(client).markProcessed({
+      messageId: 'm-nodate', folder: 'inbox', subject: '', fromAddress: null, receivedAt: '',
+      outcome: 'error', attempts: 1, lastError: 'x', prefilterReason: null, projectId: null,
+      mailEventId: null, reviewId: null,
+    });
+    const [row] = opsOf(calls.find((c) => c.table === 'processed_messages'), 'upsert')[0] as [Record<string, unknown>];
+    assert.equal(row.received_at, null);
+  });
+
+  test('addMailEvent upserts on message_id and returns the row id', async () => {
+    const { client, calls } = fakeClient(() => ({ data: { id: 'ev-1' }, error: null }));
+    const id = await createSupabaseMailRepository(client).addMailEvent({
+      projectId: 'p1', messageId: 'AAMk-9', folder: 'inbox', direction: 'received', kind: 'update',
+      summary: 's', subject: 'Subj', fromAddress: null, receivedAt: '2026-11-25T07:00:00Z', webLink: null,
+      conversationId: null, linksCount: 0, aiForm: null, matchReason: 'm', confidence: { match: 'high', facts: 'high' },
+    } as any);
+    assert.equal(id, 'ev-1');
+    const call = calls.find((c) => c.table === 'mail_events');
+    assert.deepEqual(opsOf(call, 'insert'), []);
+    const [row, opts] = opsOf(call, 'upsert')[0] as [Record<string, unknown>, Record<string, unknown>];
+    assert.equal(row.message_id, 'AAMk-9');
+    assert.equal(row.project_id, 'p1');
+    assert.equal(opts.onConflict, 'message_id');
+  });
+
+  test('findMailEventByMessageId looks the event up by message_id', async () => {
+    const { client, calls } = fakeClient(() => ({ data: { id: 'ev-1', project_id: 'p1' }, error: null }));
+    const found = await createSupabaseMailRepository(client).findMailEventByMessageId('AAMk-9');
+    assert.deepEqual(found, { id: 'ev-1', projectId: 'p1' });
+    assert.deepEqual(opsOf(calls[0], 'eq'), [['message_id', 'AAMk-9']]);
+  });
+
   test('startRun calls rpc rpc_start_mail_run with p_trigger', async () => {
     const { client, calls } = fakeClient(() => ({ data: 'run-uuid-7', error: null }));
     const id = await createSupabaseMailRepository(client).startRun('cron');
