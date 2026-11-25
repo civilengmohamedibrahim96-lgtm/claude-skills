@@ -11,5 +11,7 @@ export async function createDataLayer() {
     return mod.createSupabaseDataLayer({ client });
   }
   const { createMockDataLayer } = await import('./mock.js');
-  return createMockDataLayer({ storage: window.localStorage });
+  let storage = null;
+  try { storage = window.localStorage; } catch (_) { storage = null; } // blocked storage: keep the demo in memory
+  return createMockDataLayer({ storage });
 }
