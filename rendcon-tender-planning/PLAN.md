@@ -102,6 +102,39 @@ Instead of fixed keyword rules, an AI model reads each tender email the way a pe
 4. **The app – not the AI – changes the board**: creates the project in Unassigned, moves the date (recorded in the date history as "from email"), adds tags, links and the update-log line.
 5. **Anything uncertain goes to "Needs review"** instead of the board: low confidence, a postponement for a project it cannot find, a date in the past, or a disagreement with the simple keyword check. One click accepts or corrects it.
 
+### Flow
+
+The full page with both flows (email to board, daily work and reminders) is `flowchart.html`.
+
+```mermaid
+flowchart TD
+  A(["⏱ Every hour<br/>or Sync email button"]):::start --> B["Fetch new emails<br/>from the tenders mailbox<br/>Outlook · Microsoft Graph"]
+  B --> C{"Read this<br/>email before?"}:::q
+  C -- "Yes" --> X1(["Skip"]):::stop
+  C -- "No" --> D{"Quick check (free):<br/>tender words or<br/>known sender?"}:::q
+  D -- "No" --> X2(["Not a tender<br/>no AI cost"]):::stop
+  D -- "Yes" --> E["🤖 AI reads the email<br/>together with the list<br/>of current projects"]:::ai
+  E --> F["AI fills the form<br/>type · project · client · submission date<br/>public / private · supervisor first name<br/>links · one-line summary · confidence"]:::ai
+  F --> G{"App checks the answer<br/>real date? project found?<br/>confident?"}:::q
+  G -- "Unsure" --> R["⚠ Needs review list"]:::review
+  R --> R2{"A person accepts<br/>or corrects it"}:::q
+  R2 --> H
+  G -- "OK" --> H{"What kind<br/>of email?"}:::q
+  H -- "ورد الينا – new" --> N1["New card in Unassigned<br/>tag: New project"]
+  H -- "Update / annex" --> N2["Tag: New updates<br/>new date if given"]
+  H -- "تأجيل – postponed" --> N3["Tag: Postponed<br/>move submission date"]
+  H -- "استفسارات – answers" --> N4["Tag: Queries answers"]
+  H -- "Not a tender" --> X3(["Ignore"]):::stop
+  N1 & N2 & N3 & N4 --> L["Save links, update-log line<br/>and date history “from email”"]
+  L --> M["Label the email in Outlook<br/>“Tender Planning”"]
+  M --> P(["Board updates for all 4 users<br/>card shows “1 new” · notification"]):::start
+  classDef start fill:#111,stroke:#111,color:#fff
+  classDef ai fill:#FCE5D6,stroke:#EE6A1F,color:#111,stroke-width:2px
+  classDef q fill:#F5F5F3,stroke:#9A9A95,color:#111
+  classDef stop fill:#fff,stroke:#C7C7C1,color:#74746F,stroke-dasharray:4 3
+  classDef review fill:#FCEBE7,stroke:#C8321E,color:#111,stroke-width:2px
+```
+
 ### Safeguards
 
 - The AI only fills in the form; it cannot change anything by itself, and every value is checked (dates must be real dates, the project must exist, etc.).

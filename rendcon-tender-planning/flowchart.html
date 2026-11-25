@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tender Planning Flow</title>
+<meta name="description" content="How Redcon Tender Planning turns tender emails into cards on the board, and how the planning team works from there.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EDEDEA;--surface:#fff;--line:#D8D8D3;--ink:#111;--ink-2:#3A3A38;--muted:#74746F;--accent:#EE6A1F;--accent-soft:#FCE5D6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans","IBM Plex Sans Arabic",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+header{background:#fff;border-bottom:1px solid var(--line)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+header .wrap{display:flex;align-items:center;gap:16px;height:64px}
+.badge{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+header h1{margin:0;font-size:17px;font-weight:600}
+main .wrap{padding-top:28px;padding-bottom:48px}
+.intro{color:var(--ink-2);max-width:760px;margin:0 0 24px}
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tabs button{height:36px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:#fff;font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:all .18s}
+.tabs button:hover{border-color:#bbb}
+.tabs button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;overflow-x:auto}
+.card h2{margin:0 0 4px;font-size:18px}
+.card p.sub{margin:0 0 18px;color:var(--muted);font-size:14px}
+.chart{min-width:720px}
+.chart .mermaid{width:100%;margin:0;display:flex;justify-content:center}
+.chart svg{height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:18px;padding-top:14px;border-top:1px solid #EFEFEC;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{width:16px;height:12px;border-radius:3px;border:1.5px solid}
+.panel[hidden]{display:none}
+.mermaid{visibility:hidden}
+.mermaid[data-processed="true"]{visibility:visible}
+@media (max-width:640px){.wrap{padding:0 16px}.card{padding:16px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><span class="badge">Redcon</span><h1>Tender Planning – how it flows</h1></div></header>
+<main><div class="wrap">
+  <p class="intro">Two flows: how a tender email becomes a card on the board without anyone typing it, and how the 4 planning engineers work from there until submission.</p>
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="mail">1 · Email to board (every hour)</button>
+    <button role="tab" aria-selected="false" data-tab="work">2 · Daily work and reminders</button>
+  </div>
+
+  <section class="panel" id="mail">
+    <div class="card">
+      <h2>Email to board</h2>
+      <p class="sub">Runs automatically every hour, or when someone presses “Sync email”.</p>
+      <div class="chart"><pre class="mermaid">
+flowchart TD
+  A(["⏱ Every hour<br/>or Sync email button"]):::start --> B["Fetch new emails<br/>from the tenders mailbox<br/><small>Outlook · Microsoft Graph</small>"]
+  B --> C{"Read this<br/>email before?"}:::q
+  C -- "Yes" --> X1(["Skip"]):::stop
+  C -- "No" --> D{"Quick check (free):<br/>tender words or<br/>known sender?"}:::q
+  D -- "No" --> X2(["Not a tender<br/>no AI cost"]):::stop
+  D -- "Yes" --> E["🤖 AI reads the email<br/>together with the list<br/>of current projects"]:::ai
+  E --> F["AI fills the form<br/><small>type · project · client · submission date<br/>public / private · supervisor first name<br/>links · one-line summary · confidence</small>"]:::ai
+  F --> G{"App checks the answer<br/><small>real date? project found?<br/>confident?</small>"}:::q
+  G -- "Unsure" --> R["⚠ Needs review list"]:::review
+  R --> R2{"A person accepts<br/>or corrects it"}:::q
+  R2 --> H
+  G -- "OK" --> H{"What kind<br/>of email?"}:::q
+  H -- "ورد الينا – new" --> N1["New card in Unassigned<br/>tag: New project"]
+  H -- "Update / annex" --> N2["Tag: New updates<br/>new date if given"]
+  H -- "تأجيل – postponed" --> N3["Tag: Postponed<br/>move submission date"]
+  H -- "استفسارات – answers" --> N4["Tag: Queries answers"]
+  H -- "Not a tender" --> X3(["Ignore"]):::stop
+  N1 & N2 & N3 & N4 --> L["Save links, update-log line<br/>and date history “from email”"]
+  L --> M["Label the email in Outlook<br/>“Tender Planning”"]
+  M --> P(["Board updates for all 4 users<br/>card shows “1 new” · notification"]):::start
+  classDef start fill:#111,stroke:#111,color:#fff
+  classDef ai fill:#FCE5D6,stroke:#EE6A1F,color:#111,stroke-width:2px
+  classDef q fill:#F5F5F3,stroke:#9A9A95,color:#111
+  classDef stop fill:#fff,stroke:#C7C7C1,color:#74746F,stroke-dasharray:4 3
+  classDef review fill:#FCEBE7,stroke:#C8321E,color:#111,stroke-width:2px
+</pre></div>
+      <div class="legend">
+        <span><i style="background:#111;border-color:#111"></i>Start and result</span>
+        <span><i style="background:#FCE5D6;border-color:#EE6A1F"></i>AI step</span>
+        <span><i style="background:#F5F5F3;border-color:#9A9A95"></i>Check / decision</span>
+        <span><i style="background:#FCEBE7;border-color:#C8321E"></i>A person decides</span>
+        <span><i style="background:#fff;border-color:#C7C7C1;border-style:dashed"></i>Stops here</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="work" hidden>
+    <div class="card">
+      <h2>Daily work and reminders</h2>
+      <p class="sub">From a new card to submission, and how reminders reach the team.</p>
+      <div class="chart"><pre class="mermaid">
+flowchart TD
+  A(["New card in Unassigned<br/><small>from email or added by hand</small>"]):::start --> B["Drag the card to an<br/>engineer's column<br/><small>= assigned to them</small>"]
+  B --> C["Engineer works on the project<br/><small>status · sub-tasks · comments · links</small>"]
+  C --> D["Files go to the project folder<br/><small>SharePoint / OneDrive</small>"]
+  C --> E["Set reminders<br/><small>me · assigned engineer · everyone</small>"]
+  F["Automatic reminders<br/><small>submission in 3 days and tomorrow</small>"]:::auto --> G
+  E --> G{"Checked every<br/>5 minutes:<br/>reminder due?"}:::q
+  G -- "Yes" --> H["Desktop / browser notification<br/>+ email from the tenders mailbox"]:::auto
+  I["New email about this tender<br/><small>postponed · answers · annex</small>"]:::ai --> J["Card shows “1 new”<br/>date and tags update"]
+  J --> C
+  C --> K{"Submitted?"}:::q
+  K -- "Not yet" --> C
+  K -- "Yes" --> L(["Tag Submitted<br/>date chip turns green"]):::start
+  classDef start fill:#111,stroke:#111,color:#fff
+  classDef ai fill:#FCE5D6,stroke:#EE6A1F,color:#111,stroke-width:2px
+  classDef auto fill:#FFF5EE,stroke:#F6B38A,color:#111
+  classDef q fill:#F5F5F3,stroke:#9A9A95,color:#111
+</pre></div>
+      <div class="legend">
+        <span><i style="background:#111;border-color:#111"></i>Start and result</span>
+        <span><i style="background:#FCE5D6;border-color:#EE6A1F"></i>From email (AI)</span>
+        <span><i style="background:#FFF5EE;border-color:#F6B38A"></i>Automatic</span>
+        <span><i style="background:#F5F5F3;border-color:#9A9A95"></i>Check / decision</span>
+      </div>
+    </div>
+  </section>
+</div></main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false,theme:'base',securityLevel:'strict',flowchart:{curve:'basis',htmlLabels:true,nodeSpacing:34,rankSpacing:46,useMaxWidth:false},
+  themeVariables:{fontFamily:'"IBM Plex Sans","IBM Plex Sans Arabic",sans-serif',fontSize:'16px',primaryColor:'#ffffff',primaryBorderColor:'#C7C7C1',primaryTextColor:'#111111',lineColor:'#8A8A85',edgeLabelBackground:'#ffffff',tertiaryColor:'#ffffff'}});
+async function draw(id){const el=document.querySelector('#'+id+' .mermaid');if(el.dataset.processed)return;await mermaid.run({nodes:[el]})}
+draw('mail');
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',async()=>{
+  document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!==b.dataset.tab);
+  await draw(b.dataset.tab);
+}));
+</script>
+</body>
+</html>
