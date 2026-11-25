@@ -1,0 +1,1 @@
+{ "name": "Redcon Tender Planning", "short_name": "Tenders", "start_url": "/", "display": "standalone", "background_color": "#E9E9E6", "theme_color": "#FFFFFF", "icons": [{ "src": "/redcon-logo.svg", "sizes": "any", "type": "image/svg+xml" }] }
