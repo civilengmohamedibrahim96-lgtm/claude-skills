@@ -2,7 +2,7 @@
 // Reads come from S (the last BoardState); every write goes through act(() => dl.method(...)).
 import {
   $, $$, esc, icon, HOUR, fmtDate, fmtShort, fmtDT, ago, dueInfo, workload, firstName, typeBadge, avatar,
-  norm, SORTS, sortItems, COLORS, folderKind, folderLabel, localDT, isoIn, toDate, daysUntil, initials,
+  norm, SORTS, sortItems, COLORS, safeColor, folderKind, folderLabel, localDT, isoIn, toDate, daysUntil, initials,
 } from './lib/util.js';
 import { KIND_LABELS, REVIEW_REASON_LABELS, OUTCOME_LABELS } from './data/contract.js';
 import { enablePush, pushSupported } from './push.js';
@@ -128,11 +128,11 @@ function cardHTML(p) {
   const last = (p.dueHistory || [])[0];
   const fresh = p.updatedAt && Date.now() - p.updatedAt < 24 * HOUR;
   const footer = tot || p.links.length || com || p.folder || rem || eng;
-  return `<article class="card ${du.cls === 'late' ? 'is-late' : ''}" data-id="${p.id}" tabindex="0" aria-label="${esc(p.title)}">
+  return `<article class="card ${du.cls === 'late' ? 'is-late' : ''}" data-id="${esc(p.id)}" tabindex="0" aria-label="${esc(p.title)}">
     <div class="c-top">${typeBadge(projType(p))}${tl ? `<span class="c-tender" dir="auto" title="Study supervisor (المشرف على الدراسة)${tnd ? ' · ' + esc(tnd.name) : ''}">${esc(tl)}</span>` : ''}
-      ${ml.length ? `<button class="c-upd-btn ${unread ? 'new' : ''} ${open ? 'open' : ''}" data-nodrag data-log="${p.id}" aria-expanded="${open}" title="Updates from email · last change ${p.updatedAt ? fmtDT(p.updatedAt) : ''}">${unread ? `<i></i><b>${unread} new</b>` : icon('mail') + ml.length} · ${ago(p.updatedAt)}${icon('chev', 'chev')}</button>`
+      ${ml.length ? `<button class="c-upd-btn ${unread ? 'new' : ''} ${open ? 'open' : ''}" data-nodrag data-log="${esc(p.id)}" aria-expanded="${open}" title="Updates from email · last change ${p.updatedAt ? fmtDT(p.updatedAt) : ''}">${unread ? `<i></i><b>${unread} new</b>` : icon('mail') + ml.length} · ${ago(p.updatedAt)}${icon('chev', 'chev')}</button>`
       : `<span class="c-upd ${fresh ? 'fresh' : ''}" title="Last updated ${p.updatedAt ? fmtDT(p.updatedAt) : ''}${p.updatedBy ? ' by ' + esc(p.updatedBy) : ''}"><i></i>Updated ${ago(p.updatedAt)}</span>`}</div>
-    ${ml.length ? `<div class="c-log ${open ? 'open' : ''}" data-logbox="${p.id}"><div><div class="c-log-in"><div class="c-log-h">${icon('mail')}Updates from email</div>${ml.slice(0, 6).map((e) => {
+    ${ml.length ? `<div class="c-log ${open ? 'open' : ''}" data-logbox="${esc(p.id)}"><div><div class="c-log-in"><div class="c-log-h">${icon('mail')}Updates from email</div>${ml.slice(0, 6).map((e) => {
       const [label, cls] = KIND_LABELS[e.kind] || ['Update', 'k-upd'];
       return `<div class="c-log-it"><div class="r"><span class="dir">${e.direction === 'sent' ? '↑' : '↓'}</span><span class="k ${cls}">${esc(label)}</span>${e.at > (p.mailSeen || 0) ? '<span class="nw">new</span>' : ''}<time title="${fmtDT(e.at)}">${ago(e.at)}</time></div><p>${esc(e.summary)}${e.links ? ` <span class="ln">${icon('link')}${e.links}</span>` : ''}</p><small dir="rtl" title="${esc(e.subject)}">${esc(e.subject)}</small>${e.webLink ? ` <a href="${esc(e.webLink)}" target="_blank" rel="noopener" data-nodrag>Open email</a>` : ''}</div>`;
     }).join('')}${ml.length > 6 ? `<div class="c-log-more">+ ${ml.length - 6} older in the project</div>` : ''}</div></div></div>` : ''}
@@ -142,11 +142,11 @@ function cardHTML(p) {
       ${icon('cal')}<b>${p.due ? fmtDate(p.due) : 'No submission date'}</b>
       ${p.due ? `<span class="c-rel">${du.rel}</span>` : ''}
       ${last && Date.now() - last.at < 7 * 24 * HOUR ? `<span class="c-due-src ${last.by === 'email' ? 'em' : ''}" title="${last.by === 'email' ? 'Date updated from email' : 'Date changed by ' + esc(last.by)} · ${ago(last.at)}${last.from ? ' (was ' + fmtDate(last.from) + ')' : ''}">${icon(last.by === 'email' ? 'mail' : 'user')}</span>` : ''}
-      <button class="c-due-edit" data-nodrag data-due="${p.id}" aria-label="Change submission date" title="Change submission date">${icon('edit')}</button>
-      <input type="date" class="due-in" data-duein="${p.id}" value="${p.due || ''}" tabindex="-1" aria-hidden="true">
+      <button class="c-due-edit" data-nodrag data-due="${esc(p.id)}" aria-label="Change submission date" title="Change submission date">${icon('edit')}</button>
+      <input type="date" class="due-in" data-duein="${esc(p.id)}" value="${p.due || ''}" tabindex="-1" aria-hidden="true">
     </div>
     ${p.status ? `<div class="c-status" dir="auto">${esc(p.status)}</div>` : ''}
-    ${p.tags.length ? `<div class="card-tags">${p.tags.map((id) => { const t = tagById(id); return t ? `<span class="tag"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</span>` : ''; }).join('')}</div>` : ''}
+    ${p.tags.length ? `<div class="card-tags">${p.tags.map((id) => { const t = tagById(id); return t ? `<span class="tag"><i class="tdot" style="background:${safeColor(t.color)}"></i>${esc(t.name)}</span>` : ''; }).join('')}</div>` : ''}
     ${footer ? `<div class="c-foot">
       ${tot ? `<span class="c-tasks" title="${done} of ${tot} sub-tasks done"><span class="c-bar"><i style="width:${done / tot * 100}%"></i></span>${done}/${tot}</span>` : ''}
       ${p.links.length ? `<span title="Links">${icon('link')}${p.links.length}</span>` : ''}
@@ -165,16 +165,16 @@ function colHTML(col, unassigned) {
   const shown = items.filter(matches);
   const u = colUser(col);
   const canEdit = !unassigned && (isAdmin() || u.id === S.me.id);
-  return `<section class="col ${unassigned ? 'unassigned' : ''}" data-col="${col ? col.id : ''}">
+  return `<section class="col ${unassigned ? 'unassigned' : ''}" data-col="${esc(col ? col.id : '')}">
     <div class="col-head">
       ${unassigned ? `<div class="col-who"><div class="avatar">${icon('mail')}</div><div class="col-title"><span>Unassigned projects</span><small>New jobs land here${workload(items)}</small></div></div>`
-        : `<${canEdit ? 'button' : 'div'} class="col-who" ${canEdit ? `data-profile="${u.id}" title="Edit ${esc(u.name)}'s profile"` : ''}>${avatar(u)}<div class="col-title"><span dir="auto">${esc(u.name)}</span><small>${items.length} project${items.length === 1 ? '' : 's'}${workload(items)}${canEdit ? `<span class="edit-hint">${icon('edit')}</span>` : ''}</small></div></${canEdit ? 'button' : 'div'}>`}
+        : `<${canEdit ? 'button' : 'div'} class="col-who" ${canEdit ? `data-profile="${esc(u.id)}" title="Edit ${esc(u.name)}'s profile"` : ''}>${avatar(u)}<div class="col-title"><span dir="auto">${esc(u.name)}</span><small>${items.length} project${items.length === 1 ? '' : 's'}${workload(items)}${canEdit ? `<span class="edit-hint">${icon('edit')}</span>` : ''}</small></div></${canEdit ? 'button' : 'div'}>`}
       <span class="col-count">${shown.length}</span>
-      ${unassigned || !isAdmin() ? '' : `<button class="btn ghost icon sm" data-colmenu="${col.id}" aria-label="Column options">${icon('dots')}</button>`}
+      ${unassigned || !isAdmin() ? '' : `<button class="btn ghost icon sm" data-colmenu="${esc(col.id)}" aria-label="Column options">${icon('dots')}</button>`}
     </div>
-    <div class="col-sort"><button class="sort-btn" data-sort="${sk}" title="Sort this column">${icon('sort')}<span>${SORTS[skey][1]}</span>${icon('chev', 'chev')}</button></div>
-    <div class="col-list" data-list="${col ? col.id : ''}">${shown.map(cardHTML).join('') || `<div class="empty-col">${unassigned ? 'No unassigned projects' : 'Drag a project here to assign it'}</div>`}</div>
-    <div class="col-foot"><button class="btn sm add-card" data-add="${col ? col.id : ''}">${icon('plus')}Add project</button></div>
+    <div class="col-sort"><button class="sort-btn" data-sort="${esc(sk)}" title="Sort this column">${icon('sort')}<span>${SORTS[skey][1]}</span>${icon('chev', 'chev')}</button></div>
+    <div class="col-list" data-list="${esc(col ? col.id : '')}">${shown.map(cardHTML).join('') || `<div class="empty-col">${unassigned ? 'No unassigned projects' : 'Drag a project here to assign it'}</div>`}</div>
+    <div class="col-foot"><button class="btn sm add-card" data-add="${esc(col ? col.id : '')}">${icon('plus')}Add project</button></div>
   </section>`;
 }
 
@@ -195,7 +195,7 @@ function filterLabel(id) {
 }
 function renderFilters() {
   const act_ = [...filterTags].filter((id) => !id.startsWith('tm:') || tenderById(id.slice(3)));
-  $('#qChips').innerHTML = act_.map((id) => { const l = filterLabel(id); return `<span class="qchip">${l.dot ? `<i class="tdot" style="background:${l.dot}"></i>` : ''}${esc(l.txt)}<button type="button" data-unfilter="${esc(id)}" aria-label="Remove filter ${esc(l.txt)}">${icon('x')}</button></span>`; }).join('');
+  $('#qChips').innerHTML = act_.map((id) => { const l = filterLabel(id); return `<span class="qchip">${l.dot ? `<i class="tdot" style="background:${safeColor(l.dot)}"></i>` : ''}${esc(l.txt)}<button type="button" data-unfilter="${esc(id)}" aria-label="Remove filter ${esc(l.txt)}">${icon('x')}</button></span>`; }).join('');
   $('#fCount').hidden = !act_.length;
   $('#fCount').textContent = act_.length;
   $('#q').placeholder = act_.length ? 'Search within filters…' : 'Search project names…';
@@ -203,7 +203,7 @@ function renderFilters() {
   $('#fPanel').innerHTML = `
     <div class="fgrp"><span>Tender type</span><div>${opt('type:public', 'Public')}${opt('type:private', 'Private')}</div></div>
     <div class="fgrp"><span>Tender team</span><div>${(S.tenderTeam || []).map((t) => opt('tm:' + t.id, `<em class="tt ${t.type}">${t.type === 'private' ? 'Pr' : 'Pu'}</em><bdi>${esc(firstName(t.name.replace(/^Eng\.?\s*/i, '')))}</bdi>`)).join('')}</div></div>
-    <div class="fgrp"><span>Tags</span><div>${S.tags.map((t) => opt(t.id, `<i class="tdot" style="background:${t.color}"></i>${esc(t.name)}`)).join('')}</div></div>
+    <div class="fgrp"><span>Tags</span><div>${S.tags.map((t) => opt(t.id, `<i class="tdot" style="background:${safeColor(t.color)}"></i>${esc(t.name)}`)).join('')}</div></div>
     <div class="ffoot"><button type="button" class="btn sm ghost" id="fClear" ${act_.length ? '' : 'disabled'}>Clear all</button><button type="button" class="btn sm dark" id="fDone">Done</button></div>`;
 }
 
@@ -422,7 +422,7 @@ function renderQList() {
   const n = norm(v);
   const ms = S.projects.filter((p) => norm(p.title).includes(n)).slice(0, 8);
   qSel = Math.min(qSel, Math.max(ms.length - 1, 0));
-  L.innerHTML = ms.length ? ms.map((p, i) => `<button class="qi ${i === qSel ? 'on' : ''}" role="option" data-qo="${p.id}"><b dir="auto">${esc(p.title)}</b></button>`).join('') : '<div class="qe">No project with that name</div>';
+  L.innerHTML = ms.length ? ms.map((p, i) => `<button class="qi ${i === qSel ? 'on' : ''}" role="option" data-qo="${esc(p.id)}"><b dir="auto">${esc(p.title)}</b></button>`).join('') : '<div class="qe">No project with that name</div>';
   L.classList.add('show');
   $('#q').setAttribute('aria-expanded', 'true');
 }
@@ -457,7 +457,7 @@ function menu(x, y, items) {
   m.id = 'menu';
   m.style.left = Math.max(8, x) + 'px';
   m.style.top = y + 'px';
-  m.innerHTML = items.map((it, i) => `<button data-i="${i}" class="${it[3] || ''}">${icon(it[1])}${it[0]}</button>`).join('');
+  m.innerHTML = items.map((it, i) => `<button data-i="${esc(i)}" class="${it[3] || ''}">${icon(it[1])}${it[0]}</button>`).join('');
   document.body.appendChild(m);
   m.onclick = (e) => { const b = e.target.closest('[data-i]'); if (b) { closeMenu(); items[b.dataset.i][2](); } };
   setTimeout(() => document.addEventListener('click', closeMenu, { once: true }), 0);
@@ -575,7 +575,7 @@ function renderPage() {
       </div>
       <div class="panel">
         <h4>Tags</h4>
-        <div class="tagpick" id="tagpick">${S.tags.map((t) => `<button data-tag="${t.id}" class="${p.tags.includes(t.id) ? 'on' : ''}"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</button>`).join('')}<input class="newtag" id="newTag" placeholder="+ New tag" dir="auto" aria-label="New tag"></div>
+        <div class="tagpick" id="tagpick">${S.tags.map((t) => `<button data-tag="${esc(t.id)}" class="${p.tags.includes(t.id) ? 'on' : ''}"><i class="tdot" style="background:${safeColor(t.color)}"></i>${esc(t.name)}</button>`).join('')}<input class="newtag" id="newTag" placeholder="+ New tag" dir="auto" aria-label="New tag"></div>
       </div>
       <div class="panel">
         <h4>Project folder</h4>
@@ -595,7 +595,7 @@ function renderPage() {
       <div class="panel" style="animation-delay:.06s">
         <div class="tabs" id="tabs">
           ${[['files', 'folder', 'Files', 0], ['links', 'link', 'Links', p.links.length], ['comments', 'msg', 'Comments', nonSys], ['notifications', 'bell', 'Notifications', p.notifications.length], ['uploads', 'up', 'Uploads', 0]]
-            .map(([k, ic, l, n]) => `<button class="tab ${curTab === k ? 'on' : ''}" data-tab="${k}">${icon(ic)}${l}${n ? `<span class="n">${n}</span>` : ''}</button>`).join('')}
+            .map(([k, ic, l, n]) => `<button class="tab ${curTab === k ? 'on' : ''}" data-tab="${esc(k)}">${icon(ic)}${l}${n ? `<span class="n">${n}</span>` : ''}</button>`).join('')}
           <span class="tab-ink" id="tabInk"></span>
         </div>
         <div id="pane"></div>
@@ -609,7 +609,7 @@ function renderPage() {
 
 function subHTML(s) {
   const open = openSubs.has(s.id);
-  return `<div class="sub ${s.done ? 'done' : ''} ${open ? 'open' : ''}" data-sub="${s.id}">
+  return `<div class="sub ${s.done ? 'done' : ''} ${open ? 'open' : ''}" data-sub="${esc(s.id)}">
     <div class="sub-row">
       <button class="chk" data-act="toggle" aria-label="Done"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10" fill="none"/></svg></button>
       <input class="sub-text" value="${esc(s.text)}" dir="auto" data-act="text" aria-label="Sub-task">
@@ -662,7 +662,7 @@ function bindPage(p) {
     $$('#pType button').forEach((x) => x.classList.toggle('on', x === b));
     act(() => dl.updateProject(p.id, { type: b.dataset.v }));
   };
-  $('#pTender').onchange = (e) => act(() => dl.updateProject(p.id, { tender: e.target.value || null }));
+  $('#pTender').onchange = (e) => act(() => dl.updateProject(p.id, { tender: e.target.value || null, supervisor: '' }));
   $('#pCol').onchange = async (e) => {
     const v = e.target.value || null;
     const r = await act(() => dl.moveProject(p.id, v, [p.id, ...columnIdsExcept(v, p.id)]));
@@ -767,7 +767,7 @@ function renderPane() {
   }
   if (curTab === 'links') {
     pane.innerHTML = `<form class="addrow" id="lf" style="margin-bottom:10px"><input class="in" id="lt" placeholder="Title" style="max-width:160px" dir="auto"><input class="in" id="lu" placeholder="https://…" type="url" required><button class="btn primary sm" style="height:34px">${icon('plus')}Add</button></form>
-      ${p.links.length ? p.links.map((l) => `<div class="list-item"><span class="ico">${icon('link')}</span><div class="body"><b><a href="${esc(l.url)}" target="_blank" rel="noopener" dir="auto">${esc(l.title || l.url)}</a></b><small>${esc(l.url)}${l.src ? ' · from email' : ''}</small></div><button class="btn ghost icon sm" data-dell="${l.id}" aria-label="Remove">${icon('x')}</button></div>`).join('')
+      ${p.links.length ? p.links.map((l) => `<div class="list-item"><span class="ico">${icon('link')}</span><div class="body"><b><a href="${esc(l.url)}" target="_blank" rel="noopener" dir="auto">${esc(l.title || l.url)}</a></b><small>${esc(l.url)}${l.src ? ' · from email' : ''}</small></div><button class="btn ghost icon sm" data-dell="${esc(l.id)}" aria-label="Remove">${icon('x')}</button></div>`).join('')
         : '<div class="empty">No links yet. Links found in emails are added here automatically.</div>'}`;
     $('#lf').onsubmit = (e) => {
       e.preventDefault();
@@ -809,7 +809,7 @@ function renderPane() {
         <label class="chk-row full"><input type="checkbox" id="nemail" checked>Also send by email</label>
         <button class="btn primary full">${icon('bell')}Set reminder</button>
       </form>
-      ${list.length ? list.map((n) => remRow(n, p, `data-deln="${n.id}"`, true)).join('') : '<div class="empty">No reminders for this project.</div>'}`;
+      ${list.length ? list.map((n) => remRow(n, p, `data-deln="${esc(n.id)}"`, true)).join('') : '<div class="empty">No reminders for this project.</div>'}`;
     const pb = $('#perm');
     if (pb) pb.onclick = () => (canPush ? enablePushUI() : Notification.requestPermission().then(() => renderPane()));
     $('.presets', pane).onclick = (e) => {
@@ -852,7 +852,7 @@ function renderPane() {
 
 /* ---------------- reminders: recipients ---------------- */
 function recipPicker(id, selected, withAssignee) {
-  const opt = (v, html, cls = '') => `<button type="button" class="${cls} ${selected.includes(v) ? 'on' : ''}" data-r="${v}">${html}</button>`;
+  const opt = (v, html, cls = '') => `<button type="button" class="${cls} ${selected.includes(v) ? 'on' : ''}" data-r="${esc(v)}">${html}</button>`;
   return `<div class="recips" id="${id}">${opt('all', 'Everyone', 'txt')}${withAssignee ? opt('assignee', 'Assigned engineer', 'txt') : ''}${S.users.map((u) => opt(u.id, avatar(u, 'sm') + esc(u.name.replace(/^Eng\.\s*/, '')))).join('')}</div>`;
 }
 function bindPicker(id) {
@@ -886,7 +886,7 @@ function remRow(n, p, del, inProject = false) {
       ${p && !inProject ? `<small dir="auto" style="color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.title)}</small>` : ''}
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px"><span class="when">${fmtDT(n.at)}</span>${n.repeat !== 'none' ? `<span class="pill o">${n.repeat}</span>` : ''}${n.email ? '<span class="pill">+ email</span>' : ''}<span style="color:var(--muted);font-size:12px">→ ${esc(toLabel(n, p))}</span></div></div>
     <span style="display:flex">${who.slice(0, 3).map((u) => avatar(u, 'sm')).join('')}</span>
-    ${p && !inProject ? `<button class="btn sm ghost" data-open="${p.id}">Open</button>` : ''}
+    ${p && !inProject ? `<button class="btn sm ghost" data-open="${esc(p.id)}">Open</button>` : ''}
     <button class="btn ghost icon sm" ${del} aria-label="Delete reminder">${icon('x')}</button></div>`;
 }
 
@@ -936,7 +936,7 @@ function renderMailSheet() {
     </div>
     <div class="section-label">Recent emails</div>
     ${m.log.length ? m.log.map((l) => `<div class="mail ${l.outcome === 'review' ? 'pending' : ''}"><div class="subj ar" dir="rtl">${esc(l.subject)}</div><div class="from">${esc(l.from || '')}</div>
-      <div class="res"><span class="${pillFor(l.outcome)}">${esc(OUTCOME_LABELS[l.outcome] || l.outcome)}</span><span>${esc(l.label || '')}</span>${l.pid ? `<button class="btn sm ghost" data-open="${l.pid}" style="margin-left:auto">Open ${icon('ext')}</button>` : ''}</div></div>`).join('') : '<div class="empty">No emails read yet.</div>'}
+      <div class="res"><span class="${pillFor(l.outcome)}">${esc(OUTCOME_LABELS[l.outcome] || l.outcome)}</span><span>${esc(l.label || '')}</span>${l.pid ? `<button class="btn sm ghost" data-open="${esc(l.pid)}" style="margin-left:auto">Open ${icon('ext')}</button>` : ''}</div></div>`).join('') : '<div class="empty">No emails read yet.</div>'}
     <div class="section-label">Recent runs</div>
     ${m.runs.length ? m.runs.map((r) => `<div style="font-size:12.5px;color:var(--muted);margin-bottom:4px">${fmtDT(r.at)} · ${esc(r.trigger)} · ${r.fetched} read · ${r.created} new · ${r.updated} updated${r.review ? ` · ${r.review} for review` : ''}</div>`).join('') : '<div class="empty">No runs yet.</div>'}
   </div>`;
@@ -1002,7 +1002,7 @@ function renderRemSheet() {
       <div style="display:flex;gap:8px"><button class="btn" id="rNow" style="flex:1;justify-content:center">${icon('send')}Send now</button><button class="btn primary" id="rAdd" style="flex:1;justify-content:center">${icon('bell')}Schedule reminder</button></div>
     </div>
     <div class="section-label">Upcoming · ${up.length}</div>
-    ${up.length ? up.map(({ n, p }) => remRow(n, p, p ? `data-delp="${p.id}" data-n="${n.id}"` : `data-delg="${n.id}"`)).join('') : '<div class="empty">Nothing scheduled.</div>'}
+    ${up.length ? up.map(({ n, p }) => remRow(n, p, p ? `data-delp="${esc(p.id)}" data-n="${esc(n.id)}"` : `data-delg="${esc(n.id)}"`)).join('') : '<div class="empty">Nothing scheduled.</div>'}
     <div class="section-label">Recently sent</div>
     ${S.sentLog.length ? S.sentLog.slice(0, 10).map((l) => `<div class="sent"><span style="color:var(--accent)">${icon('check')}</span><div class="b"><b style="font-weight:500" dir="auto">${esc(l.msg)}</b><small>to ${esc(l.names.join(', '))}${l.email ? ' · ' + l.email + ' email' + (l.email > 1 ? 's' : '') : ''} · ${fmtDT(l.at)}</small></div></div>`).join('') : '<div class="empty">No reminders sent yet.</div>'}
   </div>`;
@@ -1101,23 +1101,23 @@ function renderTeamSheet() {
         <button class="btn primary" id="tSend" style="width:100%;justify-content:center">${icon('plus')}Add engineer</button>
       </div>
       <div class="members">
-    ${order.map((u, ix) => { const st = memberStats(u); return `<div class="member" draggable="true" data-mid="${u.id}"><span class="grip" title="Drag to reorder" aria-hidden="true">${icon('grip')}</span><span class="mv"><button class="btn ghost icon sm" data-up="${u.id}" ${ix === 0 ? 'disabled' : ''} aria-label="Move ${esc(u.name)} up" title="Move up">${icon('up1')}</button><button class="btn ghost icon sm" data-down="${u.id}" ${ix === order.length - 1 ? 'disabled' : ''} aria-label="Move ${esc(u.name)} down" title="Move down">${icon('chev')}</button></span>${avatar(u)}
+    ${order.map((u, ix) => { const st = memberStats(u); return `<div class="member" draggable="true" data-mid="${esc(u.id)}"><span class="grip" title="Drag to reorder" aria-hidden="true">${icon('grip')}</span><span class="mv"><button class="btn ghost icon sm" data-up="${esc(u.id)}" ${ix === 0 ? 'disabled' : ''} aria-label="Move ${esc(u.name)} up" title="Move up">${icon('up1')}</button><button class="btn ghost icon sm" data-down="${esc(u.id)}" ${ix === order.length - 1 ? 'disabled' : ''} aria-label="Move ${esc(u.name)} down" title="Move down">${icon('chev')}</button></span>${avatar(u)}
       <div class="b"><b dir="auto">${esc(u.name)} ${u.role === 'admin' ? '<span class="pill o">admin</span>' : ''}${me().id === u.id ? '<span class="pill">you</span>' : ''}</b>
         <small>${u.email ? esc(u.email) : 'No email – not signed in'}</small>
         <small>${st.active} project${st.active !== 1 ? 's' : ''}${st.late ? ` · <span style="color:var(--danger)">${st.late} overdue</span>` : ''}${colOfUser(u.id) ? '' : ' · no board column'}</small></div>
       <div class="acts">
-        <button class="btn ghost icon sm" data-edit="${u.id}" aria-label="Edit profile" title="Edit profile">${icon('edit')}</button>
-        ${u.id !== me().id ? `<button class="btn ghost icon sm" data-rm="${u.id}" aria-label="Remove" title="Remove from team">${icon('trash')}</button>` : ''}
+        <button class="btn ghost icon sm" data-edit="${esc(u.id)}" aria-label="Edit profile" title="Edit profile">${icon('edit')}</button>
+        ${u.id !== me().id ? `<button class="btn ghost icon sm" data-rm="${esc(u.id)}" aria-label="Remove" title="Remove from team">${icon('trash')}</button>` : ''}
       </div></div>`; }).join('')}
       </div>
     </div>
     <div class="team-sec second">
       <div class="sec-h"><div><h3>Tender team</h3><small>Private and public tender engineers we work with</small></div></div>
     <div id="ttList">${(S.tenderTeam || []).map((t) => `<div class="tt-row">
-      <input class="in" data-tt="${t.id}" data-f="name" value="${esc(t.name)}" aria-label="Name">
-      <input class="in ar" dir="rtl" data-tt="${t.id}" data-f="ar" value="${esc(t.ar || '')}" placeholder="الاسم بالعربي" aria-label="Name in Arabic, used to read emails">
-      <select class="in" data-tt="${t.id}" data-f="type" aria-label="Public or private"><option value="private" ${t.type === 'private' ? 'selected' : ''}>Private</option><option value="public" ${t.type === 'public' ? 'selected' : ''}>Public</option></select>
-      <button class="btn ghost icon sm" data-ttrm="${t.id}" aria-label="Remove ${esc(t.name)}">${icon('trash')}</button></div>`).join('')}</div>
+      <input class="in" data-tt="${esc(t.id)}" data-f="name" value="${esc(t.name)}" aria-label="Name">
+      <input class="in ar" dir="rtl" data-tt="${esc(t.id)}" data-f="ar" value="${esc(t.ar || '')}" placeholder="الاسم بالعربي" aria-label="Name in Arabic, used to read emails">
+      <select class="in" data-tt="${esc(t.id)}" data-f="type" aria-label="Public or private"><option value="private" ${t.type === 'private' ? 'selected' : ''}>Private</option><option value="public" ${t.type === 'public' ? 'selected' : ''}>Public</option></select>
+      <button class="btn ghost icon sm" data-ttrm="${esc(t.id)}" aria-label="Remove ${esc(t.name)}">${icon('trash')}</button></div>`).join('')}</div>
     <button class="btn sm" id="ttAdd" style="margin-top:8px">${icon('plus')}Add tender engineer</button>
     <p style="font-size:12px;color:var(--muted);margin:8px 0 0">The Arabic name is how emails are matched to a tender engineer.</p>
     </div>
@@ -1202,7 +1202,7 @@ function editProfile(id) {
       <div class="full"><label class="lbl-sm" for="pfName">Full name</label><input class="in" id="pfName" value="${esc(u.name)}" dir="auto"></div>
       <div><label class="lbl-sm" for="pfEmail">Email</label><input class="in" id="pfEmail" type="email" value="${esc(u.email)}" ${admin ? '' : 'disabled'}></div>
       ${admin && !self ? `<div><label class="lbl-sm" for="pfRole">Access</label><select class="in" id="pfRole"><option value="engineer" ${u.role === 'engineer' ? 'selected' : ''}>Engineer</option><option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option></select></div>` : ''}
-      <div class="full"><span class="lbl-sm">Avatar colour</span><div class="swatches" id="pfSw">${COLORS.map((c) => `<button type="button" data-c="${c}" class="${c === u.color ? 'on' : ''}" style="background:${c}" aria-label="Colour ${c}"></button>`).join('')}</div></div>
+      <div class="full"><span class="lbl-sm">Avatar colour</span><div class="swatches" id="pfSw">${COLORS.map((c) => `<button type="button" data-c="${esc(c)}" class="${c === u.color ? 'on' : ''}" style="background:${safeColor(c)}" aria-label="Colour ${c}"></button>`).join('')}</div></div>
     </div>
     <span class="lbl-sm">Notifications</span>
     <label class="chk-row"><input type="checkbox" id="pfBr" ${u.prefs.browser ? 'checked' : ''}>Desktop / browser notifications</label>
@@ -1265,7 +1265,7 @@ async function enablePushUI() {
 function addColumn() {
   const free = S.users.filter((u) => u.role === 'engineer' && !colOfUser(u.id));
   modal(`<h3>Add engineer</h3>
-    ${free.length ? `<span class="lbl-sm">Team members without a column</span><div class="recips" style="margin-bottom:16px">${free.map((u) => `<button data-existing="${u.id}">${avatar(u, 'sm')}${esc(u.name)}</button>`).join('')}</div><span class="lbl-sm">Or add someone new</span>` : ''}
+    ${free.length ? `<span class="lbl-sm">Team members without a column</span><div class="recips" style="margin-bottom:16px">${free.map((u) => `<button data-existing="${esc(u.id)}">${avatar(u, 'sm')}${esc(u.name)}</button>`).join('')}</div><span class="lbl-sm">Or add someone new</span>` : ''}
     ${personFormHTML('m')}
     <div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="mOk">${icon('plus')}Add engineer</button></div>`, () => {
     $$('[data-existing]').forEach((b) => {

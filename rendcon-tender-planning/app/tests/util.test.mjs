@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  esc, norm, firstName, dueInfo, sortItems, SORTS, ago, folderKind, fmtDate, isoIn,
+  esc, norm, firstName, dueInfo, sortItems, SORTS, ago, folderKind, fmtDate, isoIn, safeColor, avatar,
 } from '../src/lib/util.js';
 
 test('esc escapes HTML and tolerates null', () => {
@@ -76,4 +76,19 @@ test('isoIn returns local calendar dates', () => {
   assert.equal(isoIn(0, new Date(2026, 10, 25)), '2026-11-25');
   assert.equal(isoIn(-3, new Date(2026, 10, 25)), '2026-11-22');
   assert.equal(isoIn(14, new Date(2026, 10, 25)), '2026-12-09');
+});
+
+test('safeColor passes hex colours and replaces anything else', () => {
+  assert.equal(safeColor('#EE6A1F'), '#EE6A1F');
+  assert.equal(safeColor('#abc'), '#abc');
+  assert.equal(safeColor('red"><x'), '#5B5B57');
+  assert.equal(safeColor('#111"></span><a href=//evil>'), '#5B5B57');
+  assert.equal(safeColor(undefined), '#5B5B57');
+});
+
+test('avatar never lets a stored colour break out of the style attribute', () => {
+  const out = avatar({ name: 'A B', color: 'x"><y' });
+  assert.ok(!out.includes('"><y'));
+  assert.ok(out.includes('style="background:#5B5B57"'));
+  assert.ok(avatar({ name: 'A B', color: '#EE6A1F' }).includes('style="background:#EE6A1F"'));
 });

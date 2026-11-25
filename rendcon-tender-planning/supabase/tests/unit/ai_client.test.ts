@@ -137,6 +137,21 @@ test('invalid JSON returns bad_output', async () => {
   if (!res.ok) assert.equal(res.error, 'bad_output');
 });
 
+test('after a server-side fallback marker only the fallback model reply is used', async () => {
+  const { client } = fakeClient({
+    stop_reason: 'end_turn',
+    model: 'claude-haiku-5-5',
+    content: [
+      { type: 'text', text: '{"partial' },
+      { type: 'fallback' },
+      { type: 'text', text: JSON.stringify(validForm()) },
+    ],
+  });
+  const res = await understandEmail(client, input(), OPTS);
+  assert.equal(res.ok, true);
+  if (res.ok) assert.equal(res.form.matched_project, 'new');
+});
+
 test('JSON without confidence returns bad_output', async () => {
   const form = validForm();
   delete form.confidence;

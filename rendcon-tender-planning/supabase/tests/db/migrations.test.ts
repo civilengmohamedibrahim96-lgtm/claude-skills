@@ -286,3 +286,16 @@ test('13. changing a tender engineer type updates their projects', async () => {
   const after = await one<{ t: string }>('select tender_type as t from public.projects where id = $1', [projectId]);
   assert.equal(after.t, 'public');
 });
+
+test('14. colours are 6-digit hex: an injected colour is refused, a valid one is accepted', async () => {
+  await assert.rejects(
+    as(ENGINEER, 'authenticated', () =>
+      db.query(`update public.people set color = 'red"><x' where id = $1`, [engineerId])),
+    /people_color_hex/,
+  );
+  const ok = await as(ENGINEER, 'authenticated', () =>
+    db.query(`update public.people set color = '#123ABC' where id = $1`, [engineerId]));
+  assert.equal(ok.affectedRows, 1);
+  const color = await one<{ color: string }>('select color from public.people where id = $1', [engineerId]);
+  assert.equal(color.color, '#123ABC');
+});

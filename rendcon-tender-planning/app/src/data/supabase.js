@@ -220,7 +220,7 @@ export function createSupabaseDataLayer({
       mail: {
         address: mailSetting.address ?? '',
         subject: mailSetting.subjectHint ?? '',
-        hourly: !!mailSetting.hourlyEnabled,
+        hourly: mailSetting.hourlyEnabled !== false,
         lastSync: mailState.lastRunAt ? ms(mailState.lastRunAt) : null,
         runs: (unwrap(runs) ?? []).map(mapMailRun),
         log: (unwrap(processed) ?? []).map(mapMailLog),
@@ -228,6 +228,22 @@ export function createSupabaseDataLayer({
       },
       folders: { root: (settingsMap.folders ?? {}).rootUrl ?? '' },
     };
+  }
+
+  /** Invokes an edge function. Errors carry the function's JSON `error` code when it has one, mapped to a readable message. */
+  async function invoke(name, body) {
+    const res = await client.functions.invoke(name, { body });
+    if (res.error) {
+      let j = null;
+      try { j = await res.error.context?.json?.(); } catch { j = null; }
+      const code = j?.error;
+      const message = code === 'not_found_or_closed' ? 'Someone already handled this email'
+        : code === 'project_not_found' ? 'That project no longer exists'
+          : code === 'forbidden' ? 'Your account is not on the team'
+            : (code || res.error.message || 'Server function failed');
+      throw new Error(message);
+    }
+    return res.data;
   }
 
   return {
@@ -424,14 +440,14 @@ export function createSupabaseDataLayer({
     },
 
     async sendReminderNow({ projectId, msg, to, email }) {
-      const data = unwrap(await client.functions.invoke('send-reminders', {
-        body: { mode: 'now', reminder: { projectId: projectId ?? null, message: msg, recipients: to, email } },
-      }), 'Server function failed');
-      return { names: data?.names ?? [], emails: data?.emails ?? 0 };
+      const data = await invoke('send-reminders', {
+        mode: 'now', reminder: { projectId: projectId ?? null, message: msg, recipients: to, email },
+      });
+      return { names: data?.recipientNames ?? [], emails: data?.emails ?? 0 };
     },
 
     async sendTestNotification() {
-      unwrap(await client.functions.invoke('send-reminders', { body: { mode: 'test' } }), 'Server function failed');
+      await invoke('send-reminders', { mode: 'test' });
     },
 
     // ---- team ----
@@ -539,7 +555,9 @@ export function createSupabaseDataLayer({
 
     // ---- email ----
     async syncMailNow() {
-      const d = unwrap(await client.functions.invoke('mail-sync', { body: { source: 'manual' } }), 'Server function failed');
+      const d = await invoke('mail-sync', { source: 'manual' });
+      if (d?.skipped === 'already_running') throw new Error('An email sync is already running – try again in a few minutes');
+      if ((d?.errors ?? 0) > 0 && !d?.fetched) throw new Error('Email sync failed – check the mailbox connection (Email intake → recent runs)');
       return {
         read: (d?.fetched ?? 0) - (d?.alreadyProcessed ?? 0),
         created: d?.created ?? 0,
@@ -549,7 +567,7 @@ export function createSupabaseDataLayer({
     },
 
     async resolveReview(reviewId, resolution) {
-      const d = unwrap(await client.functions.invoke('mail-review', { body: { reviewId, ...resolution } }), 'Server function failed');
+      const d = await invoke('mail-review', { reviewId, ...resolution });
       return { projectId: d?.projectId ?? null };
     },
 

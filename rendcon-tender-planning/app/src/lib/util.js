@@ -4,6 +4,8 @@ export const $ = (s, r = globalThis.document) => r.querySelector(s);
 export const $$ = (s, r = globalThis.document) => [...r.querySelectorAll(s)];
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+/** Only a plain hex colour may reach a style attribute; anything else falls back to the neutral grey. */
+export const safeColor = (c) => (/^#[0-9a-fA-F]{3,8}$/.test(String(c)) ? c : '#5B5B57');
 export const icon = (n, c = '') => `<svg class="i ${c}"><use href="#i-${n}"/></svg>`;
 
 export const HOUR = 3600000;
@@ -74,7 +76,7 @@ export function firstName(v) {
 export const typeBadge = (t) => `<span class="ttype ${t === 'private' ? 'priv' : 'pub'}">${t === 'private' ? 'Private' : 'Public'}</span>`;
 
 export const avatar = (u, cls = '') => (u
-  ? `<span class="avatar ${cls}" style="background:${u.color}" title="${esc(u.name)}">${esc(initials(u.name))}</span>`
+  ? `<span class="avatar ${cls}" style="background:${safeColor(u.color)}" title="${esc(u.name)}">${esc(initials(u.name))}</span>`
   : `<span class="avatar ghost ${cls}" title="Unassigned">${icon('user')}</span>`);
 
 export const digits = (s) => String(s).replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));

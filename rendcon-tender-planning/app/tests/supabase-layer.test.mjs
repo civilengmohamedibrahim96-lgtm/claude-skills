@@ -401,13 +401,53 @@ test('resolveReview invokes mail-review with the resolution', async () => {
 });
 
 test('sendReminderNow invokes send-reminders in now mode and returns names and emails', async () => {
-  const { client, layer } = make({ functions: { 'send-reminders': ok({ names: ['Mina'], emails: 1 }) } });
+  const { client, layer } = make({
+    functions: {
+      'send-reminders': ok({
+        reminders: 0, autoReminders: 0, pushes: 1, pushesFailed: 0, emails: 1, emailsFailed: 0,
+        removedSubscriptions: 0, recipientNames: ['Mina'],
+      }),
+    },
+  });
   const res = await layer.sendReminderNow({ projectId: 'p1', msg: 'Call', to: ['all'], email: true });
   assert.deepEqual(res, { names: ['Mina'], emails: 1 });
   assert.deepEqual(client.log.invoke[0], {
     name: 'send-reminders',
     opts: { body: { mode: 'now', reminder: { projectId: 'p1', message: 'Call', recipients: ['all'], email: true } } },
   });
+});
+
+test('mail hourly sync defaults to on when hourlyEnabled is missing, and off only when false', async () => {
+  const withSetting = (value) => make({
+    session: null,
+    tables: { ...boardTables(), settings: ok([{ key: 'mail', value }]) },
+  }).layer.loadBoard();
+  assert.equal((await withSetting({ address: 'a@redcon.com' })).mail.hourly, true);
+  assert.equal((await withSetting({ address: 'a@redcon.com', hourlyEnabled: false })).mail.hourly, false);
+});
+
+test('syncMailNow reports a skipped or failed run instead of "up to date"', async () => {
+  const skipped = make({ functions: { 'mail-sync': ok({ skipped: 'already_running', fetched: 0, errors: 0 }) } });
+  await assert.rejects(skipped.layer.syncMailNow(), { message: /already running/ });
+  const failed = make({ functions: { 'mail-sync': ok({ skipped: null, fetched: 0, errors: 2 }) } });
+  await assert.rejects(failed.layer.syncMailNow(), { message: /Email sync failed/ });
+  const partial = make({ functions: { 'mail-sync': ok({ skipped: null, fetched: 4, alreadyProcessed: 0, created: 1, updated: 0, review: 0, errors: 1 }) } });
+  assert.deepEqual(await partial.layer.syncMailNow(), { read: 4, created: 1, updated: 0, review: 0 });
+});
+
+test('edge function errors use the JSON error code from the response body', async () => {
+  const errorWith = (json) => ({
+    data: null,
+    error: { message: 'Edge Function returned a non-2xx status code', context: { json: () => Promise.resolve(json) } },
+  });
+  const closed = make({ functions: { 'mail-review': errorWith({ ok: false, error: 'not_found_or_closed' }) } });
+  await assert.rejects(closed.layer.resolveReview('r1', { action: 'assign' }), { message: 'Someone already handled this email' });
+  const missing = make({ functions: { 'send-reminders': errorWith({ error: 'project_not_found' }) } });
+  await assert.rejects(missing.layer.sendReminderNow({ projectId: 'p1', msg: 'x', to: [], email: false }), { message: 'That project no longer exists' });
+  const denied = make({ functions: { 'mail-sync': errorWith({ error: 'forbidden' }) } });
+  await assert.rejects(denied.layer.syncMailNow(), { message: 'Your account is not on the team' });
+  const unreadable = make({ functions: { 'mail-sync': { data: null, error: { message: 'Failed to send a request', context: { json: () => Promise.reject(new Error('no body')) } } } } });
+  await assert.rejects(unreadable.layer.syncMailNow(), { message: 'Failed to send a request' });
 });
 
 test('sendTestNotification invokes send-reminders in test mode', async () => {

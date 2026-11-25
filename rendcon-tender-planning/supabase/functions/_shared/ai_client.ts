@@ -111,7 +111,13 @@ export async function understandEmail(client: AnthropicLike, input: AiInput, opt
     return { ok: false, error: 'max_tokens', retryable: false, detail: 'output truncated at max_tokens' };
   }
 
-  const block = (response.content ?? []).find((b) => b.type === 'text');
+  // With server-side fallbacks the content can hold the declining model's blocks, then a
+  // {type:'fallback'} marker, then the fallback model's output. Only blocks after the last
+  // marker belong to the usable turn.
+  const blocks = response.content ?? [];
+  let start = 0;
+  for (let i = 0; i < blocks.length; i++) if (blocks[i].type === 'fallback') start = i + 1;
+  const block = blocks.slice(start).find((b) => b.type === 'text');
   let parsed: unknown;
   try {
     parsed = JSON.parse(block?.text ?? '');
