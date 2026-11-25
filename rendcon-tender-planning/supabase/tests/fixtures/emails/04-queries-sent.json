@@ -1,0 +1,43 @@
+{
+  "name": "04-queries-sent",
+  "description": "Sent folder: the team sends questions to the client.",
+  "folder": "sent",
+  "raw": {
+    "id": "AAMk-04-queries-sent",
+    "conversationId": "conv-04",
+    "subject": "استفسارات – صيانة شبكات الصرف الصحي بالحي الثالث",
+    "from": { "emailAddress": { "name": "Redcon Tenders", "address": "tenders@redcon.example" } },
+    "toRecipients": [ { "emailAddress": { "name": "مجلس المدينة", "address": "procurement@city-council.example" } } ],
+    "sentDateTime": "2026-11-24T13:40:00Z",
+    "receivedDateTime": "2026-11-24T13:40:02Z",
+    "hasAttachments": false,
+    "webLink": "https://outlook.office365.com/owa/?ItemID=AAMk-04",
+    "body": { "contentType": "text", "content": "السادة / مجلس المدينة – إدارة التعاقدات\nبالإشارة إلى مناقصة صيانة شبكات الصرف الصحي بالحي الثالث، نرجو التكرم بالرد على الاستفسارات التالية:\n1- هل يشمل البند رقم 4 توريد المواسير أم التركيب فقط؟\n2- برجاء إرسال لوحات المسار بصيغة DWG.\n3- هل يمكن زيارة الموقع يوم الخميس القادم؟\nوتفضلوا بقبول فائق الاحترام،\nإدارة المناقصات – ريدكون" }
+  },
+  "expect": {
+    "prefilter": null,
+    "shortlistTop": "p-sewer",
+    "shortlistIncludes": ["p-sewer"],
+    "aiForm": {
+      "direction": "sent",
+      "kind": "queries_sent",
+      "matched_project": "@p-sewer",
+      "match_reason": "Questions about the sewer network maintenance tender for the third district, sent to the city council.",
+      "other_possible_projects": [],
+      "project_name": "صيانة شبكات الصرف الصحي بالحي الثالث",
+      "client": "مجلس المدينة",
+      "submission_date": null,
+      "submission_date_source": null,
+      "tender_type": "unknown",
+      "supervisor_first_name": null,
+      "links": [],
+      "suggested_status": "Queries sent to client – waiting for answers",
+      "summary": "3 queries sent to the city council",
+      "confidence": { "match": "high", "facts": "high" }
+    },
+    "decision": "apply",
+    "reviewReasons": [],
+    "validated": { "projectId": "p-sewer", "kind": "queries_sent", "submissionDate": null, "tenderId": null, "tenderType": null, "supervisor": null, "linksCount": 0 },
+    "board": { "project": "p-sewer", "tagsInclude": ["new", "un"], "due": "2026-12-06", "status": "Queries sent to client – waiting for answers", "linksAdded": 0, "dateChange": null }
+  }
+}

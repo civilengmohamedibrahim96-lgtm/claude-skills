@@ -1,0 +1,212 @@
+{
+  "today": "2026-11-25",
+  "timeZone": "Africa/Cairo",
+  "people": [
+    {
+      "id": "u-admin",
+      "name": "Mohamed Ibrahim",
+      "email": "mohamed@redcon.example",
+      "role": "admin",
+      "active": true,
+      "prefs": {
+        "push": true,
+        "email": true
+      }
+    },
+    {
+      "id": "u-ahmed",
+      "name": "Eng. Ahmed Hassan",
+      "email": "ahmed@redcon.example",
+      "role": "engineer",
+      "active": true,
+      "prefs": {
+        "push": true,
+        "email": true
+      }
+    },
+    {
+      "id": "u-sara",
+      "name": "Eng. Sara Mostafa",
+      "email": "sara@redcon.example",
+      "role": "engineer",
+      "active": true,
+      "prefs": {
+        "push": true,
+        "email": false
+      }
+    },
+    {
+      "id": "u-omar",
+      "name": "Eng. Omar Khaled",
+      "email": "omar@redcon.example",
+      "role": "engineer",
+      "active": true,
+      "prefs": {
+        "push": false,
+        "email": true
+      }
+    }
+  ],
+  "tenderTeam": [
+    {
+      "id": "t-mina",
+      "name": "Eng. Mina",
+      "nameAr": "مينا",
+      "type": "private"
+    },
+    {
+      "id": "t-merihan",
+      "name": "Eng. Merihan",
+      "nameAr": "ميريهان",
+      "type": "private"
+    },
+    {
+      "id": "t-mm",
+      "name": "Eng. Mohamed Mustafa",
+      "nameAr": "محمد مصطفى",
+      "type": "public"
+    },
+    {
+      "id": "t-shreine",
+      "name": "Eng. Shreine",
+      "nameAr": "شيرين",
+      "type": "public"
+    }
+  ],
+  "projects": [
+    {
+      "id": "p-elec",
+      "title": "توريد وتركيب أعمال الكهرباء – مبنى الإدارة",
+      "client": "وزارة الإسكان",
+      "supervisor": null,
+      "tenderId": "t-mm",
+      "tenderType": "public",
+      "dueOn": "2026-11-29",
+      "status": "Pricing MEP BOQ – waiting on lighting supplier quote",
+      "tags": [
+        "upd"
+      ],
+      "assigneeId": "u-sara",
+      "updatedAt": "2026-11-24T10:00:00Z",
+      "lastEmailSubject": "ورد الينا – ملحق رقم 1: توريد وتركيب أعمال الكهرباء – مبنى الإدارة"
+    },
+    {
+      "id": "p-tank",
+      "title": "إنشاء خزان مياه أرضي سعة 5000 م³",
+      "client": "هيئة مياه الشرب",
+      "supervisor": "شيرين",
+      "tenderId": "t-shreine",
+      "tenderType": "public",
+      "dueOn": "2026-12-03",
+      "status": "Site visit done – structural take-off in progress",
+      "tags": [
+        "new"
+      ],
+      "assigneeId": "u-ahmed",
+      "updatedAt": "2026-11-24T08:00:00Z",
+      "lastEmailSubject": "ورد الينا – إنشاء خزان مياه أرضي سعة 5000 م³"
+    },
+    {
+      "id": "p-roads2",
+      "title": "إعادة تأهيل الطرق الداخلية – المرحلة الثانية",
+      "client": "هيئة المجتمعات العمرانية الجديدة",
+      "supervisor": null,
+      "tenderId": "t-mm",
+      "tenderType": "public",
+      "dueOn": "2026-12-24",
+      "status": "Postponed by client – new date to be announced",
+      "tags": [
+        "pp"
+      ],
+      "assigneeId": "u-omar",
+      "updatedAt": "2026-11-23T09:00:00Z",
+      "lastEmailSubject": "تأجيل موعد تقديم العطاءات – إعادة تأهيل الطرق الداخلية – المرحلة الثانية"
+    },
+    {
+      "id": "p-roads3",
+      "title": "تطوير شبكة الطرق الداخلية – المرحلة الثالثة",
+      "client": "محافظة المدينة",
+      "supervisor": "مينا",
+      "tenderId": "t-mina",
+      "tenderType": "private",
+      "dueOn": "2026-12-28",
+      "status": "Received by email – needs an engineer",
+      "tags": [
+        "new",
+        "un"
+      ],
+      "assigneeId": null,
+      "updatedAt": "2026-11-24T12:00:00Z",
+      "lastEmailSubject": "ورد إلينا – ممارسة محدودة: تطوير شبكة الطرق الداخلية"
+    },
+    {
+      "id": "p-fire",
+      "title": "Fire fighting system – Logistics Hub",
+      "client": "Port Logistics Co.",
+      "supervisor": null,
+      "tenderId": "t-mina",
+      "tenderType": "private",
+      "dueOn": "2026-11-27",
+      "status": "Hydraulic calc pending",
+      "tags": [
+        "new",
+        "urgent"
+      ],
+      "assigneeId": "u-sara",
+      "updatedAt": "2026-11-25T06:00:00Z",
+      "lastEmailSubject": null
+    },
+    {
+      "id": "p-sewer",
+      "title": "صيانة شبكات الصرف الصحي – الحي الثالث",
+      "client": "مجلس المدينة",
+      "supervisor": null,
+      "tenderId": "t-shreine",
+      "tenderType": "public",
+      "dueOn": "2026-12-06",
+      "status": "Received by email – needs an engineer",
+      "tags": [
+        "new",
+        "un"
+      ],
+      "assigneeId": null,
+      "updatedAt": "2026-11-25T02:00:00Z",
+      "lastEmailSubject": "ورد الينا – صيانة شبكات الصرف الصحي – الحي الثالث"
+    },
+    {
+      "id": "p-shed",
+      "title": "Steel shed – Industrial Zone plot 14",
+      "client": "Private client",
+      "supervisor": null,
+      "tenderId": "t-merihan",
+      "tenderType": "private",
+      "dueOn": "2026-12-12",
+      "status": "",
+      "tags": [
+        "un"
+      ],
+      "assigneeId": null,
+      "updatedAt": "2026-11-24T05:00:00Z",
+      "lastEmailSubject": null
+    },
+    {
+      "id": "p-wall",
+      "title": "Boundary wall & gatehouse",
+      "client": "Education Directorate",
+      "supervisor": null,
+      "tenderId": "t-mm",
+      "tenderType": "public",
+      "dueOn": "2026-11-30",
+      "status": "Ready for submission",
+      "tags": [],
+      "assigneeId": "u-ahmed",
+      "updatedAt": "2026-11-24T15:00:00Z",
+      "lastEmailSubject": null
+    }
+  ],
+  "conversations": {
+    "conv-elec-01": [
+      "p-elec"
+    ]
+  }
+}

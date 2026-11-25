@@ -1,0 +1,45 @@
+{
+  "name": "03-queries-answers",
+  "description": "Answers to bidders' queries, a reply in a thread already linked to the electrical project; two links, one only inside an href; the date is explicitly unchanged.",
+  "folder": "inbox",
+  "raw": {
+    "id": "AAMk-03-queries-answers",
+    "conversationId": "conv-elec-01",
+    "subject": "RE: الرد على الاستفسارات - كهرباء مبنى الادارة",
+    "from": { "emailAddress": { "name": "وزارة الإسكان – إدارة المناقصات", "address": "tenders@moh.example" } },
+    "toRecipients": [ { "emailAddress": { "name": "Tenders", "address": "tenders@redcon.example" } } ],
+    "receivedDateTime": "2026-11-24T13:05:00Z",
+    "hasAttachments": false,
+    "webLink": "https://outlook.office365.com/owa/?ItemID=AAMk-03",
+    "body": { "contentType": "HTML", "content": "<div dir='rtl'><p>السادة المتقدمين لمناقصة توريد وتركيب أعمال الكهرباء لمبنى الإدارة،</p><p>مرفق لسيادتكم الرد على الاستفسارات الواردة من السادة المتقدمين، مع العلم بأن آخر موعد للتقديم كما هو دون تغيير.</p><p>ملف الردود: <a href='https://tenders.example/electrical-admin/answers.pdf'>ملف الردود</a><br>ملحق رقم 2 – جداول الكميات المعدلة: <a href='https://tenders.example/electrical-admin/addendum-2.xlsx'>https://tenders.example/electrical-admin/addendum-2.xlsx</a></p></div>" }
+  },
+  "expect": {
+    "prefilter": null,
+    "shortlistTop": "p-elec",
+    "shortlistIncludes": ["p-elec"],
+    "aiForm": {
+      "direction": "received",
+      "kind": "queries_answers",
+      "matched_project": "@p-elec",
+      "match_reason": "Same thread as the electrical works tender for the administration building; the body names it.",
+      "other_possible_projects": [],
+      "project_name": "توريد وتركيب أعمال الكهرباء لمبنى الإدارة",
+      "client": "وزارة الإسكان",
+      "submission_date": null,
+      "submission_date_source": null,
+      "tender_type": "unknown",
+      "supervisor_first_name": null,
+      "links": [
+        { "url": "https://tenders.example/electrical-admin/answers.pdf", "label": "Answers" },
+        { "url": "https://tenders.example/electrical-admin/addendum-2.xlsx", "label": "Addendum" }
+      ],
+      "suggested_status": "Answers to queries received – review",
+      "summary": "Answers to bidders' queries and revised BOQ (Annex 2) received",
+      "confidence": { "match": "high", "facts": "high" }
+    },
+    "decision": "apply",
+    "reviewReasons": [],
+    "validated": { "projectId": "p-elec", "kind": "queries_answers", "submissionDate": null, "tenderId": null, "tenderType": null, "supervisor": null, "linksCount": 2 },
+    "board": { "project": "p-elec", "tagsInclude": ["upd", "qa"], "due": "2026-11-29", "status": "Answers to queries received – review", "linksAdded": 2, "dateChange": null }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "06-newsletter",
+  "description": "Supplier newsletter with a List-Unsubscribe header: skipped by the prefilter, no AI call.",
+  "folder": "inbox",
+  "raw": {
+    "id": "AAMk-06-newsletter",
+    "conversationId": "conv-06",
+    "subject": "النشرة الشهرية – عروض نوفمبر",
+    "from": { "emailAddress": { "name": "مواد البناء الحديثة", "address": "newsletter@supplier.example" } },
+    "toRecipients": [ { "emailAddress": { "name": "Tenders", "address": "tenders@redcon.example" } } ],
+    "receivedDateTime": "2026-11-24T20:00:00Z",
+    "hasAttachments": false,
+    "webLink": "https://outlook.office365.com/owa/?ItemID=AAMk-06",
+    "internetMessageHeaders": [ { "name": "List-Unsubscribe", "value": "<https://supplier.example/unsubscribe>" }, { "name": "Precedence", "value": "bulk" } ],
+    "body": { "contentType": "html", "content": "<p>تعرف على أحدث عروضنا لمواد البناء لهذا الشهر: خصم ١٥٪ على حديد التسليح.</p><p>لإلغاء الاشتراك اضغط <a href='https://supplier.example/unsubscribe'>هنا</a></p>" }
+  },
+  "expect": {
+    "prefilter": "bulk_header",
+    "shortlistTop": null,
+    "shortlistIncludes": [],
+    "aiForm": null,
+    "decision": "prefiltered",
+    "reviewReasons": [],
+    "validated": null,
+    "board": null
+  }
+}

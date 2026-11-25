@@ -1,0 +1,40 @@
+name: rendcon-ci
+on:
+  push:
+    paths: ['rendcon-tender-planning/**', '.github/workflows/rendcon-*.yml']
+  pull_request:
+    paths: ['rendcon-tender-planning/**', '.github/workflows/rendcon-*.yml']
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rendcon-tender-planning/supabase
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rendcon-tender-planning/app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm run build
+      - run: node --test tests/util.test.mjs tests/mock-layer.test.mjs tests/supabase-layer.test.mjs
+      - name: Smoke test (Playwright, mock data layer)
+        run: |
+          npm install -g playwright@1.63.0
+          npx -y playwright@1.63.0 install --with-deps chromium
+          NODE_PATH="$(npm root -g)" node tests/smoke.mjs

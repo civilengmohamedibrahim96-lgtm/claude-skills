@@ -1,0 +1,42 @@
+{
+  "name": "05-offer-submitted",
+  "description": "Sent folder: offer submitted; English subject matches an English board title, Arabic body.",
+  "folder": "sent",
+  "raw": {
+    "id": "AAMk-05-offer-submitted",
+    "conversationId": "conv-05",
+    "subject": "Offer submission – Boundary wall & gatehouse",
+    "from": { "emailAddress": { "name": "Redcon Tenders", "address": "tenders@redcon.example" } },
+    "toRecipients": [ { "emailAddress": { "name": "Education Directorate", "address": "tenders@edu.example" } } ],
+    "sentDateTime": "2026-11-25T08:15:00Z",
+    "hasAttachments": true,
+    "webLink": "https://outlook.office365.com/owa/?ItemID=AAMk-05",
+    "body": { "contentType": "text", "content": "السادة / مديرية التربية والتعليم\nمرفق لسيادتكم العرض الفني والمالي لمناقصة إنشاء السور الخارجي وغرفة الأمن (Boundary wall & gatehouse) طبقاً لكراسة الشروط.\nرابط ملفات العرض: https://share.redcon.example/offers/boundary-wall\nمع خالص التحية،\nريدكون للمقاولات" }
+  },
+  "expect": {
+    "prefilter": null,
+    "shortlistTop": "p-wall",
+    "shortlistIncludes": ["p-wall"],
+    "aiForm": {
+      "direction": "sent",
+      "kind": "offer_submitted",
+      "matched_project": "@p-wall",
+      "match_reason": "Subject and body name the boundary wall and gatehouse tender of the Education Directorate.",
+      "other_possible_projects": [],
+      "project_name": "إنشاء السور الخارجي وغرفة الأمن",
+      "client": "مديرية التربية والتعليم",
+      "submission_date": null,
+      "submission_date_source": null,
+      "tender_type": "unknown",
+      "supervisor_first_name": null,
+      "links": [ { "url": "https://share.redcon.example/offers/boundary-wall", "label": "Offer files" } ],
+      "suggested_status": "Offer submitted",
+      "summary": "Technical and financial offer submitted",
+      "confidence": { "match": "high", "facts": "high" }
+    },
+    "decision": "apply",
+    "reviewReasons": [],
+    "validated": { "projectId": "p-wall", "kind": "offer_submitted", "submissionDate": null, "tenderId": null, "tenderType": null, "supervisor": null, "linksCount": 1 },
+    "board": { "project": "p-wall", "tagsInclude": ["sub"], "due": "2026-11-30", "status": "Offer submitted", "linksAdded": 1, "dateChange": null }
+  }
+}

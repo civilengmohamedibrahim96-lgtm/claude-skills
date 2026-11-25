@@ -1,0 +1,45 @@
+{
+  "name": "01-new-tender",
+  "description": "«ورد الينا» new public tender with a supervisor line and an Arabic-digit date; nothing similar on the board.",
+  "folder": "inbox",
+  "raw": {
+    "id": "AAMk-01-new-tender",
+    "conversationId": "conv-01",
+    "subject": "ورد الينا – مناقصة عامة: إنشاء مبنى إداري بالمنطقة الصناعية",
+    "from": { "emailAddress": { "name": "إدارة المشتريات", "address": "Procurement@NUCA.example" } },
+    "toRecipients": [ { "emailAddress": { "name": "Tenders", "address": "tenders@redcon.example" } } ],
+    "ccRecipients": [],
+    "receivedDateTime": "2026-11-25T07:12:00Z",
+    "sentDateTime": "2026-11-25T07:11:40Z",
+    "hasAttachments": false,
+    "webLink": "https://outlook.office365.com/owa/?ItemID=AAMk-01",
+    "internetMessageHeaders": [ { "name": "Message-ID", "value": "<01@nuca.example>" } ],
+    "body": { "contentType": "html", "content": "<html><body><p>السادة / إدارة المناقصات</p><p>ورد الينا طلب تسعير للمشروع التالي:</p><p>اسم المشروع: إنشاء مبنى إداري بالمنطقة الصناعية الثانية<br>نوع المناقصة: عامة<br>والمشرف علي الدراسه : م/ شيرين محمود<br>الجهة المالكة: هيئة المجتمعات العمرانية الجديدة<br>آخر موعد للتقديم: ٢٠/١٢/٢٠٢٦<br>رابط كراسة الشروط: <a href='https://tenders.example/admin-building/specs.pdf'>https://tenders.example/admin-building/specs.pdf</a></p><p>وتفضلوا بقبول فائق الاحترام</p></body></html>" }
+  },
+  "expect": {
+    "prefilter": null,
+    "shortlistTop": null,
+    "shortlistIncludes": [],
+    "aiForm": {
+      "direction": "received",
+      "kind": "new_project",
+      "matched_project": "new",
+      "match_reason": "No board project is about an administrative building in the industrial zone.",
+      "other_possible_projects": [],
+      "project_name": "إنشاء مبنى إداري بالمنطقة الصناعية الثانية",
+      "client": "هيئة المجتمعات العمرانية الجديدة",
+      "submission_date": "2026-12-20",
+      "submission_date_source": "آخر موعد للتقديم: ٢٠/١٢/٢٠٢٦",
+      "tender_type": "public",
+      "supervisor_first_name": "شيرين",
+      "links": [ { "url": "https://tenders.example/admin-building/specs.pdf", "label": "Specs" } ],
+      "suggested_status": null,
+      "summary": "New public tender received – submission 20 Dec 2026",
+      "confidence": { "match": "high", "facts": "high" }
+    },
+    "decision": "apply",
+    "reviewReasons": [],
+    "validated": { "projectId": null, "kind": "new_project", "submissionDate": "2026-12-20", "tenderId": "t-shreine", "tenderType": "public", "supervisor": "شيرين", "linksCount": 1 },
+    "board": { "project": "new", "title": "إنشاء مبنى إداري بالمنطقة الصناعية الثانية", "tagsInclude": ["new", "un"], "due": "2026-12-20", "status": "Received by email – needs an engineer", "linksAdded": 1, "dateChange": null }
+  }
+}
