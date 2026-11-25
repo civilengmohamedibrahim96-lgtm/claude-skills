@@ -135,7 +135,7 @@ function logRow(state, m, outcome, pid, label, at) {
  */
 export function runMockSync(state, now) {
   const pending = MOCK_MAILBOX.filter((m) => !state.mail.processed.includes(m.id));
-  const counts = { read: pending.length, created: 0, updated: 0, review: 0 };
+  const counts = { read: pending.length, created: 0, updated: 0, review: 0, prefiltered: 0 };
   for (const m of pending) {
     const at = now + m.received * HOUR;
     const r = parseMail(m);
@@ -198,6 +198,7 @@ export function runMockSync(state, now) {
       });
       logRow(state, m, 'review', null, undefined, at);
     } else {
+      counts.prefiltered++;
       logRow(state, m, 'prefiltered', null, undefined, at);
     }
   }
