@@ -139,3 +139,14 @@ test('mail forwarded from a Public Sector sender is always read', () => {
   const other = msg({ ...fwd, bodyText: fwd.bodyText.replace('ps@redconcon.com', 'shop@store.example') });
   assert.deepEqual(pf(other), { skip: true, reason: 'bulk_header' });
 });
+
+test('a Public Sector From: line in the body counts whatever the subject says', () => {
+  const pf = createPrefilter({ alwaysReadSenders: ['redconcon.com'] });
+  const m = msg({
+    from: { name: null, address: 'me@gmail.com' },
+    subject: 'Weekly newsletter',
+    bodyText: 'unsubscribe\n\nFrom: PS Team <ps@redconcon.com>\nSent: Monday',
+    headers: { 'list-unsubscribe': '<x>' },
+  });
+  assert.deepEqual(pf(m), NOT_SKIPPED);
+});

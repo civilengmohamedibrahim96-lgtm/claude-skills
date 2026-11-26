@@ -72,7 +72,8 @@ export type PrefilterOptions = { alwaysReadSenders?: string[] };
 function fromAlwaysRead(m: MailMessage, senders: string[]): boolean {
   if (senders.length === 0) return false;
   if (isAlwaysReadSender(m.from?.address, senders)) return true;
-  return isForwarded(m) && forwardedSenders(m.bodyText).some((a) => isAlwaysReadSender(a, senders));
+  // decided by sender only: any From: line in the body (a forwarded original), whatever the subject
+  return forwardedSenders(m.bodyText).some((a) => isAlwaysReadSender(a, senders));
 }
 
 // Mail from an always-read sender skips the bulk/system/newsletter/meeting rules; only

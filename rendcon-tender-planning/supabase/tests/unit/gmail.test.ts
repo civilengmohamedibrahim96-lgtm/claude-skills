@@ -59,7 +59,8 @@ describe('gmail client', () => {
     assert.equal(requests.length, 2);
     const first = JSON.parse(requests[0].body ?? '').arguments;
     assert.equal(first.query, `in:inbox after:${Date.parse('2026-11-26T05:00:00Z') / 1000}`);
-    assert.equal(first.include_payload, true);
+    assert.equal(first.include_payload, false);
+    assert.equal(first.verbose, false);
     assert.equal(first.page_token, undefined);
     assert.equal(JSON.parse(requests[1].body ?? '').arguments.page_token, 'tok2');
     assert.ok(requests[0].url.endsWith('/GMAIL_FETCH_EMAILS'));
@@ -86,6 +87,20 @@ describe('gmail client', () => {
     await client.sendMail({ to: 'a@b.c', subject: 'Hi', html: '<p>x</p>' });
     assert.ok(requests[1].url.endsWith('/GMAIL_SEND_EMAIL'));
     assert.deepEqual(JSON.parse(requests[1].body ?? '').arguments, { recipient_email: 'a@b.c', subject: 'Hi', body: '<p>x</p>', is_html: true });
+  });
+});
+
+describe('gmail listing keeps metadata only', () => {
+  test('bodies are dropped so the full message is fetched later', async () => {
+    const { transport } = transportOf([
+      page([{ ...msg('a', '2026-11-26T06:00:00Z'), messageText: 'partial', preview: { body: 'p' }, payload: { x: 1 }, sender: 'A <a@b.c>' }]),
+    ]);
+    const items = await createComposioMailClient(composioConfigFromEnv(ENV), transport)
+      .listMessages('inbox', '2026-11-26T05:00:00Z', 10) as any[];
+    assert.deepEqual(items[0], { messageId: 'a', messageTimestamp: '2026-11-26T06:00:00Z', sender: 'A <a@b.c>' });
+    const m = normalizeGmailMessage(items[0], 'inbox');
+    assert.equal(m?.bodyText, '');
+    assert.equal(m?.bodyHtml, null);
   });
 });
 
