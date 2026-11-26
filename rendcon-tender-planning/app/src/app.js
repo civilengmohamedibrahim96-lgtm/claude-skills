@@ -22,6 +22,10 @@ let syncing = false;
 let pendingRepaint = false;
 let refreshTimer = null;
 const SORT_KEY = 'rendcon-sort-v1';
+const FOLD_KEY = 'rendcon-subfold-v1';
+let openFolds = new Set();
+try { openFolds = new Set(JSON.parse(localStorage.getItem(FOLD_KEY) || '[]')); } catch (_) { openFolds = new Set(); }
+const saveFolds = () => { try { localStorage.setItem(FOLD_KEY, JSON.stringify([...openFolds])); } catch (_) { /* storage unavailable */ } };
 let sortPrefs = {};
 try { sortPrefs = JSON.parse(localStorage.getItem(SORT_KEY) || '{}') || {}; } catch (_) { sortPrefs = {}; }
 
@@ -44,6 +48,7 @@ const tenderById = (id) => (S.tenderTeam || []).find((t) => t.id === id);
 const projType = (p) => { const t = tenderById(p.tender); return t ? t.type : (p.type || 'public'); };
 const sortKey = (k) => sortPrefs[k] || 'due';
 const tenderLabel = (p) => p.supervisor || firstName(((tenderById(p.tender) || {}).name || '').replace(/^Eng\.?\s*/i, ''));
+const isSubmitted = (p) => p.tags.includes('sub');
 const upcomingCount = () => S.projects.reduce((a, p) => a + p.notifications.length, 0) + S.reminders.length;
 
 /* ---------------- write helper ---------------- */
@@ -142,6 +147,7 @@ function cardHTML(p) {
       ${icon('cal')}<b>${p.due ? fmtDate(p.due) : 'No submission date'}</b>
       ${p.due ? `<span class="c-rel">${du.rel}</span>` : ''}
       ${last && Date.now() - last.at < 7 * 24 * HOUR ? `<span class="c-due-src ${last.by === 'email' ? 'em' : ''}" title="${last.by === 'email' ? 'Date updated from email' : 'Date changed by ' + esc(last.by)} · ${ago(last.at)}${last.from ? ' (was ' + fmtDate(last.from) + ')' : ''}">${icon(last.by === 'email' ? 'mail' : 'user')}</span>` : ''}
+      <button class="c-due-edit c-sub-btn ${isSubmitted(p) ? 'on' : ''}" data-nodrag data-submit="${esc(p.id)}" aria-label="${isSubmitted(p) ? 'Move back to active' : 'Mark as submitted'}" title="${isSubmitted(p) ? 'Submitted · click to move back to active' : 'Mark as submitted'}">${icon('check')}</button>
       <button class="c-due-edit" data-nodrag data-due="${esc(p.id)}" aria-label="Change submission date" title="Change submission date">${icon('edit')}</button>
       <input type="date" class="due-in" data-duein="${esc(p.id)}" value="${p.due || ''}" tabindex="-1" aria-hidden="true">
     </div>
@@ -161,8 +167,13 @@ function cardHTML(p) {
 
 function colHTML(col, unassigned) {
   const sk = col ? col.id : 'un', skey = sortKey(sk);
-  const items = sortItems(S.projects.filter((p) => (p.columnId || null) === (col ? col.id : null)), skey);
+  const all = sortItems(S.projects.filter((p) => (p.columnId || null) === (col ? col.id : null)), skey);
+  const items = all.filter((p) => !isSubmitted(p));
   const shown = items.filter(matches);
+  const subs = all.filter(isSubmitted).sort((a, b2) => (b2.due || '').localeCompare(a.due || ''));
+  const subShown = subs.filter(matches);
+  const filtering = !!(query || filterTags.size);
+  const foldOpen = openFolds.has(sk) || (filtering && subShown.length > 0);
   const u = colUser(col);
   const canEdit = !unassigned && (isAdmin() || u.id === S.me.id);
   return `<section class="col ${unassigned ? 'unassigned' : ''}" data-col="${esc(col ? col.id : '')}">
@@ -174,6 +185,10 @@ function colHTML(col, unassigned) {
     </div>
     <div class="col-sort"><button class="sort-btn" data-sort="${esc(sk)}" title="Sort this column">${icon('sort')}<span>${SORTS[skey][1]}</span>${icon('chev', 'chev')}</button></div>
     <div class="col-list" data-list="${esc(col ? col.id : '')}">${shown.map(cardHTML).join('') || `<div class="empty-col">${unassigned ? 'No unassigned projects' : 'Drag a project here to assign it'}</div>`}</div>
+    ${subs.length ? `<div class="sub-fold ${foldOpen ? 'open' : ''}">
+      <button class="sub-fold-h" data-fold="${esc(sk)}" aria-expanded="${foldOpen}">${icon('check', 'ok')}<span>Submitted</span><span class="col-count">${filtering ? `${subShown.length}/${subs.length}` : subs.length}</span><span class="grow"></span>${icon('chev', 'chev')}</button>
+      <div class="collapse ${foldOpen ? '' : 'closed'}"><div><div class="sub-fold-list">${subShown.map(cardHTML).join('') || '<div class="empty-col">No submitted projects match</div>'}</div></div></div>
+    </div>` : ''}
     <div class="col-foot"><button class="btn sm add-card" data-add="${esc(col ? col.id : '')}">${icon('plus')}Add project</button></div>
   </section>`;
 }
@@ -239,11 +254,12 @@ function bindBoardDrag() {
     if (e.target.closest('[data-nodrag]')) return;
     const card = e.target.closest('.card');
     if (!card || e.button > 0) return;
-    drag = { card, id: card.dataset.id, x: e.clientX, y: e.clientY, started: false, from: card.closest('.col-list').dataset.list };
+    const fromList = card.closest('.col-list');
+    drag = { card, id: card.dataset.id, x: e.clientX, y: e.clientY, started: false, fixed: !fromList, from: fromList ? fromList.dataset.list : null };
   });
   document.addEventListener('pointermove', (e) => {
     if (!drag) return;
-    if (!drag.started) { if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return; startDrag(e); }
+    if (!drag.started) { if (drag.fixed || Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return; startDrag(e); }
     const g = drag.ghost;
     g.style.left = (e.clientX - drag.ox) + 'px';
     g.style.top = (e.clientY - drag.oy) + 'px';
@@ -322,6 +338,8 @@ function bindBoardClicks() {
     const pr = e.target.closest('[data-profile]'); if (pr) { editProfile(pr.dataset.profile); return; }
     const so = e.target.closest('[data-sort]'); if (so) { sortMenu(so, so.dataset.sort); return; }
     const lg = e.target.closest('[data-log]'); if (lg) { toggleLog(lg.dataset.log); return; }
+    const sb = e.target.closest('[data-submit]'); if (sb) { setSubmitted(sb.dataset.submit); return; }
+    const fd = e.target.closest('[data-fold]'); if (fd) { toggleFold(fd); return; }
     const dd = e.target.closest('[data-due]');
     if (dd) {
       const i = $(`[data-duein="${dd.dataset.due}"]`);
@@ -340,6 +358,25 @@ function bindBoardClicks() {
     const r = await act(() => dl.setDueDate(p.id, i.value));
     if (r.ok && r.value) { flash(p.id); toast(`Submission date set to <b>${fmtDate(i.value)}</b>`, 'cal'); }
   });
+}
+
+/** Marks a project submitted (the system 'sub' tag) or moves it back to active. */
+async function setSubmitted(id, on) {
+  const p = proj(id);
+  if (!p) return;
+  const want = on === undefined ? !isSubmitted(p) : on;
+  const r = await act(() => dl.toggleTag(p.id, 'sub', want));
+  if (!r.ok) return;
+  toast(want ? `<b dir="auto">${esc(p.title)}</b> marked as submitted` : `<b dir="auto">${esc(p.title)}</b> moved back to active`, want ? 'check' : 'left');
+  if (!want) flash(p.id);
+}
+function toggleFold(btn) {
+  const k = btn.dataset.fold, fold = btn.closest('.sub-fold'), open = !fold.classList.contains('open');
+  if (open) openFolds.add(k); else openFolds.delete(k);
+  saveFolds();
+  fold.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', open);
+  $('.collapse', fold).classList.toggle('closed', !open);
 }
 
 function toggleLog(id) {
@@ -546,8 +583,8 @@ function renderPage() {
   const p = proj(cur);
   if (!p) return;
   const done = p.subtasks.filter((s) => s.done).length;
-  const dinfo = dueInfo(p.due);
-  const dueStyle = dinfo.cls === 'late' ? 'background:var(--danger);color:#fff;border-color:var(--danger)' : dinfo.cls === 'soon' ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : '';
+  const dinfo = isSubmitted(p) && p.due ? { cls: 'done', rel: 'Submitted' } : dueInfo(p.due);
+  const dueStyle = dinfo.cls === 'done' ? 'background:var(--ok);color:#fff;border-color:var(--ok)' : dinfo.cls === 'late' ? 'background:var(--danger);color:#fff;border-color:var(--danger)' : dinfo.cls === 'soon' ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : '';
   const nonSys = p.comments.filter((c) => !c.sys).length;
   $('#page').innerHTML = `
   <div class="page-head">
@@ -556,6 +593,7 @@ function renderPage() {
       <div class="crumb">${typeBadge(projType(p))}${tenderById(p.tender) ? ' ' + esc(tenderById(p.tender).name) + ' ·' : ''} received ${fmtDate(p.received)} · updated ${ago(p.updatedAt)}${p.updatedBy ? ' by ' + esc(p.updatedBy) : ''}${p.source === 'email' ? ' <span class="src">from email</span>' : ''}</div>
       <input class="title-in" id="pTitle" value="${esc(p.title)}" dir="auto" aria-label="Project title">
     </div>
+    <button class="btn ${isSubmitted(p) ? 'sub-on' : ''}" id="pSubmit" title="${isSubmitted(p) ? 'Click to move it back to active' : 'Move this tender to the Submitted list'}">${icon('check')}${isSubmitted(p) ? 'Submitted' : 'Mark as submitted'}</button>
     <button class="btn icon" id="pMore" aria-label="More">${icon('dots')}</button>
     <button class="btn icon p-close" id="pClose" aria-label="Close project" title="Close (Esc)">${icon('x')}</button>
   </div>
@@ -628,6 +666,7 @@ function subHTML(s) {
 function bindPage(p) {
   $('#back').onclick = closePage;
   $('#pClose').onclick = closePage;
+  $('#pSubmit').onclick = () => setSubmitted(p.id);
   $('#pMore').onclick = (e) => {
     const r = e.currentTarget.getBoundingClientRect();
     menu(r.right - 190, r.bottom + 4, [['Delete project', 'trash', async () => {
