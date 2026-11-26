@@ -253,14 +253,24 @@ describe('runMailSync', () => {
 
   test('retryable AI error → error record with attempts + 1 and lastRunAt one second before it', async () => {
     const h = harness({ inbox: [msg('flaky', '2026-11-25T07:00:00Z')] });
-    h.setAi('flaky', { ok: false, error: 'api_error', retryable: true, detail: 'overloaded' });
+    h.setAi('flaky', { ok: false, error: 'api_error', retryable: true, detail: 'socket hang up' });
     const s = await runMailSync(h.deps, 'manual');
     assert.equal(s.errors, 1);
     const rec = h.memory.dump().processed.get('flaky');
     assert.equal(rec?.outcome, 'error');
     assert.equal(rec?.attempts, 1);
-    assert.equal(rec?.lastError, 'overloaded');
+    assert.equal(rec?.lastError, 'socket hang up');
     assert.equal(h.memory.dump().lastRunAt, '2026-11-25T06:59:59.000Z');
+  });
+
+  test('Gemini quota error keeps attempts and defers the rest of the run', async () => {
+    const h = harness({ inbox: [msg('q1', '2026-11-25T07:00:00Z'), msg('q2', '2026-11-25T08:00:00Z')] });
+    h.setAi('q1', { ok: false, error: 'api_error', retryable: true, detail: 'You exceeded your current quota' });
+    const s = await runMailSync(h.deps, 'manual');
+    assert.equal(s.errors, 1);
+    assert.equal(s.deferred, 1);
+    assert.equal(h.memory.dump().processed.get('q1')?.attempts, 0);
+    assert.equal(h.memory.dump().processed.get('q2'), undefined);
   });
 
   test('AI refusal → review item with ai_refused', async () => {
