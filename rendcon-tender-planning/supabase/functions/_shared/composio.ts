@@ -156,16 +156,26 @@ export function createComposioMailClient(cfg: ComposioConfig, transport: HttpTra
     const all: unknown[] = [];
     let pageToken: string | null = null;
     do {
+      // Metadata only: full payloads of a whole page can exceed Composio's response size
+      // (HTTP 413). Bodies are fetched one message at a time just before processing.
       const args: Record<string, unknown> = {
         query,
         max_results: cfg.pageSize,
-        include_payload: true,
-        verbose: true,
+        include_payload: false,
+        verbose: false,
         include_spam_trash: false,
       };
       if (pageToken) args.page_token = pageToken;
       const data = await call(slug, args);
-      all.push(...extractList(data));
+      for (const item of extractList(data)) {
+        if (isObject(item)) {
+          // drop partial bodies so the sync fetches the full message (withBody)
+          const { messageText: _t, preview: _p, payload: _pl, snippet: _s, ...meta } = item;
+          all.push(meta);
+        } else {
+          all.push(item);
+        }
+      }
       const next = isObject(data) ? data.nextPageToken : undefined;
       pageToken = typeof next === 'string' && next !== '' ? next : null;
     } while (pageToken && all.length < hardCap);

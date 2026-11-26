@@ -1,5 +1,6 @@
 // Mail sync orchestrator: fetch Inbox + Sent through the mail client, then run each
 // new message through prefilter -> shortlist -> AI -> validator -> apply/review.
+import { focusMessage } from './forwarded.ts';
 import type {
   AiInput,
   AiResult,
@@ -193,14 +194,15 @@ async function execute(
 
   // 7. process one by one
   const failureDates: string[] = [];
+  let aiQuotaHit = false;
   for (const m of todo) {
-    if (deps.now().getTime() - started.getTime() > config.timeBudgetMs) {
+    if (aiQuotaHit || deps.now().getTime() - started.getTime() > config.timeBudgetMs) {
       summary.deferred += 1;
       failureDates.push(m.date);
       continue;
     }
     try {
-      await processOne(deps, summary, m, processed.get(m.id), failureDates);
+      if (await processOne(deps, summary, m, processed.get(m.id), failureDates) === 'ai_quota') aiQuotaHit = true;
     } catch (err) {
       const text = errorText(err);
       deps.log?.('message failed', { id: m.id, error: text });
@@ -241,22 +243,29 @@ async function withBody(deps: MailSyncDeps, m: MailMessage): Promise<MailMessage
   return m;
 }
 
+const AI_QUOTA = /quota|resource[_ ]exhausted|rate limit|\b429\b/i;
+const AI_BUSY = /high demand|overloaded|unavailable|try again later|\b503\b/i;
+export const isAiQuotaError = (detail: string): boolean => AI_QUOTA.test(detail);
+export const isAiCapacityError = (detail: string): boolean => AI_QUOTA.test(detail) || AI_BUSY.test(detail);
+
 async function processOne(
   deps: MailSyncDeps,
   summary: MailRunSummary,
   listed: MailMessage,
   prev: ProcessedRecord | undefined,
   failureDates: string[],
-): Promise<void> {
+): Promise<'ai_quota' | undefined> {
   const { repo } = deps;
 
-  const m = await withBody(deps, listed);
-  const pre = deps.prefilter(m);
+  const full = await withBody(deps, listed);
+  const pre = deps.prefilter(full);
   if (pre.skip) {
-    await repo.markProcessed(record(m, { outcome: 'prefiltered', prefilterReason: pre.reason }));
+    await repo.markProcessed(record(full, { outcome: 'prefiltered', prefilterReason: pre.reason }));
     summary.prefiltered += 1;
     return;
   }
+  // Only the forwarded original: no To/Cc lists, signatures or older quoted emails.
+  const m = focusMessage(full);
 
   const projects = await repo.listOpenProjects();
   const convIds = m.conversationId ? await repo.findProjectIdsByConversation(m.conversationId) : [];
@@ -270,14 +279,17 @@ async function processOne(
 
   if (!result.ok) {
     if (result.retryable) {
+      // Gemini busy or out of quota says nothing about this email: keep its attempts, and
+      // on a quota error stop calling the AI for the rest of this run.
+      const busy = isAiCapacityError(result.detail);
       await repo.markProcessed(record(m, {
         outcome: 'error',
-        attempts: (prev?.attempts ?? 0) + 1,
+        attempts: (prev?.attempts ?? 0) + (busy ? 0 : 1),
         lastError: result.detail,
       }));
       summary.errors += 1;
       failureDates.push(m.date);
-      return;
+      return isAiQuotaError(result.detail) ? 'ai_quota' : undefined;
     }
     const reason: ReviewReason = result.error === 'refusal'
       ? 'ai_refused'
