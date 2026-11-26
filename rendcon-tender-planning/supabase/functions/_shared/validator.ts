@@ -1,6 +1,6 @@
 // Checks the AI form against the board and decides apply / review / ignore (BUILD_PLAN.md §2.4 validator). Pure.
 
-import { extractSupervisor } from './forwarded.ts';
+import { compareNames, extractSupervisor, projectNameHint } from './forwarded.ts';
 import type {
   ActionKind, AiForm, AiLink, Decision, ReviewReason,
   ShortlistEntry, TenderMember, TenderType, ValidateContext, ValidatedForm,
@@ -60,11 +60,25 @@ export function validateForm(form: AiForm, ctx: ValidateContext): Decision {
     else addReason('unknown_project');
   }
 
+  // 3b. the project name written at the top of the email must fit the board title.
+  // An exact name on the shortlist wins; a board title with extra words (another package or
+  // phase of the same scheme) is not the same tender, so it goes to review.
+  const hint = projectNameHint(ctx.message);
+  if (hint && !reasons.includes('unknown_project')) {
+    const exact = ctx.shortlist.find((e) => compareNames(hint, e.project.title) === 'same');
+    if (exact) {
+      matched = exact;
+      projectId = exact.project.id;
+    } else if (matched && compareNames(hint, matched.project.title) === 'differs') {
+      addReason('low_match_confidence');
+    }
+  }
+
   // 4. runners-up: known refs other than the matched one, max 2
   const others: ShortlistEntry[] = [];
   for (const r of form.other_possible_projects) {
     const key = r.trim();
-    if (key === ref) continue;
+    if (key === ref || key === matched?.ref) continue;
     const entry = ctx.shortlist.find((e) => e.ref === key);
     if (entry && !others.includes(entry)) others.push(entry);
     if (others.length === 2) break;

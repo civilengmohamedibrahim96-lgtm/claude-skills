@@ -82,3 +82,26 @@ test('projectNameHint reads the name at the top', () => {
   assert.equal(projectNameHint({ subject: 'تحديث', bodyText: 'ورد إلينا Addendum خاص بمشروع .Sharm El Sheikh Cruise Terminal Project' }),
     'Sharm El Sheikh Cruise Terminal Project');
 });
+
+import { compareNames } from '../../functions/_shared/forwarded.ts';
+test('compareNames', () => {
+  assert.equal(compareNames('Jirian - Island B Villas Construction Package', 'Jirian – Island B Villas Construction Package'), 'same');
+  assert.equal(compareNames('Jirian - Island B Villas Construction Package', 'Jirian - Island B Fully finished Villas Construction Package 2'), 'differs');
+  assert.equal(compareNames('Metal Cans Plant Project', 'Metal Cans Plant'), 'same');
+  assert.equal(compareNames('El Ayat 28,000 Feddans – Integrated Infrastructure Development Project', 'El Ayat Infrastructure'), 'fits');
+  assert.equal(compareNames('Metal Cans Plant Project', 'مصنع العلب المعدنية'), 'unrelated');
+});
+
+test('a forward of a forward uses the first block with text', () => {
+  const body = [
+    'sig', '', 'From: Public Sector Tendering DC <public.sector@redconcon.com>', 'Sent: x', 'To: me',
+    'Subject: Fw: New Tender Notification - Metal Cans Plant Project', '', '', 'Sent from Outlook for Android<https://aka.ms/x>',
+    '________________________________', 'From: Public Sector Tendering DC <public.sector@redconcon.com>', 'Sent: y',
+    'To: Shereen <s@redconcon.com>', 'Subject: New Tender Notification - Metal Cans Plant Project', '',
+    'ورد الينا مناقصه جديده – Metal Cans Plant Project', 'والمشرف علي الدراسة', '', 'م. شيرين العقاد', 'موعد تسليم العطاء : 20– 12– 2026',
+  ].join('\r\n');
+  const f = focusBody({ subject: 'FW: New Tender Notification  - Metal Cans Plant Project', bodyText: body })!;
+  assert.equal(f.subject, 'New Tender Notification - Metal Cans Plant Project');
+  assert.match(f.body, /20– 12– 2026/);
+  assert.equal(extractSupervisor(f.body), 'شيرين');
+});

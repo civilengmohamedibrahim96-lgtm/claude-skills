@@ -211,3 +211,29 @@ test('isRealIsoDate', () => {
   assert.equal(isRealIsoDate('2027-1-10'), false);
   assert.equal(isRealIsoDate('10/01/2027'), false);
 });
+
+const jirian = (id: string, title: string): BoardProject => ({ ...project('p-tank'), id, title });
+const jEntry = (ref: string, p: BoardProject): ShortlistEntry => ({ ref, project: p, score: 0.8, conversationMatch: false });
+
+test('project name at the top: a board title with extra words is not the same tender', () => {
+  const pkg2 = jirian('p-pkg2', 'Jirian - Island B Fully finished Villas Construction Package 2');
+  const msg = message({ subject: 'New Notification - Jirian - Island B Villas Construction Package' });
+  const d = validateForm(form({ matched_project: 'P1' }), ctx({ message: msg, shortlist: [jEntry('P1', pkg2)] }));
+  assert.equal(d.action, 'review');
+  assert.ok(reasonsOf(d).includes('low_match_confidence'));
+});
+
+test('project name at the top: the exact name on the shortlist wins over the AI pick', () => {
+  const pkg2 = jirian('p-pkg2', 'Jirian - Island B Fully finished Villas Construction Package 2');
+  const villas = jirian('p-villas', 'Jirian – Island B Villas Construction Package');
+  const msg = message({ subject: 'New Notification - Jirian - Island B Villas Construction Package' });
+  const d = validateForm(form({ matched_project: 'P1' }), ctx({ message: msg, shortlist: [jEntry('P1', pkg2), jEntry('P2', villas)] }));
+  assert.equal(d.action, 'apply');
+  assert.equal(d.action === 'apply' && d.form.projectId, 'p-villas');
+});
+
+test('supervisor comes from the line after المشرف علي الدراسة, not from the AI', () => {
+  const msg = message({ bodyText: `${BODY}\nوالمشرف علي الدراسة\n\nم. محمد مصطفي` });
+  const d = validateForm(form({ supervisor_first_name: 'شيرين' }), ctx({ message: msg }));
+  assert.equal(d.action === 'apply' && d.form.supervisor, 'محمد');
+});

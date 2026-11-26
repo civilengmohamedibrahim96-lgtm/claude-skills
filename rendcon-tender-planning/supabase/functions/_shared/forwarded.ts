@@ -6,7 +6,7 @@
 
 import type { MailMessage } from './types.ts';
 import { isForwarded } from './prefilter.ts';
-import { firstNameAr } from './arabic.ts';
+import { firstNameAr, normalizeArabic } from './arabic.ts';
 
 const HEADER_KEY = /^[\s>*]*(from|sent|date|to|cc|bcc|subject|من|أرسل|مرسل|التاريخ|إلى|الى|نسخة|الموضوع)\s*[*]?\s*:\s*[*]?\s*(.*)$/i;
 const FROM_KEY = /^(from|من)$/i;
@@ -48,6 +48,9 @@ function slice(lines: string[], from: number, to: number): string {
   return lines.slice(from, end).map(unquote).join('\n').trim();
 }
 
+const contentLength = (body: string): number =>
+  body.replace(/^.*\bsent from\b.*$/gim, '').replace(/\s+/g, '').length;
+
 export interface FocusedMail { subject: string; from: string | null; body: string }
 
 export function focusBody(m: Pick<MailMessage, 'subject' | 'bodyText'>): FocusedMail | null {
@@ -57,9 +60,13 @@ export function focusBody(m: Pick<MailMessage, 'subject' | 'bodyText'>): Focused
   const blocks = headerBlocks(lines);
   if (!blocks.length) return null;
   if (isForwarded(m)) {
-    const b = blocks[0];
-    const next = blocks[1]?.start ?? lines.length;
-    const body = slice(lines, b.end + 1, next);
+    // A forward of a forward ("Fw: …" with only "Sent from Outlook for Android") has no text of
+    // its own: use the first block that says something.
+    let k = 0;
+    const bodyOf = (i: number): string => slice(lines, blocks[i].end + 1, blocks[i + 1]?.start ?? lines.length);
+    while (k < blocks.length - 1 && contentLength(bodyOf(k)) < 40) k += 1;
+    const b = blocks[k];
+    const body = bodyOf(k);
     const head = `From: ${b.from}\nSubject: ${b.subject}`;
     return { subject: b.subject || m.subject, from: b.from || null, body: `${head}\n\n${body}${linksBlock}` };
   }
@@ -106,4 +113,28 @@ export function projectNameHint(m: Pick<MailMessage, 'subject' | 'bodyText'>): s
   const b = BODY_NAME.exec(String(m.bodyText ?? ''));
   if (b && tidy(b[1]).length >= 3) return tidy(b[1]).slice(0, 200);
   return null;
+}
+
+// Name comparison that keeps short tokens such as "B" or "2": "Package 1" and "Package 2" are
+// different tenders. Generic words are dropped.
+const NAME_STOP = new Set(['project', 'projects', 'the', 'of', 'and', 'for', 'مشروع', 'مشروعات', 'لمشروع', 'بمشروع', 'و']);
+
+export function nameTokens(s: string): Set<string> {
+  return new Set(normalizeArabic(s).split(' ').filter((t) => t !== '' && !NAME_STOP.has(t)));
+}
+
+// 'same': same words; 'fits': every board word is in the email name (board name is shorter);
+// 'differs': the board name has words the email name lacks (e.g. "Fully finished … 2");
+// 'unrelated': no shared word, e.g. Arabic board title and English email name.
+export type NameFit = 'same' | 'fits' | 'differs' | 'unrelated';
+
+export function compareNames(emailName: string, boardTitle: string): NameFit {
+  const a = nameTokens(emailName);
+  const b = nameTokens(boardTitle);
+  if (!a.size || !b.size) return 'unrelated';
+  let shared = 0;
+  for (const t of b) if (a.has(t)) shared += 1;
+  if (shared === 0) return 'unrelated';
+  if (shared === b.size) return shared === a.size ? 'same' : 'fits';
+  return 'differs';
 }
