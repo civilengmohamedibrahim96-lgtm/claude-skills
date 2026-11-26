@@ -7,7 +7,7 @@ import { composioConfigFromEnv, createComposioMailClient } from '../_shared/comp
 import { applyForm } from '../_shared/applier.ts';
 import { runMailSync } from '../_shared/mail_sync.ts';
 import { createSupabaseMailRepository } from '../_shared/mail_repo_supabase.ts';
-import { normalizeGraphMessage } from '../_shared/mail_normalize.ts';
+import { normalizerFor } from '../_shared/mail_normalize.ts';
 import { prefilter } from '../_shared/prefilter.ts';
 import { buildShortlist } from '../_shared/shortlist.ts';
 import { validateForm } from '../_shared/validator.ts';
@@ -35,7 +35,8 @@ Deno.serve(async (req) => {
 
     // short timeout and no retries: the whole run must finish inside the function's time limit
     const gemini = createGeminiClient(env.GEMINI_API_KEY, fetch, 35_000);
-    const mail = createComposioMailClient(composioConfigFromEnv(env), fetchTransport);
+    const composio = composioConfigFromEnv(env);
+    const mail = createComposioMailClient(composio, fetchTransport);
     const aiOptions = aiOptionsFromEnv(env);
     const timeZone = env.APP_TIMEZONE || 'Africa/Cairo';
 
@@ -43,7 +44,7 @@ Deno.serve(async (req) => {
       repo: createSupabaseMailRepository(db),
       mail,
       ai: (input) => understandEmail(gemini, input, aiOptions),
-      normalize: normalizeGraphMessage,
+      normalize: normalizerFor(composio.provider),
       prefilter,
       shortlist: (m, p, c) => buildShortlist(m, p, c),
       validate: validateForm,
