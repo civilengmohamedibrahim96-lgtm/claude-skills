@@ -20,6 +20,7 @@ const TABLES = [
   'mail_events', 'links', 'comments', 'date_changes', 'project_seen',
   'review_queue', 'processed_messages', 'match_examples', 'mail_runs',
   'reminders', 'reminder_deliveries', 'push_subscriptions', 'settings',
+  'access_requests',
 ];
 
 // Shared-database state built in before(); tests run in declaration order.
@@ -77,12 +78,12 @@ after(async () => {
   await db?.close();
 });
 
-test('1. all 19 tables of section 2.2 exist in public', async () => {
+test('1. all 20 tables exist in public', async () => {
   const r = await db.query<{ tablename: string }>(
     "select tablename from pg_tables where schemaname = 'public' order by tablename",
   );
   const names = r.rows.map((x) => x.tablename);
-  assert.equal(names.length, 19);
+  assert.equal(names.length, TABLES.length);
   assert.deepEqual([...names].sort(), [...TABLES].sort());
 });
 
@@ -267,16 +268,41 @@ test('11. rpc_start_mail_run: service role gets a run id once; engineer is refus
   );
 });
 
-test('12. hook_before_user_created: team email allowed, outsider refused with 403', async () => {
+test('12. hook_before_user_created: anyone may sign up; outsiders wait for an admin', async () => {
   const ok = await one<{ r: unknown }>(
     `select public.hook_before_user_created($1::jsonb) as r`,
     [JSON.stringify({ user: { email: 'ENG@redcon.example' } })]);
   assert.deepEqual(ok.r, {});
+  const none = await one<{ n: number }>(`select count(*)::int as n from public.access_requests`);
+  assert.equal(none.n, 0);
 
-  const denied = await one<{ r: { error: { http_code: number } } }>(
+  const outsider = await one<{ r: unknown }>(
     `select public.hook_before_user_created($1::jsonb) as r`,
-    [JSON.stringify({ user: { email: OUTSIDER } })]);
-  assert.equal(denied.r.error.http_code, 403);
+    [JSON.stringify({ user: { email: 'X@Evil.example' } })]);
+  assert.deepEqual(outsider.r, {});
+  await db.query(`select public.hook_before_user_created($1::jsonb)`, [JSON.stringify({ user: { email: OUTSIDER } })]);
+  const queued = await one<{ n: number; e: string }>(`select count(*)::int as n, max(email) as e from public.access_requests`);
+  assert.equal(queued.n, 1);
+  assert.equal(queued.e, OUTSIDER);
+
+  // the outsider (and an engineer) cannot see requests or any board data; the admin can see requests
+  const seenByOutsider = await as(OUTSIDER, 'authenticated', () => db.query('select * from public.access_requests'));
+  assert.equal(seenByOutsider.rows.length, 0);
+  const projectsByOutsider = await as(OUTSIDER, 'authenticated', () => db.query('select * from public.projects'));
+  assert.equal(projectsByOutsider.rows.length, 0);
+  const seenByEngineer = await as(ENGINEER, 'authenticated', () => db.query('select * from public.access_requests'));
+  assert.equal(seenByEngineer.rows.length, 0);
+  const seenByAdmin = await as(ADMIN, 'authenticated', () => db.query('select * from public.access_requests'));
+  assert.equal(seenByAdmin.rows.length, 1);
+
+  // approving = adding them to people, which clears the request
+  await as(ADMIN, 'authenticated', () =>
+    db.query(`insert into public.people (name, email, has_column) values ('X', $1, false)`, [OUTSIDER]));
+  const cleared = await one<{ n: number }>(`select count(*)::int as n from public.access_requests`);
+  assert.equal(cleared.n, 0);
+  const nowMember = await as(OUTSIDER, 'authenticated', () => db.query('select * from public.projects'));
+  assert.equal(nowMember.rows.length, 1);
+  await db.query(`delete from public.people where email = $1`, [OUTSIDER]);
 });
 
 test('13. changing a tender engineer type updates their projects', async () => {

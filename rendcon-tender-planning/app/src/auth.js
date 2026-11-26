@@ -27,7 +27,7 @@ export function showAuth(dl, mode = 'signin') {
 
 function showSignIn(dl) {
   const el = shell('Redcon Tender Planning', `
-    <p>Sign in with your team email and password.</p>
+    <p>Sign in with your email and password.</p>
     <form id="authForm" class="auth-form">
       <label>Email <input class="in" id="aEmail" type="email" autocomplete="username" required></label>
       <label>Password <input class="in" id="aPass" type="password" autocomplete="current-password" required></label>
@@ -35,7 +35,7 @@ function showSignIn(dl) {
       <button class="btn primary" type="submit">Sign in</button>
     </form>
     <div class="auth-links">
-      <button class="btn ghost sm" type="button" id="toSignup">First time here? Create your password</button>
+      <button class="btn ghost sm" type="button" id="toSignup">New here? Create an account</button>
       <button class="btn ghost sm" type="button" id="toReset">Forgot password?</button>
     </div>`);
   el.querySelector('#authForm').onsubmit = async (e) => {
@@ -53,14 +53,14 @@ function showSignIn(dl) {
 }
 
 function showSignUp(dl) {
-  const el = shell('Create your password', `
-    <p>Use the email your admin added to the planning team.</p>
+  const el = shell('Create an account', `
+    <p>Anyone can create an account. If you are not on the planning team yet, an admin lets you in before you can see the board.</p>
     <form id="authForm" class="auth-form">
       <label>Email <input class="in" id="aEmail" type="email" autocomplete="username" required></label>
       <label>Password <input class="in" id="aPass" type="password" autocomplete="new-password" minlength="8" required></label>
       <label>Repeat password <input class="in" id="aPass2" type="password" autocomplete="new-password" minlength="8" required></label>
       <div class="auth-err" role="alert"></div>
-      <button class="btn primary" type="submit">Create password</button>
+      <button class="btn primary" type="submit">Create account</button>
     </form>
     <div class="auth-links"><button class="btn ghost sm" type="button" id="toSignin">Back to sign in</button></div>`);
   el.querySelector('#toSignin').onclick = () => showSignIn(dl);
@@ -92,7 +92,7 @@ function showReset(dl) {
     e.preventDefault();
     const res = await dl.requestPasswordReset(el.querySelector('#aEmail').value.trim());
     if (!res.ok) return setErr(el, res.error || 'Could not send the link');
-    el.querySelector('#authForm').innerHTML = '<p class="auth-ok">If that email is on the team, a reset link is on its way.</p>';
+    el.querySelector('#authForm').innerHTML = '<p class="auth-ok">If that email has an account, a reset link is on its way.</p>';
   };
 }
 
@@ -116,8 +116,8 @@ function showRecovery(dl) {
 
 /** Signed in, but the email is not on the planning team. */
 export function showNotMember(dl, email) {
-  const el = shell('Not on the planning team', `
-    <p>The email <b>${esc(email)}</b> is not on the Redcon planning team. Ask your admin to add you.</p>
+  const el = shell('Waiting for access', `
+    <p>Your account <b>${esc(email)}</b> is ready. An admin of the Redcon planning team still has to let you in. Try again once they have.</p>
     <div class="auth-links"><button class="btn sm" type="button" id="aOut">Sign out</button></div>`);
   el.querySelector('#aOut').onclick = async () => { await dl.signOut(); location.reload(); };
 }
