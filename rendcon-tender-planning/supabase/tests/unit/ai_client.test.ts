@@ -2,17 +2,17 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  aiOptionsFromEnv, buildUserPrompt, buildRequest, understandEmail,
+  aiOptionsFromEnv, buildUserPrompt, buildRequest, createGeminiClient, understandEmail,
 } from '../../functions/_shared/ai_client.ts';
 import { AI_FORM_SCHEMA, SYSTEM_PROMPT, checkAiFormShape } from '../../functions/_shared/ai_schema.ts';
 import type {
-  AiInput, AiOptions, AnthropicLike, AnthropicMessageLike, MailMessage,
+  AiInput, AiOptions, GeminiLike, GeminiResponseLike, MailMessage,
 } from '../../functions/_shared/types.ts';
 
 const fixture = (name: string): any =>
   JSON.parse(readFileSync(new URL(`../fixtures/emails/${name}.json`, import.meta.url), 'utf8'));
 
-const OPTS: AiOptions = { model: 'claude-opus-5-5', effort: 'low', maxTokens: 8000 };
+const OPTS: AiOptions = { model: 'gemini-3.8-flash', maxTokens: 16000 };
 
 const message = (over: Partial<MailMessage> = {}): MailMessage => ({
   id: 'm1', conversationId: 'c1', folder: 'inbox', subject: 'ورد الينا', from: { name: 'Buyer <x>', address: 'b@client.example' },
@@ -25,67 +25,74 @@ const input = (over: Partial<AiInput> = {}): AiInput => ({
   examples: [], today: '2026-11-25', ...over,
 });
 
-function fakeClient(reply: AnthropicMessageLike | (() => never)) {
-  const calls: Record<string, unknown>[] = [];
-  const client: AnthropicLike = {
-    beta: {
-      messages: {
-        create: async (params: Record<string, unknown>) => {
-          calls.push(params);
-          if (typeof reply === 'function') return reply();
-          return reply;
-        },
-      },
+function fakeClient(reply: GeminiResponseLike | (() => never)) {
+  const calls: { model: string; body: Record<string, unknown> }[] = [];
+  const client: GeminiLike = {
+    generateContent: async (model: string, body: Record<string, unknown>) => {
+      calls.push({ model, body });
+      if (typeof reply === 'function') return reply();
+      return reply;
     },
   };
   return { client, calls };
 }
 
+const textReply = (text: string, finishReason = 'STOP'): GeminiResponseLike => ({
+  candidates: [{ content: { parts: [{ text }] }, finishReason }],
+});
+
 const validForm = (): Record<string, unknown> => structuredClone(fixture('01-new-tender').expect.aiForm);
 
 test('aiOptionsFromEnv defaults and overrides', () => {
-  assert.deepEqual(aiOptionsFromEnv({}), { model: 'claude-opus-5-5', effort: 'low', maxTokens: 8000 });
+  assert.deepEqual(aiOptionsFromEnv({}), { model: 'gemini-3.5-flash-lite', maxTokens: 16000 });
   assert.deepEqual(
-    aiOptionsFromEnv({ CLAUDE_MODEL: 'claude-haiku-5-5', CLAUDE_EFFORT: 'max' }),
-    { model: 'claude-haiku-5-5', effort: 'low', maxTokens: 8000 },
+    aiOptionsFromEnv({ GEMINI_MODEL: 'gemini-3.8-flash', GEMINI_MAX_TOKENS: '1234' }),
+    { model: 'gemini-3.8-flash', maxTokens: 1234 },
   );
-  assert.deepEqual(
-    aiOptionsFromEnv({ CLAUDE_EFFORT: 'high', CLAUDE_MAX_TOKENS: '1234' }),
-    { model: 'claude-opus-5-5', effort: 'high', maxTokens: 1234 },
-  );
+  // the old Claude settings are ignored
+  assert.deepEqual(aiOptionsFromEnv({ CLAUDE_MODEL: 'claude-opus-5-5' }), { model: 'gemini-3.5-flash-lite', maxTokens: 16000 });
 });
 
-test('buildRequest has exactly the §2.4 shape', () => {
+test('buildRequest asks Gemini for JSON in the form schema', () => {
   const req = buildRequest(input(), OPTS);
-  assert.deepEqual(Object.keys(req), ['model', 'max_tokens', 'betas', 'fallbacks', 'thinking', 'output_config', 'system', 'messages']);
-  assert.equal(req.model, 'claude-opus-5-5');
-  assert.equal(req.max_tokens, 8000);
-  assert.deepEqual(req.betas, ['server-side-fallback-2026-07-01']);
-  assert.equal(req.fallbacks, 'default');
-  assert.deepEqual(req.thinking, { type: 'adaptive' });
-  const oc = req.output_config as { effort: string; format: { type: string; schema: unknown } };
-  assert.equal(oc.effort, 'low');
-  assert.equal(oc.format.type, 'json_schema');
-  assert.equal(oc.format.schema, AI_FORM_SCHEMA);
-  assert.equal(req.system, SYSTEM_PROMPT);
+  assert.deepEqual(Object.keys(req), ['systemInstruction', 'contents', 'generationConfig']);
+  assert.deepEqual(req.systemInstruction, { parts: [{ text: SYSTEM_PROMPT }] });
+  assert.deepEqual(req.contents, [{ role: 'user', parts: [{ text: buildUserPrompt(input()) }] }]);
+  const gc = req.generationConfig as { maxOutputTokens: number; responseMimeType: string; responseJsonSchema: unknown };
+  assert.equal(gc.maxOutputTokens, 16000);
+  assert.equal(gc.responseMimeType, 'application/json');
+  assert.equal(gc.responseJsonSchema, AI_FORM_SCHEMA);
   assert.equal(JSON.stringify(req).includes('temperature'), false);
 });
 
 test('understandEmail sends buildRequest and returns the parsed form', async () => {
   const { client, calls } = fakeClient({
-    stop_reason: 'end_turn', model: 'claude-opus-5-5', content: [{ type: 'text', text: JSON.stringify(validForm()) }],
-    usage: { input_tokens: 11, output_tokens: 22 },
+    ...textReply(JSON.stringify(validForm())),
+    modelVersion: 'gemini-3.8-flash',
+    usageMetadata: { promptTokenCount: 11, candidatesTokenCount: 20, thoughtsTokenCount: 2 },
   });
   const i = input();
   const res = await understandEmail(client, i, OPTS);
   assert.equal(calls.length, 1);
-  assert.deepEqual(calls[0], buildRequest(i, OPTS));
-  assert.equal(calls[0].output_config && (calls[0].output_config as any).format.schema, AI_FORM_SCHEMA);
+  assert.equal(calls[0].model, 'gemini-3.8-flash');
+  assert.deepEqual(calls[0].body, buildRequest(i, OPTS));
   assert.equal(res.ok, true);
   if (res.ok) {
     assert.equal(res.form.matched_project, 'new');
-    assert.deepEqual([res.model, res.inputTokens, res.outputTokens], ['claude-opus-5-5', 11, 22]);
+    assert.deepEqual([res.model, res.inputTokens, res.outputTokens], ['gemini-3.8-flash', 11, 22]);
   }
+});
+
+test('thought parts are skipped and split text parts are joined', async () => {
+  const json = JSON.stringify(validForm());
+  const { client } = fakeClient({
+    candidates: [{
+      finishReason: 'STOP',
+      content: { parts: [{ text: 'thinking about it {', thought: true }, { text: json.slice(0, 50) }, { text: json.slice(50) }] },
+    }],
+  });
+  const res = await understandEmail(client, input(), OPTS);
+  assert.equal(res.ok, true);
 });
 
 test('buildUserPrompt has one <email_json> and no raw "<" inside the JSON parts', () => {
@@ -111,17 +118,17 @@ test('buildUserPrompt cuts bodies over 24000 characters and flags them', () => {
   assert.equal(short.from, 'Buyer <x> <b@client.example>');
 });
 
-test('a refusal returns refusal without parsing the content', async () => {
-  const { client } = fakeClient({
-    stop_reason: 'refusal', stop_details: { category: 'cyber', explanation: 'x' },
-    content: [{ type: 'text', text: 'not json at all' }],
-  });
+test('a safety block returns refusal without parsing the content', async () => {
+  const { client } = fakeClient(textReply('not json at all', 'SAFETY'));
   const res = await understandEmail(client, input(), OPTS);
-  assert.deepEqual(res, { ok: false, error: 'refusal', retryable: false, detail: 'cyber' });
+  assert.deepEqual(res, { ok: false, error: 'refusal', retryable: false, detail: 'SAFETY' });
+  const blocked = fakeClient({ promptFeedback: { blockReason: 'PROHIBITED_CONTENT' } });
+  assert.deepEqual(await understandEmail(blocked.client, input(), OPTS),
+    { ok: false, error: 'refusal', retryable: false, detail: 'PROHIBITED_CONTENT' });
 });
 
-test('max_tokens returns max_tokens', async () => {
-  const { client } = fakeClient({ stop_reason: 'max_tokens', content: [{ type: 'text', text: '{"partial"' }] });
+test('MAX_TOKENS returns max_tokens', async () => {
+  const { client } = fakeClient(textReply('{"partial"', 'MAX_TOKENS'));
   const res = await understandEmail(client, input(), OPTS);
   assert.equal(res.ok, false);
   if (!res.ok) {
@@ -130,32 +137,19 @@ test('max_tokens returns max_tokens', async () => {
   }
 });
 
-test('invalid JSON returns bad_output', async () => {
-  const { client } = fakeClient({ stop_reason: 'end_turn', content: [{ type: 'text', text: '{nope' }] });
+test('invalid JSON or no candidates returns bad_output', async () => {
+  const { client } = fakeClient(textReply('{nope'));
   const res = await understandEmail(client, input(), OPTS);
   assert.equal(res.ok, false);
   if (!res.ok) assert.equal(res.error, 'bad_output');
-});
-
-test('after a server-side fallback marker only the fallback model reply is used', async () => {
-  const { client } = fakeClient({
-    stop_reason: 'end_turn',
-    model: 'claude-haiku-5-5',
-    content: [
-      { type: 'text', text: '{"partial' },
-      { type: 'fallback' },
-      { type: 'text', text: JSON.stringify(validForm()) },
-    ],
-  });
-  const res = await understandEmail(client, input(), OPTS);
-  assert.equal(res.ok, true);
-  if (res.ok) assert.equal(res.form.matched_project, 'new');
+  const empty = await understandEmail(fakeClient({}).client, input(), OPTS);
+  assert.equal(empty.ok === false && empty.error, 'bad_output');
 });
 
 test('JSON without confidence returns bad_output', async () => {
   const form = validForm();
   delete form.confidence;
-  const { client } = fakeClient({ stop_reason: 'end_turn', content: [{ type: 'text', text: JSON.stringify(form) }] });
+  const { client } = fakeClient(textReply(JSON.stringify(form)));
   const res = await understandEmail(client, input(), OPTS);
   assert.equal(res.ok, false);
   if (!res.ok) {
@@ -164,8 +158,8 @@ test('JSON without confidence returns bad_output', async () => {
   }
 });
 
-test('a 529 error is retryable api_error', async () => {
-  const { client } = fakeClient(() => { throw Object.assign(new Error('overloaded'), { status: 529 }); });
+test('a 503 error is retryable api_error', async () => {
+  const { client } = fakeClient(() => { throw Object.assign(new Error('overloaded'), { status: 503 }); });
   const res = await understandEmail(client, input(), OPTS);
   assert.deepEqual(res, { ok: false, error: 'api_error', retryable: true, detail: 'overloaded' });
 });
@@ -180,6 +174,32 @@ test('a 400 error is not retryable; 429 is', async () => {
   const conflict = fakeClient(() => { throw Object.assign(new Error('conflict'), { status: 409 }); });
   const r409 = await understandEmail(conflict.client, input(), OPTS);
   assert.equal(r409.ok === false && r409.retryable, true);
+});
+
+test('createGeminiClient posts to generateContent with the key header and maps HTTP errors', async () => {
+  const seen: { url: string; init: any }[] = [];
+  const reply = textReply('{}');
+  const ok = createGeminiClient('k-123', async (url, init) => {
+    seen.push({ url, init });
+    return { ok: true, status: 200, json: async () => reply };
+  });
+  assert.deepEqual(await ok.generateContent('gemini-3.8-flash', { a: 1 }), reply);
+  assert.equal(seen[0].url, 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent');
+  assert.equal(seen[0].init.method, 'POST');
+  assert.equal(seen[0].init.headers['x-goog-api-key'], 'k-123');
+  assert.equal(seen[0].init.body, '{"a":1}');
+
+  const limited = createGeminiClient('k', async () => ({
+    ok: false, status: 429, json: async () => ({ error: { message: 'Resource has been exhausted' } }),
+  }));
+  const r = await understandEmail(limited, input(), OPTS);
+  assert.deepEqual(r, { ok: false, error: 'api_error', retryable: true, detail: 'Resource has been exhausted' });
+
+  let called = false;
+  const noKey = createGeminiClient(undefined, async () => { called = true; throw new Error('x'); });
+  const rk = await understandEmail(noKey, input(), OPTS);
+  assert.equal(called, false);
+  assert.deepEqual(rk, { ok: false, error: 'api_error', retryable: true, detail: 'GEMINI_API_KEY is not set' });
 });
 
 test('checkAiFormShape accepts the fixture forms and rejects a bad enum', () => {
