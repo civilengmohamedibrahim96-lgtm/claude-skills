@@ -1,8 +1,7 @@
 // mail-sync: pg_cron (x-cron-secret) or a planning team member (Bearer JWT) runs one
 // mail sync. Thin wiring only; all logic lives in ../_shared.
 import { createClient } from 'npm:@supabase/supabase-js@2.119.2';
-import Anthropic from 'npm:@anthropic-ai/sdk@1.14.0';
-import type { AnthropicLike, HttpRequest, HttpResponse } from '../_shared/types.ts';
+import type { HttpRequest, HttpResponse } from '../_shared/types.ts';
 import { allowedOrigins, authorize, corsHeaders, findPersonByEmail, json } from '../_shared/http.ts';
 import { composioConfigFromEnv, createComposioMailClient } from '../_shared/composio.ts';
 import { applyForm } from '../_shared/applier.ts';
@@ -12,7 +11,7 @@ import { normalizeGraphMessage } from '../_shared/mail_normalize.ts';
 import { prefilter } from '../_shared/prefilter.ts';
 import { buildShortlist } from '../_shared/shortlist.ts';
 import { validateForm } from '../_shared/validator.ts';
-import { aiOptionsFromEnv, understandEmail } from '../_shared/ai_client.ts';
+import { aiOptionsFromEnv, createGeminiClient, understandEmail } from '../_shared/ai_client.ts';
 
 async function fetchTransport(r: HttpRequest): Promise<HttpResponse> {
   const res = await fetch(r.url, { method: r.method, headers: r.headers, body: r.body });
@@ -34,8 +33,8 @@ Deno.serve(async (req) => {
     }, { cron: true, user: true });
     if (auth.kind === 'denied') return json(auth.status, { error: auth.status === 401 ? 'unauthorized' : 'forbidden' }, cors);
 
-    // short timeout and no SDK retries: the whole run must finish inside the function's time limit
-    const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: 35_000, maxRetries: 0 }) as unknown as AnthropicLike;
+    // short timeout and no retries: the whole run must finish inside the function's time limit
+    const gemini = createGeminiClient(env.GEMINI_API_KEY, fetch, 35_000);
     const mail = createComposioMailClient(composioConfigFromEnv(env), fetchTransport);
     const aiOptions = aiOptionsFromEnv(env);
     const timeZone = env.APP_TIMEZONE || 'Africa/Cairo';
@@ -43,7 +42,7 @@ Deno.serve(async (req) => {
     const summary = await runMailSync({
       repo: createSupabaseMailRepository(db),
       mail,
-      ai: (input) => understandEmail(anthropic, input, aiOptions),
+      ai: (input) => understandEmail(gemini, input, aiOptions),
       normalize: normalizeGraphMessage,
       prefilter,
       shortlist: (m, p, c) => buildShortlist(m, p, c),

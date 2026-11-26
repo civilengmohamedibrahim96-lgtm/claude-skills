@@ -1,24 +1,25 @@
-// Builds the Claude request and turns the reply into an AiResult (BUILD_PLAN.md §2.4 ai_client). No SDK import: the client is injected.
+// Builds the Gemini request and turns the reply into an AiResult (BUILD_PLAN.md §2.4 ai_client,
+// switched from Claude to Google Gemini on the AI Studio free tier). No SDK import: the client
+// is injected; createGeminiClient wraps the REST API around any fetch function.
 
 import type {
-  AiForm, AiInput, AiOptions, AiResult, AnthropicLike, AnthropicMessageLike,
+  AiForm, AiInput, AiOptions, AiResult, GeminiLike, GeminiResponseLike,
 } from './types.ts';
 import { AI_FORM_SCHEMA, SYSTEM_PROMPT, checkAiFormShape } from './ai_schema.ts';
 
 const BODY_LIMIT = 24000;
 const TIME_ZONE = 'Africa/Cairo';
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.8-flash';
+const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
 // JSON that can never contain a raw '<', so email text cannot close a tag.
 const safeJson = (x: unknown): string => JSON.stringify(x).replace(/</g, '\\u003c');
 
 export function aiOptionsFromEnv(env: Record<string, string | undefined>): AiOptions {
-  const effortRaw = env.CLAUDE_EFFORT;
-  const effort: AiOptions['effort'] =
-    effortRaw === 'low' || effortRaw === 'medium' || effortRaw === 'high' ? effortRaw : 'low';
   return {
-    model: env.CLAUDE_MODEL || 'claude-opus-5-5',
-    effort,
-    maxTokens: parseInt(env.CLAUDE_MAX_TOKENS ?? '', 10) || 8000,
+    model: env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
+    // thinking tokens count toward Gemini's output limit, so leave room above the ~1k-token form
+    maxTokens: parseInt(env.GEMINI_MAX_TOKENS ?? '', 10) || 16000,
   };
 }
 
@@ -68,14 +69,38 @@ export function buildUserPrompt(input: AiInput): string {
 
 export function buildRequest(input: AiInput, opts: AiOptions): Record<string, unknown> {
   return {
-    model: opts.model,
-    max_tokens: opts.maxTokens,
-    betas: ['server-side-fallback-2026-07-01'],
-    fallbacks: 'default',
-    thinking: { type: 'adaptive' },
-    output_config: { effort: opts.effort, format: { type: 'json_schema', schema: AI_FORM_SCHEMA } },
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: buildUserPrompt(input) }],
+    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents: [{ role: 'user', parts: [{ text: buildUserPrompt(input) }] }],
+    generationConfig: {
+      maxOutputTokens: opts.maxTokens,
+      responseMimeType: 'application/json',
+      responseJsonSchema: AI_FORM_SCHEMA,
+    },
+  };
+}
+
+type FetchLike = (url: string, init: {
+  method: string; headers: Record<string, string>; body: string; signal?: AbortSignal;
+}) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
+
+// REST wrapper. A non-2xx reply throws { status, message } like an SDK error.
+export function createGeminiClient(apiKey: string | undefined, fetchFn: FetchLike, timeoutMs = 35_000): GeminiLike {
+  return {
+    async generateContent(model, body) {
+      if (!apiKey) throw new Error('GEMINI_API_KEY is not set'); // no status: retried once the key is added
+      const res = await fetchFn(`${GEMINI_BASE}/models/${encodeURIComponent(model)}:generateContent`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey },
+        body: JSON.stringify(body),
+        signal: typeof AbortSignal !== 'undefined' && 'timeout' in AbortSignal ? AbortSignal.timeout(timeoutMs) : undefined,
+      });
+      const data = await res.json().catch(() => null) as
+        (GeminiResponseLike & { error?: { message?: string } }) | null;
+      if (!res.ok) {
+        throw Object.assign(new Error(data?.error?.message ?? `Gemini HTTP ${res.status}`), { status: res.status });
+      }
+      return data ?? {};
+    },
   };
 }
 
@@ -89,38 +114,34 @@ function errorMessage(err: unknown): string {
   return typeof msg === 'string' ? msg : String(err);
 }
 
-export async function understandEmail(client: AnthropicLike, input: AiInput, opts: AiOptions): Promise<AiResult> {
-  let response: AnthropicMessageLike;
+// Gemini finish reasons that mean the model would not answer (safety or policy blocks).
+const BLOCKED = new Set(['SAFETY', 'RECITATION', 'BLOCKLIST', 'PROHIBITED_CONTENT', 'SPII', 'IMAGE_SAFETY', 'LANGUAGE']);
+
+export async function understandEmail(client: GeminiLike, input: AiInput, opts: AiOptions): Promise<AiResult> {
+  let response: GeminiResponseLike;
   try {
-    response = await client.beta.messages.create(buildRequest(input, opts));
+    response = await client.generateContent(opts.model, buildRequest(input, opts));
   } catch (err) {
     const status = errorStatus(err);
     const permanent = status !== null && status >= 400 && status <= 499 && ![408, 409, 429].includes(status);
     return { ok: false, error: 'api_error', retryable: !permanent, detail: errorMessage(err) };
   }
 
-  if (response.stop_reason === 'refusal') {
-    return {
-      ok: false,
-      error: 'refusal',
-      retryable: false,
-      detail: response.stop_details?.category ?? '',
-    };
-  }
-  if (response.stop_reason === 'max_tokens') {
-    return { ok: false, error: 'max_tokens', retryable: false, detail: 'output truncated at max_tokens' };
+  const blockReason = response.promptFeedback?.blockReason;
+  if (blockReason) return { ok: false, error: 'refusal', retryable: false, detail: blockReason };
+  const candidate = response.candidates?.[0];
+  const finish = candidate?.finishReason ?? '';
+  if (BLOCKED.has(finish)) return { ok: false, error: 'refusal', retryable: false, detail: finish };
+  if (finish === 'MAX_TOKENS') {
+    return { ok: false, error: 'max_tokens', retryable: false, detail: 'output truncated at maxOutputTokens' };
   }
 
-  // With server-side fallbacks the content can hold the declining model's blocks, then a
-  // {type:'fallback'} marker, then the fallback model's output. Only blocks after the last
-  // marker belong to the usable turn.
-  const blocks = response.content ?? [];
-  let start = 0;
-  for (let i = 0; i < blocks.length; i++) if (blocks[i].type === 'fallback') start = i + 1;
-  const block = blocks.slice(start).find((b) => b.type === 'text');
+  // Skip thought-summary parts; the answer is the remaining text.
+  const text = (candidate?.content?.parts ?? []).filter((p) => !p.thought && typeof p.text === 'string')
+    .map((p) => p.text).join('');
   let parsed: unknown;
   try {
-    parsed = JSON.parse(block?.text ?? '');
+    parsed = JSON.parse(text);
   } catch {
     return { ok: false, error: 'bad_output', retryable: false, detail: 'reply is not valid JSON' };
   }
@@ -129,11 +150,12 @@ export async function understandEmail(client: AnthropicLike, input: AiInput, opt
     return { ok: false, error: 'bad_output', retryable: false, detail: problems.join(', ') };
   }
 
+  const u = response.usageMetadata;
   return {
     ok: true,
     form: parsed as AiForm,
-    model: response.model ?? opts.model,
-    inputTokens: response.usage?.input_tokens ?? 0,
-    outputTokens: response.usage?.output_tokens ?? 0,
+    model: response.modelVersion ?? opts.model,
+    inputTokens: u?.promptTokenCount ?? 0,
+    outputTokens: (u?.candidatesTokenCount ?? 0) + (u?.thoughtsTokenCount ?? 0),
   };
 }

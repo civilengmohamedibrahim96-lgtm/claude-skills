@@ -111,24 +111,24 @@ export type AiInput = {
   today: IsoDate;
 };
 
-export type AiOptions = { model: string; effort: 'low' | 'medium' | 'high'; maxTokens: number };
+export type AiOptions = { model: string; maxTokens: number };
 
 export type AiFailure = 'refusal' | 'max_tokens' | 'bad_output' | 'api_error';
 export type AiResult =
   | { ok: true; form: AiForm; model: string; inputTokens: number; outputTokens: number }
   | { ok: false; error: AiFailure; retryable: boolean; detail: string };
 
-// Minimal structural view of the Anthropic SDK client (new Anthropic()) used by ai_client.ts.
-export type AnthropicContentBlock = { type: string; text?: string };
-export type AnthropicMessageLike = {
-  model?: string;
-  stop_reason: string | null;
-  stop_details?: { category?: string | null; explanation?: string | null } | null;
-  content: AnthropicContentBlock[];
-  usage?: { input_tokens?: number; output_tokens?: number };
+// Minimal structural view of the Gemini REST API (models/{model}:generateContent) used by ai_client.ts.
+// A failed call throws { status?: number, message: string }.
+export type GeminiPart = { text?: string; thought?: boolean };
+export type GeminiResponseLike = {
+  candidates?: { content?: { parts?: GeminiPart[] }; finishReason?: string | null }[];
+  promptFeedback?: { blockReason?: string | null } | null;
+  usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; thoughtsTokenCount?: number };
+  modelVersion?: string;
 };
-export type AnthropicLike = {
-  beta: { messages: { create(params: Record<string, unknown>): Promise<AnthropicMessageLike> } };
+export type GeminiLike = {
+  generateContent(model: string, body: Record<string, unknown>): Promise<GeminiResponseLike>;
 };
 
 // ---------------------------------------------------------------- validator

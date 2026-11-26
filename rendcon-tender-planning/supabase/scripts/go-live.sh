@@ -22,11 +22,11 @@ need() { [ -n "${!1:-}" ] || { echo "Please set $1 in $ENV_FILE"; exit 1; }; }
 for v in SUPABASE_PROJECT_REF APP_URL ADMIN_NAME ADMIN_EMAIL; do need "$v"; done
 # Outlook reading (mail-sync) needs these three; they can be added later with
 # `supabase secrets set`. Without them the board and reminders still work.
-for v in ANTHROPIC_API_KEY COMPOSIO_API_KEY COMPOSIO_CONNECTED_ACCOUNT_ID; do
+for v in GEMINI_API_KEY COMPOSIO_API_KEY COMPOSIO_CONNECTED_ACCOUNT_ID; do
   [ -n "${!v:-}" ] || echo "Note: $v is empty, so reading Outlook emails stays off for now."
 done
 APP_TIMEZONE=${APP_TIMEZONE:-Africa/Cairo}
-CLAUDE_MODEL=${CLAUDE_MODEL:-claude-opus-5-5}
+GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.8-flash}
 VAPID_SUBJECT=${VAPID_SUBJECT:-mailto:$ADMIN_EMAIL}
 
 SB="npx --yes supabase@latest"
@@ -57,8 +57,8 @@ trap 'rm -f "$SECRETS_TMP"' EXIT
   echo "CRON_SECRET=$CRON_SECRET"
   echo "APP_URL=$APP_URL"
   echo "APP_TIMEZONE=$APP_TIMEZONE"
-  [ -n "${ANTHROPIC_API_KEY:-}" ] && echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY"
-  echo "CLAUDE_MODEL=$CLAUDE_MODEL"
+  [ -n "${GEMINI_API_KEY:-}" ] && echo "GEMINI_API_KEY=$GEMINI_API_KEY"
+  echo "GEMINI_MODEL=$GEMINI_MODEL"
   [ -n "${COMPOSIO_API_KEY:-}" ] && echo "COMPOSIO_API_KEY=$COMPOSIO_API_KEY"
   [ -n "${COMPOSIO_CONNECTED_ACCOUNT_ID:-}" ] && echo "COMPOSIO_CONNECTED_ACCOUNT_ID=$COMPOSIO_CONNECTED_ACCOUNT_ID"
   [ -n "${COMPOSIO_ARG_MAP:-}" ] && echo "COMPOSIO_ARG_MAP=$COMPOSIO_ARG_MAP"

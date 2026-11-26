@@ -9,7 +9,6 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "devDependencies": {
-    "@anthropic-ai/sdk": "1.14.0",
     "@electric-sql/pglite": "0.6.0",
     "@types/node": "22.20.6",
     "typescript": "5.9.3"

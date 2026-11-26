@@ -162,8 +162,9 @@ rendcon-tender-planning/
 | `APP_URL` | – (required) | e.g. `https://rendcon-planning.pages.dev`; links in emails/pushes; CORS origin |
 | `ALLOWED_ORIGINS` | `APP_URL` | comma-separated extra CORS origins (e.g. `http://localhost:5173`) |
 | `APP_TIMEZONE` | `Africa/Cairo` | day boundaries, 09:00 automatic reminders |
-| `ANTHROPIC_API_KEY` | – (required for mail) | Claude API key |
-| `CLAUDE_MODEL` | `claude-opus-5-5` | or `claude-haiku-5-5` |
+| `GEMINI_API_KEY` | – (required for mail) | Google AI Studio API key (free tier). Replaced `ANTHROPIC_API_KEY`. |
+| `GEMINI_MODEL` | `gemini-3.8-flash` | or `gemini-3.5-flash-lite` |
+| `GEMINI_MAX_TOKENS` | `16000` | output limit incl. thinking tokens |
 | `CLAUDE_EFFORT` | `low` | `output_config.effort` |
 | `CLAUDE_MAX_TOKENS` | `8000` | per email |
 | `COMPOSIO_API_KEY` | – (required for mail) | header `x-api-key` |
