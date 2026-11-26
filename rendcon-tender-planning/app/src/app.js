@@ -109,7 +109,8 @@ async function refresh(force = false) {
 }
 function scheduleRefresh() {
   clearTimeout(refreshTimer);
-  refreshTimer = setTimeout(() => { refresh(false).catch((e) => console.error(e)); }, 250);
+  // Never redraw the board under a card that is being dragged; try again once the drag ends.
+  refreshTimer = setTimeout(() => { if (drag) { scheduleRefresh(); return; } refresh(false).catch((e) => console.error(e)); }, 250);
 }
 
 /* ---------------- board ---------------- */
