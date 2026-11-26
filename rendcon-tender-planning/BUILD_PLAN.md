@@ -163,7 +163,7 @@ rendcon-tender-planning/
 | `ALLOWED_ORIGINS` | `APP_URL` | comma-separated extra CORS origins (e.g. `http://localhost:5173`) |
 | `APP_TIMEZONE` | `Africa/Cairo` | day boundaries, 09:00 automatic reminders |
 | `GEMINI_API_KEY` | – (required for mail) | Google AI Studio API key (free tier). Replaced `ANTHROPIC_API_KEY`. |
-| `GEMINI_MODEL` | `gemini-3.8-flash` | or `gemini-3.5-flash-lite` |
+| `GEMINI_MODEL` | `gemini-3.5-flash-lite` | or `gemini-3.8-flash` |
 | `GEMINI_MAX_TOKENS` | `16000` | output limit incl. thinking tokens |
 | `CLAUDE_EFFORT` | `low` | `output_config.effort` |
 | `CLAUDE_MAX_TOKENS` | `8000` | per email |

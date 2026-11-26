@@ -26,7 +26,7 @@ for v in GEMINI_API_KEY COMPOSIO_API_KEY COMPOSIO_CONNECTED_ACCOUNT_ID; do
   [ -n "${!v:-}" ] || echo "Note: $v is empty, so reading Outlook emails stays off for now."
 done
 APP_TIMEZONE=${APP_TIMEZONE:-Africa/Cairo}
-GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.8-flash}
+GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.5-flash-lite}
 VAPID_SUBJECT=${VAPID_SUBJECT:-mailto:$ADMIN_EMAIL}
 
 SB="npx --yes supabase@latest"

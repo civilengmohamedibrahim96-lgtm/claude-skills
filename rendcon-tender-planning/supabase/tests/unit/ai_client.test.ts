@@ -44,13 +44,13 @@ const textReply = (text: string, finishReason = 'STOP'): GeminiResponseLike => (
 const validForm = (): Record<string, unknown> => structuredClone(fixture('01-new-tender').expect.aiForm);
 
 test('aiOptionsFromEnv defaults and overrides', () => {
-  assert.deepEqual(aiOptionsFromEnv({}), { model: 'gemini-3.8-flash', maxTokens: 16000 });
+  assert.deepEqual(aiOptionsFromEnv({}), { model: 'gemini-3.5-flash-lite', maxTokens: 16000 });
   assert.deepEqual(
-    aiOptionsFromEnv({ GEMINI_MODEL: 'gemini-3.5-flash-lite', GEMINI_MAX_TOKENS: '1234' }),
-    { model: 'gemini-3.5-flash-lite', maxTokens: 1234 },
+    aiOptionsFromEnv({ GEMINI_MODEL: 'gemini-3.8-flash', GEMINI_MAX_TOKENS: '1234' }),
+    { model: 'gemini-3.8-flash', maxTokens: 1234 },
   );
   // the old Claude settings are ignored
-  assert.deepEqual(aiOptionsFromEnv({ CLAUDE_MODEL: 'claude-opus-5-5' }), { model: 'gemini-3.8-flash', maxTokens: 16000 });
+  assert.deepEqual(aiOptionsFromEnv({ CLAUDE_MODEL: 'claude-opus-5-5' }), { model: 'gemini-3.5-flash-lite', maxTokens: 16000 });
 });
 
 test('buildRequest asks Gemini for JSON in the form schema', () => {

@@ -9,7 +9,7 @@ import { AI_FORM_SCHEMA, SYSTEM_PROMPT, checkAiFormShape } from './ai_schema.ts'
 
 const BODY_LIMIT = 24000;
 const TIME_ZONE = 'Africa/Cairo';
-export const DEFAULT_GEMINI_MODEL = 'gemini-3.8-flash';
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash-lite';
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
 // JSON that can never contain a raw '<', so email text cannot close a tag.
