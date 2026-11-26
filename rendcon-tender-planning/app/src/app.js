@@ -22,6 +22,10 @@ let syncing = false;
 let pendingRepaint = false;
 let refreshTimer = null;
 const SORT_KEY = 'rendcon-sort-v1';
+const FOLD_KEY = 'rendcon-subfold-v1';
+let openFolds = new Set();
+try { openFolds = new Set(JSON.parse(localStorage.getItem(FOLD_KEY) || '[]')); } catch (_) { openFolds = new Set(); }
+const saveFolds = () => { try { localStorage.setItem(FOLD_KEY, JSON.stringify([...openFolds])); } catch (_) { /* storage unavailable */ } };
 let sortPrefs = {};
 try { sortPrefs = JSON.parse(localStorage.getItem(SORT_KEY) || '{}') || {}; } catch (_) { sortPrefs = {}; }
 
@@ -44,6 +48,7 @@ const tenderById = (id) => (S.tenderTeam || []).find((t) => t.id === id);
 const projType = (p) => { const t = tenderById(p.tender); return t ? t.type : (p.type || 'public'); };
 const sortKey = (k) => sortPrefs[k] || 'due';
 const tenderLabel = (p) => p.supervisor || firstName(((tenderById(p.tender) || {}).name || '').replace(/^Eng\.?\s*/i, ''));
+const isSubmitted = (p) => p.tags.includes('sub');
 const upcomingCount = () => S.projects.reduce((a, p) => a + p.notifications.length, 0) + S.reminders.length;
 
 /* ---------------- write helper ---------------- */
@@ -104,15 +109,56 @@ async function refresh(force = false) {
 }
 function scheduleRefresh() {
   clearTimeout(refreshTimer);
-  refreshTimer = setTimeout(() => { refresh(false).catch((e) => console.error(e)); }, 250);
+  // Never redraw the board under a card that is being dragged; try again once the drag ends.
+  refreshTimer = setTimeout(() => { if (drag) { scheduleRefresh(); return; } refresh(false).catch((e) => console.error(e)); }, 250);
 }
 
 /* ---------------- board ---------------- */
+/* Submission-date ranges. "This week" = the next 7 days (same as the column's "due this week"), "Next week" = the 7 days after. */
+const DUE_RANGES = [['overdue', 'Overdue'], ['today', 'Today'], ['week', 'This week'], ['next', 'Next week'], ['month', 'This month'], ['later', 'Later'], ['none', 'No date']];
+function dueRange(k, now = new Date()) {
+  const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()), add = (n) => { const d = new Date(t0); d.setDate(d.getDate() + n); return d; };
+  if (k === 'week') return [t0, add(7)];
+  if (k === 'next') return [add(8), add(14)];
+  if (k === 'month') return [new Date(now.getFullYear(), now.getMonth(), 1), new Date(now.getFullYear(), now.getMonth() + 1, 0)];
+  return null;
+}
+function dueMatch(p, k, now = new Date()) {
+  if (k === 'none') return !p.due;
+  if (!p.due) return false;
+  const dd = daysUntil(p.due, now);
+  if (k === 'overdue') return dd < 0 && !isSubmitted(p);
+  if (k === 'today') return dd === 0;
+  if (k === 'later') return toDate(p.due) > new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const r = dueRange(k, now), t = toDate(p.due);
+  return t >= r[0] && t <= r[1];
+}
+const rangeHint = (k) => { const r = dueRange(k); return r ? `${fmtShort(r[0])} – ${fmtShort(r[1])}` : ''; };
+const statusKey = (v) => String(v || '').trim().toLowerCase();
+function statusOptions() {
+  const seen = new Map();
+  S.projects.forEach((p) => { const k = statusKey(p.status); if (k && !seen.has(k)) seen.set(k, { label: p.status.trim(), n: 0 }); if (k) seen.get(k).n++; });
+  return [...seen.entries()].sort((a, b) => b[1].n - a[1].n).slice(0, 12);
+}
+/** Filters: AND across groups, OR inside a group (e.g. two engineers = either one). */
 function matches(p) {
-  if (filterTags.size && ![...filterTags].every((t) => (t.startsWith('type:') ? projType(p) === t.slice(5) : t.startsWith('tm:') ? p.tender === t.slice(3) : p.tags.includes(t)))) return false;
+  if (filterTags.size) {
+    const groups = {};
+    filterTags.forEach((t) => { const g = /^(type|tm|eng|due|st):/.test(t) ? t.split(':')[0] : 'tag:' + t; (groups[g] = groups[g] || []).push(t); });
+    const hit = (t) => {
+      if (t.startsWith('type:')) return projType(p) === t.slice(5);
+      if (t.startsWith('tm:')) return p.tender === t.slice(3);
+      if (t.startsWith('eng:')) return (p.columnId || 'un') === t.slice(4);
+      if (t.startsWith('due:')) return dueMatch(p, t.slice(4));
+      if (t.startsWith('st:')) return statusKey(p.status) === t.slice(3);
+      return p.tags.includes(t);
+    };
+    if (!Object.values(groups).every((ts) => ts.some(hit))) return false;
+  }
   if (query && !norm(p.title).includes(norm(query))) return false;
   return true;
 }
+const engFilters = () => [...filterTags].filter((t) => t.startsWith('eng:')).map((t) => t.slice(4));
 
 function cardHTML(p) {
   const done = p.subtasks.filter((s) => s.done).length, tot = p.subtasks.length;
@@ -142,6 +188,7 @@ function cardHTML(p) {
       ${icon('cal')}<b>${p.due ? fmtDate(p.due) : 'No submission date'}</b>
       ${p.due ? `<span class="c-rel">${du.rel}</span>` : ''}
       ${last && Date.now() - last.at < 7 * 24 * HOUR ? `<span class="c-due-src ${last.by === 'email' ? 'em' : ''}" title="${last.by === 'email' ? 'Date updated from email' : 'Date changed by ' + esc(last.by)} · ${ago(last.at)}${last.from ? ' (was ' + fmtDate(last.from) + ')' : ''}">${icon(last.by === 'email' ? 'mail' : 'user')}</span>` : ''}
+      <button class="c-due-edit c-sub-btn ${isSubmitted(p) ? 'on' : ''}" data-nodrag data-submit="${esc(p.id)}" aria-label="${isSubmitted(p) ? 'Move back to active' : 'Mark as submitted'}" title="${isSubmitted(p) ? 'Submitted · click to move back to active' : 'Mark as submitted'}">${icon('check')}</button>
       <button class="c-due-edit" data-nodrag data-due="${esc(p.id)}" aria-label="Change submission date" title="Change submission date">${icon('edit')}</button>
       <input type="date" class="due-in" data-duein="${esc(p.id)}" value="${p.due || ''}" tabindex="-1" aria-hidden="true">
     </div>
@@ -161,8 +208,13 @@ function cardHTML(p) {
 
 function colHTML(col, unassigned) {
   const sk = col ? col.id : 'un', skey = sortKey(sk);
-  const items = sortItems(S.projects.filter((p) => (p.columnId || null) === (col ? col.id : null)), skey);
+  const all = sortItems(S.projects.filter((p) => (p.columnId || null) === (col ? col.id : null)), skey);
+  const items = all.filter((p) => !isSubmitted(p));
   const shown = items.filter(matches);
+  const subs = all.filter(isSubmitted).sort((a, b2) => (b2.due || '').localeCompare(a.due || ''));
+  const subShown = subs.filter(matches);
+  const filtering = !!(query || filterTags.size);
+  const foldOpen = openFolds.has(sk) || (filtering && subShown.length > 0);
   const u = colUser(col);
   const canEdit = !unassigned && (isAdmin() || u.id === S.me.id);
   return `<section class="col ${unassigned ? 'unassigned' : ''}" data-col="${esc(col ? col.id : '')}">
@@ -174,6 +226,10 @@ function colHTML(col, unassigned) {
     </div>
     <div class="col-sort"><button class="sort-btn" data-sort="${esc(sk)}" title="Sort this column">${icon('sort')}<span>${SORTS[skey][1]}</span>${icon('chev', 'chev')}</button></div>
     <div class="col-list" data-list="${esc(col ? col.id : '')}">${shown.map(cardHTML).join('') || `<div class="empty-col">${unassigned ? 'No unassigned projects' : 'Drag a project here to assign it'}</div>`}</div>
+    ${subs.length ? `<div class="sub-fold ${foldOpen ? 'open' : ''}">
+      <button class="sub-fold-h" data-fold="${esc(sk)}" aria-expanded="${foldOpen}">${icon('check', 'ok')}<span>Submitted</span><span class="col-count">${filtering ? `${subShown.length}/${subs.length}` : subs.length}</span><span class="grow"></span>${icon('chev', 'chev')}</button>
+      <div class="collapse ${foldOpen ? '' : 'closed'}"><div><div class="sub-fold-list">${subShown.map(cardHTML).join('') || '<div class="empty-col">No submitted projects match</div>'}</div></div></div>
+    </div>` : ''}
     <div class="col-foot"><button class="btn sm add-card" data-add="${esc(col ? col.id : '')}">${icon('plus')}Add project</button></div>
   </section>`;
 }
@@ -181,7 +237,8 @@ function colHTML(col, unassigned) {
 function renderBoard() {
   const b = $board(), sl = b.scrollLeft;
   const cols = S.columns.filter((c) => colUser(c)).sort((a, b2) => S.users.indexOf(colUser(a)) - S.users.indexOf(colUser(b2)));
-  b.innerHTML = colHTML(null, true) + cols.map((c) => colHTML(c, false)).join('') + (isAdmin() ? `<button class="add-col" id="addCol">${icon('plus')}Add engineer</button>` : '');
+  const ef = engFilters(), showCol = (id) => !ef.length || ef.includes(id);
+  b.innerHTML = (showCol('un') ? colHTML(null, true) : '') + cols.filter((c) => showCol(c.id)).map((c) => colHTML(c, false)).join('') + (isAdmin() && !ef.length ? `<button class="add-col" id="addCol">${icon('plus')}Add engineer</button>` : '');
   b.scrollLeft = sl;
   renderFilters();
   renderHeader();
@@ -190,17 +247,24 @@ function renderBoard() {
 function filterLabel(id) {
   if (id.startsWith('type:')) return { txt: id === 'type:public' ? 'Public' : 'Private', dot: '' };
   if (id.startsWith('tm:')) { const t = tenderById(id.slice(3)); return { txt: t ? firstName(t.name.replace(/^Eng\.?\s*/i, '')) : '—', dot: '' }; }
+  if (id.startsWith('eng:')) return { txt: id === 'eng:un' ? 'Unassigned' : firstName(colName(id.slice(4)).replace(/^Eng\.?\s*/i, '')), dot: '' };
+  if (id.startsWith('due:')) return { txt: 'Due: ' + ((DUE_RANGES.find((r) => r[0] === id.slice(4)) || [])[1] || ''), dot: '' };
+  if (id.startsWith('st:')) { const o = statusOptions().find((x) => x[0] === id.slice(3)); return { txt: o ? o[1].label : id.slice(3), dot: '' }; }
   const t = tagById(id);
   return { txt: t ? t.name : id, dot: t ? t.color : '' };
 }
 function renderFilters() {
-  const act_ = [...filterTags].filter((id) => !id.startsWith('tm:') || tenderById(id.slice(3)));
+  const act_ = [...filterTags].filter((id) => (!id.startsWith('tm:') || tenderById(id.slice(3))) && (!id.startsWith('eng:') || id === 'eng:un' || colById(id.slice(4))));
   $('#qChips').innerHTML = act_.map((id) => { const l = filterLabel(id); return `<span class="qchip">${l.dot ? `<i class="tdot" style="background:${safeColor(l.dot)}"></i>` : ''}${esc(l.txt)}<button type="button" data-unfilter="${esc(id)}" aria-label="Remove filter ${esc(l.txt)}">${icon('x')}</button></span>`; }).join('');
   $('#fCount').hidden = !act_.length;
   $('#fCount').textContent = act_.length;
   $('#q').placeholder = act_.length ? 'Search within filters…' : 'Search project names…';
   const opt = (id, html) => `<button type="button" class="fopt ${filterTags.has(id) ? 'on' : ''}" data-filter="${esc(id)}">${html}</button>`;
+  const engCols = S.columns.filter((c) => colUser(c)).sort((a, b2) => S.users.indexOf(colUser(a)) - S.users.indexOf(colUser(b2)));
   $('#fPanel').innerHTML = `
+    <div class="fgrp"><span>Submission date</span><div>${DUE_RANGES.map(([k, l]) => opt('due:' + k, `${esc(l)}${rangeHint(k) ? `<small class="fhint">${esc(rangeHint(k))}</small>` : ''}`)).join('')}</div></div>
+    <div class="fgrp"><span>Engineer</span><div>${opt('eng:un', 'Unassigned')}${engCols.map((c) => { const u = colUser(c); return opt('eng:' + c.id, `${avatar(u, 'xs')}<bdi>${esc(firstName(u.name.replace(/^Eng\.?\s*/i, '')))}</bdi>`); }).join('')}</div></div>
+    <div class="fgrp"><span>Status</span><div>${statusOptions().map(([k, o]) => opt('st:' + k, `<bdi>${esc(o.label)}</bdi><small class="fhint">${o.n}</small>`)).join('') || '<em class="fnone">No statuses written yet</em>'}</div></div>
     <div class="fgrp"><span>Tender type</span><div>${opt('type:public', 'Public')}${opt('type:private', 'Private')}</div></div>
     <div class="fgrp"><span>Tender team</span><div>${(S.tenderTeam || []).map((t) => opt('tm:' + t.id, `<em class="tt ${t.type}">${t.type === 'private' ? 'Pr' : 'Pu'}</em><bdi>${esc(firstName(t.name.replace(/^Eng\.?\s*/i, '')))}</bdi>`)).join('')}</div></div>
     <div class="fgrp"><span>Tags</span><div>${S.tags.map((t) => opt(t.id, `<i class="tdot" style="background:${safeColor(t.color)}"></i>${esc(t.name)}`)).join('')}</div></div>
@@ -239,11 +303,12 @@ function bindBoardDrag() {
     if (e.target.closest('[data-nodrag]')) return;
     const card = e.target.closest('.card');
     if (!card || e.button > 0) return;
-    drag = { card, id: card.dataset.id, x: e.clientX, y: e.clientY, started: false, from: card.closest('.col-list').dataset.list };
+    const fromList = card.closest('.col-list');
+    drag = { card, id: card.dataset.id, x: e.clientX, y: e.clientY, started: false, fixed: !fromList, from: fromList ? fromList.dataset.list : null };
   });
   document.addEventListener('pointermove', (e) => {
     if (!drag) return;
-    if (!drag.started) { if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return; startDrag(e); }
+    if (!drag.started) { if (drag.fixed || Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return; startDrag(e); }
     const g = drag.ghost;
     g.style.left = (e.clientX - drag.ox) + 'px';
     g.style.top = (e.clientY - drag.oy) + 'px';
@@ -322,6 +387,8 @@ function bindBoardClicks() {
     const pr = e.target.closest('[data-profile]'); if (pr) { editProfile(pr.dataset.profile); return; }
     const so = e.target.closest('[data-sort]'); if (so) { sortMenu(so, so.dataset.sort); return; }
     const lg = e.target.closest('[data-log]'); if (lg) { toggleLog(lg.dataset.log); return; }
+    const sb = e.target.closest('[data-submit]'); if (sb) { setSubmitted(sb.dataset.submit); return; }
+    const fd = e.target.closest('[data-fold]'); if (fd) { toggleFold(fd); return; }
     const dd = e.target.closest('[data-due]');
     if (dd) {
       const i = $(`[data-duein="${dd.dataset.due}"]`);
@@ -340,6 +407,25 @@ function bindBoardClicks() {
     const r = await act(() => dl.setDueDate(p.id, i.value));
     if (r.ok && r.value) { flash(p.id); toast(`Submission date set to <b>${fmtDate(i.value)}</b>`, 'cal'); }
   });
+}
+
+/** Marks a project submitted (the system 'sub' tag) or moves it back to active. */
+async function setSubmitted(id, on) {
+  const p = proj(id);
+  if (!p) return;
+  const want = on === undefined ? !isSubmitted(p) : on;
+  const r = await act(() => dl.toggleTag(p.id, 'sub', want));
+  if (!r.ok) return;
+  toast(want ? `<b dir="auto">${esc(p.title)}</b> marked as submitted` : `<b dir="auto">${esc(p.title)}</b> moved back to active`, want ? 'check' : 'left');
+  if (!want) flash(p.id);
+}
+function toggleFold(btn) {
+  const k = btn.dataset.fold, fold = btn.closest('.sub-fold'), open = !fold.classList.contains('open');
+  if (open) openFolds.add(k); else openFolds.delete(k);
+  saveFolds();
+  fold.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', open);
+  $('.collapse', fold).classList.toggle('closed', !open);
 }
 
 function toggleLog(id) {
@@ -409,6 +495,9 @@ function bindSearch() {
     if (e.key === 'Escape') $('#qList').classList.remove('show');
   });
   $('#qList').addEventListener('mousedown', (e) => {
+    const sf = e.target.closest('[data-sfilter]');
+    if (sf) { e.preventDefault(); const id = sf.dataset.sfilter; filterTags.has(id) ? filterTags.delete(id) : filterTags.add(id); renderBoard(); renderSuggest(); return; }
+    if (e.target.closest('[data-sall]')) { e.preventDefault(); $('#qList').classList.remove('show'); setPanel(true); return; }
     const b = e.target.closest('[data-qo]');
     if (!b) return;
     e.preventDefault();
@@ -418,11 +507,29 @@ function bindSearch() {
 }
 function renderQList() {
   const v = $('#q').value.trim(), L = $('#qList');
-  if (!v) { L.classList.remove('show'); $('#q').setAttribute('aria-expanded', 'false'); return; }
+  if (!v) { renderSuggest(); return; }
   const n = norm(v);
   const ms = S.projects.filter((p) => norm(p.title).includes(n)).slice(0, 8);
   qSel = Math.min(qSel, Math.max(ms.length - 1, 0));
   L.innerHTML = ms.length ? ms.map((p, i) => `<button class="qi ${i === qSel ? 'on' : ''}" role="option" data-qo="${esc(p.id)}"><b dir="auto">${esc(p.title)}</b></button>`).join('') : '<div class="qe">No project with that name</div>';
+  L.classList.add('show');
+  $('#q').setAttribute('aria-expanded', 'true');
+}
+
+/** Quick filter suggestions shown when the empty search box is focused. */
+function renderSuggest() {
+  const L = $('#qList');
+  const chip = (id, html) => `<button type="button" class="fopt ${filterTags.has(id) ? 'on' : ''}" data-sfilter="${esc(id)}">${html}</button>`;
+  const cnt = (fn) => S.projects.filter((p) => !isSubmitted(p) && fn(p)).length;
+  const dueChips = ['overdue', 'today', 'week', 'next', 'month'].map((k) => [k, cnt((p) => dueMatch(p, k))]).filter(([k, n]) => n || filterTags.has('due:' + k));
+  const engCols = S.columns.filter((c) => colUser(c));
+  const sts = statusOptions().slice(0, 6);
+  L.innerHTML = `<div class="sugg">
+    <div class="sugg-h">Submission date</div><div class="sugg-r">${dueChips.map(([k, n]) => chip('due:' + k, `${esc(DUE_RANGES.find((r) => r[0] === k)[1])}<small class="fhint">${n}</small>`)).join('') || '<em class="fnone">Nothing due soon</em>'}</div>
+    <div class="sugg-h">Engineer</div><div class="sugg-r">${engCols.map((c) => { const u = colUser(c); return chip('eng:' + c.id, `${avatar(u, 'xs')}<bdi>${esc(firstName(u.name.replace(/^Eng\.?\s*/i, '')))}</bdi>`); }).join('')}</div>
+    ${sts.length ? `<div class="sugg-h">Status</div><div class="sugg-r">${sts.map(([k, o]) => chip('st:' + k, `<bdi>${esc(o.label)}</bdi>`)).join('')}</div>` : ''}
+    <div class="sugg-f">Or type to search project names · <button type="button" data-sall>All filters</button></div>
+  </div>`;
   L.classList.add('show');
   $('#q').setAttribute('aria-expanded', 'true');
 }
@@ -546,8 +653,8 @@ function renderPage() {
   const p = proj(cur);
   if (!p) return;
   const done = p.subtasks.filter((s) => s.done).length;
-  const dinfo = dueInfo(p.due);
-  const dueStyle = dinfo.cls === 'late' ? 'background:var(--danger);color:#fff;border-color:var(--danger)' : dinfo.cls === 'soon' ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : '';
+  const dinfo = isSubmitted(p) && p.due ? { cls: 'done', rel: 'Submitted' } : dueInfo(p.due);
+  const dueStyle = dinfo.cls === 'done' ? 'background:var(--ok);color:#fff;border-color:var(--ok)' : dinfo.cls === 'late' ? 'background:var(--danger);color:#fff;border-color:var(--danger)' : dinfo.cls === 'soon' ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : '';
   const nonSys = p.comments.filter((c) => !c.sys).length;
   $('#page').innerHTML = `
   <div class="page-head">
@@ -556,6 +663,7 @@ function renderPage() {
       <div class="crumb">${typeBadge(projType(p))}${tenderById(p.tender) ? ' ' + esc(tenderById(p.tender).name) + ' ·' : ''} received ${fmtDate(p.received)} · updated ${ago(p.updatedAt)}${p.updatedBy ? ' by ' + esc(p.updatedBy) : ''}${p.source === 'email' ? ' <span class="src">from email</span>' : ''}</div>
       <input class="title-in" id="pTitle" value="${esc(p.title)}" dir="auto" aria-label="Project title">
     </div>
+    <button class="btn ${isSubmitted(p) ? 'sub-on' : ''}" id="pSubmit" title="${isSubmitted(p) ? 'Click to move it back to active' : 'Move this tender to the Submitted list'}">${icon('check')}${isSubmitted(p) ? 'Submitted' : 'Mark as submitted'}</button>
     <button class="btn icon" id="pMore" aria-label="More">${icon('dots')}</button>
     <button class="btn icon p-close" id="pClose" aria-label="Close project" title="Close (Esc)">${icon('x')}</button>
   </div>
@@ -628,6 +736,7 @@ function subHTML(s) {
 function bindPage(p) {
   $('#back').onclick = closePage;
   $('#pClose').onclick = closePage;
+  $('#pSubmit').onclick = () => setSubmitted(p.id);
   $('#pMore').onclick = (e) => {
     const r = e.currentTarget.getBoundingClientRect();
     menu(r.right - 190, r.bottom + 4, [['Delete project', 'trash', async () => {

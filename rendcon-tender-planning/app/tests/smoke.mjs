@@ -84,6 +84,7 @@ try {
     await btn.click();
     await page.waitForSelector('.c-log.open');
     check((await page.locator('.c-upd-btn.new').count()) < 3, 'button still marked new');
+    await page.waitForTimeout(600);   // let the 'seen' write's background refresh and the log animation settle
   });
 
   await step('drag a card to the first engineer column', async () => {
