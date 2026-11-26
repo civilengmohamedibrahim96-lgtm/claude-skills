@@ -1,0 +1,21 @@
+# Supabase CLI config (local dev + `supabase functions deploy`). The hosted project's
+# dashboard settings (Auth, Hooks) are authoritative; see BUILD_PLAN.md section 5.
+project_id = "rendcon-tender-planning"
+
+[functions.mail-sync]
+verify_jwt = false
+
+[functions.send-reminders]
+verify_jwt = false
+
+[functions.mail-review]
+verify_jwt = true
+
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173"]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true

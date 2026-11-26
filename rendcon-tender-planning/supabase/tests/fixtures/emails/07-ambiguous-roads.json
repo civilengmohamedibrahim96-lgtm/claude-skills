@@ -1,0 +1,43 @@
+{
+  "name": "07-ambiguous-roads",
+  "description": "Forwarded annex for «الطرق الداخلية» without the phase: two board projects fit, AI is only medium sure → Needs review.",
+  "folder": "inbox",
+  "raw": {
+    "id": "AAMk-07-ambiguous-roads",
+    "conversationId": "conv-07",
+    "subject": "FW: ورد الينا – ملحق رقم 2 الطرق الداخلية",
+    "from": { "emailAddress": { "name": "Ahmed Hassan", "address": "ahmed@redcon.example" } },
+    "toRecipients": [ { "emailAddress": { "name": "Tenders", "address": "tenders@redcon.example" } } ],
+    "receivedDateTime": "2026-11-25T09:00:00Z",
+    "hasAttachments": true,
+    "webLink": "https://outlook.office365.com/owa/?ItemID=AAMk-07",
+    "body": { "contentType": "text", "content": "---------- Forwarded message ---------\nFrom: procurement@city.example\nورد الينا ملحق رقم 2 لمشروع الطرق الداخلية يتضمن تعديل مواصفات طبقة الأساس، مع مد آخر موعد للتقديم ليصبح 05/01/2027.\nالمرفقات: https://tenders.example/internal-roads/addendum-2.pdf" }
+  },
+  "expect": {
+    "prefilter": null,
+    "shortlistTop": null,
+    "shortlistIncludes": ["p-roads2", "p-roads3"],
+    "aiForm": {
+      "direction": "received",
+      "kind": "update",
+      "matched_project": "@p-roads3",
+      "match_reason": "Mentions an annex for the internal roads project but not which phase.",
+      "other_possible_projects": ["@p-roads2"],
+      "project_name": "الطرق الداخلية",
+      "client": null,
+      "submission_date": "2027-01-05",
+      "submission_date_source": "ورد الينا ملحق رقم 2 لمشروع الطرق الداخلية يتضمن تعديل مواصفات طبقة الأساس، مع مد آخر موعد للتقديم ليصبح 05/01/2027.",
+      "tender_type": "unknown",
+      "supervisor_first_name": null,
+      "links": [ { "url": "https://tenders.example/internal-roads/addendum-2.pdf", "label": "Addendum" } ],
+      "suggested_status": null,
+      "summary": "Annex 2 for internal roads – submission moved to 05 Jan 2027",
+      "confidence": { "match": "medium", "facts": "high" }
+    },
+    "decision": "review",
+    "reviewReasons": ["low_match_confidence", "tie"],
+    "validated": { "projectId": "p-roads3", "kind": "update", "submissionDate": "2027-01-05", "tenderId": null, "tenderType": null, "supervisor": null, "linksCount": 1 },
+    "board": null,
+    "resolveAs": { "action": "assign", "projectId": "p-roads2", "board": { "project": "p-roads2", "tagsInclude": ["pp", "upd"], "due": "2027-01-05", "linksAdded": 1, "dateChange": { "from": "2026-12-24", "to": "2027-01-05" } } }
+  }
+}

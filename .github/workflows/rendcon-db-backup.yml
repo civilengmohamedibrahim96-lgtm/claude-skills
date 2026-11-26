@@ -1,0 +1,39 @@
+name: rendcon-db-backup
+on:
+  schedule:
+    - cron: '17 2 * * 0'   # Sundays 02:17 UTC
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-17
+      - name: Dump the database
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then echo "Secret SUPABASE_DB_URL is missing"; exit 1; fi
+          mkdir -p backup
+          STAMP=$(date -u +%Y%m%d-%H%M)
+          /usr/lib/postgresql/17/bin/pg_dump "$SUPABASE_DB_URL" \
+            --schema=public --no-owner --no-privileges --format=custom \
+            --file "backup/rendcon-$STAMP.dump"
+          /usr/lib/postgresql/17/bin/pg_dump "$SUPABASE_DB_URL" \
+            --schema=public --no-owner --no-privileges --format=plain \
+            --file "backup/rendcon-$STAMP.sql"
+          ls -la backup
+      - name: Upload the backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendcon-db-backup-${{ github.run_id }}
+          path: backup/
+          retention-days: 90
+          if-no-files-found: error

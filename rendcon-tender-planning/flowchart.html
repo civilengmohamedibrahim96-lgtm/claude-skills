@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tender Planning Flow</title>
+<meta name="description" content="How Redcon Tender Planning turns tender emails into cards on the board, and how the planning team works from there.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EDEDEA;--surface:#fff;--line:#D8D8D3;--ink:#111;--ink-2:#3A3A38;--muted:#74746F;--accent:#EE6A1F;--accent-soft:#FCE5D6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans","IBM Plex Sans Arabic",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+header{background:#fff;border-bottom:1px solid var(--line)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+header .wrap{display:flex;align-items:center;gap:16px;height:64px}
+.badge{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+header h1{margin:0;font-size:17px;font-weight:600}
+main .wrap{padding-top:28px;padding-bottom:48px}
+.intro{color:var(--ink-2);max-width:760px;margin:0 0 24px}
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tabs button{height:36px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:#fff;font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:all .18s}
+.tabs button:hover{border-color:#bbb}
+.tabs button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;overflow-x:auto}
+.card h2{margin:0 0 4px;font-size:18px}
+.card p.sub{margin:0 0 18px;color:var(--muted);font-size:14px}
+.chart{min-width:720px}
+.chart .mermaid{width:100%;margin:0;display:flex;justify-content:center}
+.chart svg{height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:18px;padding-top:14px;border-top:1px solid #EFEFEC;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{width:16px;height:12px;border-radius:3px;border:1.5px solid}
+.panel[hidden]{display:none}
+.mermaid{visibility:hidden}
+.mermaid[data-processed="true"]{visibility:visible}
+@media (max-width:640px){.wrap{padding:0 16px}.card{padding:16px}}
+.chart .nodeLabel i,.chart .label i{display:inline-block;margin-top:4px;font-style:normal;font-size:12px;font-weight:600;color:#D4560F}
+.chart .start .nodeLabel i{color:#F6B38A}
+table.tools{width:100%;border-collapse:collapse;margin-top:20px;font-size:14px}
+table.tools th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line)}
+table.tools td{padding:10px;border-bottom:1px solid #EFEFEC;vertical-align:top}
+table.tools td:last-child{white-space:nowrap;color:var(--ink-2)}
+
+.arch{min-width:0;display:flex;flex-direction:column;align-items:center}
+.arch .lvl{display:flex;justify-content:center;width:100%}
+.arch .node{border:1.5px solid #C7C7C1;background:#fff;border-radius:12px;padding:12px 18px;text-align:center;font-weight:600;font-size:15px;max-width:420px}
+.arch .node small{display:block;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:2px}
+.arch .node .tool,.arch .tool{display:block;margin-top:6px;font-size:12px;font-weight:600;color:#D4560F}
+.arch .node.dark{background:#111;color:#fff;border-color:#111;border-radius:999px}
+.arch .node.dark small{color:#BDBDB8}
+.arch .node.app{border:2px solid #111}
+.arch .node.side{background:#F7F7F5;max-width:none}
+.arch .vlink{position:relative;height:46px;width:2px;background:#9A9A95;margin:4px 0 10px}
+.arch .vlink::after{content:"";position:absolute;bottom:-6px;left:-5px;border:6px solid transparent;border-top-color:#9A9A95;border-bottom:0}
+.arch .vlink span{position:absolute;left:10px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:12.5px;color:var(--ink-2);background:#fff;padding:0 4px}
+.arch .vlink.ghost{visibility:hidden}
+.arch .vlinks{display:grid;grid-template-columns:1fr 1fr 1fr;width:100%;justify-items:center}
+.arch .cols{display:grid;grid-template-columns:1fr auto 1.15fr auto 1fr;gap:0;width:100%;align-items:center}
+.arch .cols.two{grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+.arch .grp{border-radius:14px;padding:14px;border:1.5px solid;display:flex;flex-direction:column;gap:8px;align-self:stretch}
+.arch .grp h4{margin:0 0 2px;font-size:14px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.arch .grp h4 em{font-style:normal;font-size:11.5px;font-weight:600;color:#D4560F}
+.arch .grp.ms{background:#F2F6FC;border-color:#A9C2E6}
+.arch .grp.sb{background:#F2FAF5;border-color:#9FD3B3}
+.arch .grp.an{background:#FFF8F2;border-color:#F6B38A}
+.arch .chip{background:#fff;border:1px solid #DDDDD8;border-radius:8px;padding:8px 10px;font-weight:600;font-size:13.5px}
+.arch .chip small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.arch .chip.strong{border-color:#111}
+.arch .chip.ai{background:#FCE5D6;border:2px solid #EE6A1F}
+.arch .hlink{display:flex;flex-direction:column;align-items:center;padding:0 8px;max-width:130px;text-align:center}
+.arch .hlink span{font-size:12px;color:var(--ink-2);line-height:1.3}
+.arch .hlink i{font-style:normal;font-size:26px;color:#8A8A85;line-height:1}
+@media (max-width:860px){.arch .cols,.arch .cols.two{grid-template-columns:1fr;gap:6px}.arch .hlink{flex-direction:row;gap:6px;max-width:none;padding:4px 0}.arch .hlink i{transform:rotate(90deg)}.arch .vlinks{grid-template-columns:1fr}.arch .vlink.ghost{display:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><span class="badge">Redcon</span><h1>Tender Planning – how it flows</h1></div></header>
+<main><div class="wrap">
+  <p class="intro">How a tender email becomes a card on the board without anyone typing it, how the 4 planning engineers work from there until submission, and which tool does each step. The orange <b style="color:#D4560F">⚙</b> line in each box names the tool.</p>
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="mail">1 · Email to board (every hour)</button>
+    <button role="tab" aria-selected="false" data-tab="work">2 · Daily work and reminders</button>
+    <button role="tab" aria-selected="false" data-tab="tools">3 · Tools and how they connect</button>
+  </div>
+
+  <section class="panel" id="mail">
+    <div class="card">
+      <h2>Email to board</h2>
+      <p class="sub">Runs automatically every hour, or when someone presses “Sync email”. Reads received and sent emails, and finds the project by reading the body – not by the subject line.</p>
+      <div class="chart"><pre class="mermaid">
+flowchart TD
+  A(["⏱ Every hour<br/>or Sync email button<br/><i>⚙ Supabase scheduler (pg_cron)</i>"]):::start --> B["Fetch new emails<br/>Inbox ↓ and Sent ↑<br/><i>⚙ Microsoft Graph API · Supabase Edge Function</i>"]
+  B --> C{"Read this<br/>email before?<br/><i>⚙ Supabase database</i>"}:::q
+  C -- "Yes" --> X1(["Skip"]):::stop
+  C -- "No" --> D{"Quick check (free):<br/>newsletter, auto-reply,<br/>invitation?<br/><i>⚙ Edge Function rules</i>"}:::q
+  D -- "Yes" --> X2(["Not about tenders<br/>no AI cost"]):::stop
+  D -- "No" --> S["Shortlist the 8 closest projects<br/><small>name · client · supervisor · dates · links<br/>Arabic spelling evened out<br/>same email thread = strong hint</small><br/><i>⚙ Postgres similarity search (pg_trgm)</i>"]
+  S --> E["🤖 AI reads the whole body<br/>with the shortlist<br/><small>subject is never trusted alone</small><br/><i>⚙ Claude API · Opus 5.5 or Haiku 5.5</i>"]:::ai
+  E --> F["AI picks the closest project or “new”<br/>and fills the form<br/><small>received / sent · type · reason for the match<br/>date + the sentence it came from<br/>public / private · supervisor · links · summary · confidence</small><br/><i>⚙ Claude structured outputs (JSON)</i>"]:::ai
+  F --> G{"App checks the answer<br/><small>match sure? real date?<br/>no tie between projects?</small><br/><i>⚙ Edge Function</i>"}:::q
+  G -- "Unsure" --> R["⚠ Needs review<br/><small>top 3 projects suggested</small><br/><i>⚙ Web app · Cloudflare Pages</i>"]:::review
+  R --> R2{"A person picks the project<br/>or “new”, or corrects"}:::q
+  R2 -- "remembered as an example" --> H
+  G -- "OK" --> H{"Received ↓<br/>or sent ↑?"}:::q
+  H -- "↓ received" --> HI{"What kind?"}:::q
+  H -- "↑ sent" --> HS{"What kind?"}:::q
+  HI -- "ورد الينا – new" --> N1["New card in Unassigned<br/>tag: New project"]
+  HI -- "Update / annex" --> N2["Tag: New updates<br/>new date if given"]
+  HI -- "تأجيل – postponed" --> N3["Tag: Postponed<br/>move submission date"]
+  HI -- "استفسارات – answers" --> N4["Tag: Queries answers"]
+  HS -- "Queries sent" --> T1["Status: queries sent<br/>waiting for answers"]
+  HS -- "Offer submitted" --> T2["Tag: Submitted"]
+  HS -- "Extension requested<br/>or follow-up" --> T3["Status updated"]
+  H -- "Not a tender" --> X3(["Ignore"]):::stop
+  N1 & N2 & N3 & N4 & T1 & T2 & T3 --> L["Update log ↓/↑ with link to the email<br/>links saved · date history “from email”<br/><i>⚙ Supabase database</i>"]
+  L --> M["Label the email in Outlook<br/>“Tender Planning”<br/><i>⚙ Microsoft Graph API</i>"]
+  M --> P(["Board updates for all 4 users<br/>card shows “1 new” · notification<br/><i>⚙ Supabase Realtime · Web Push</i>"]):::start
+  classDef start fill:#111,stroke:#111,color:#fff
+  classDef ai fill:#FCE5D6,stroke:#EE6A1F,color:#111,stroke-width:2px
+  classDef q fill:#F5F5F3,stroke:#9A9A95,color:#111
+  classDef stop fill:#fff,stroke:#C7C7C1,color:#74746F,stroke-dasharray:4 3
+  classDef review fill:#FCEBE7,stroke:#C8321E,color:#111,stroke-width:2px
+</pre></div>
+      <div class="legend">
+        <span><i style="background:#111;border-color:#111"></i>Start and result</span>
+        <span><i style="background:#FCE5D6;border-color:#EE6A1F"></i>AI step</span>
+        <span><i style="background:#F5F5F3;border-color:#9A9A95"></i>Check / decision</span>
+        <span><i style="background:#FCEBE7;border-color:#C8321E"></i>A person decides</span>
+        <span><i style="background:#fff;border-color:#C7C7C1;border-style:dashed"></i>Stops here</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="work" hidden>
+    <div class="card">
+      <h2>Daily work and reminders</h2>
+      <p class="sub">From a new card to submission, and how reminders reach the team.</p>
+      <div class="chart"><pre class="mermaid">
+flowchart TD
+  A(["New card in Unassigned<br/><small>from email or added by hand</small><br/><i>⚙ Web app · Supabase database</i>"]):::start --> B["Drag the card to an<br/>engineer's column<br/><small>= assigned to them</small><br/><i>⚙ Web app · Supabase Realtime</i>"]
+  B --> C["Engineer works on the project<br/><small>status · sub-tasks · comments · links</small><br/><i>⚙ Web app · Supabase database</i>"]
+  C --> D["Files go to the project folder<br/><small>upload · open · list</small><br/><i>⚙ SharePoint / OneDrive · Microsoft Graph</i>"]
+  C --> E["Set reminders<br/><small>me · assigned engineer · everyone</small><br/><i>⚙ Web app</i>"]
+  F["Automatic reminders<br/><small>submission in 3 days and tomorrow</small><br/><i>⚙ Supabase database</i>"]:::auto --> G
+  E --> G{"Checked every<br/>5 minutes:<br/>reminder due?<br/><i>⚙ Supabase scheduler (pg_cron) · Edge Function</i>"}:::q
+  G -- "Yes" --> H["Desktop / browser notification<br/>+ email from the tenders mailbox<br/><i>⚙ Web Push · Microsoft Graph (send mail)</i>"]:::auto
+  I["New email about this tender<br/><small>postponed · answers · annex</small><br/><i>⚙ Flow 1 · Claude API</i>"]:::ai --> J["Card shows “1 new”<br/>date and tags update<br/><i>⚙ Supabase Realtime</i>"]
+  J --> C
+  C --> K{"Submitted?"}:::q
+  K -- "Not yet" --> C
+  K -- "Yes" --> L(["Tag Submitted<br/>date chip turns green"]):::start
+  classDef start fill:#111,stroke:#111,color:#fff
+  classDef ai fill:#FCE5D6,stroke:#EE6A1F,color:#111,stroke-width:2px
+  classDef auto fill:#FFF5EE,stroke:#F6B38A,color:#111
+  classDef q fill:#F5F5F3,stroke:#9A9A95,color:#111
+</pre></div>
+      <div class="legend">
+        <span><i style="background:#111;border-color:#111"></i>Start and result</span>
+        <span><i style="background:#FCE5D6;border-color:#EE6A1F"></i>From email (AI)</span>
+        <span><i style="background:#FFF5EE;border-color:#F6B38A"></i>Automatic</span>
+        <span><i style="background:#F5F5F3;border-color:#9A9A95"></i>Check / decision</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tools" hidden>
+    <div class="card">
+      <h2>Tools and how they connect</h2>
+      <p class="sub">Every service the app uses, what it does, and what it costs.</p>
+      <div class="arch">
+        <div class="lvl"><div class="node dark">👷 4 planning engineers<small>browser, or installed app on PC / phone</small></div></div>
+        <div class="vlink"><span>uses</span></div>
+        <div class="lvl"><div class="node app">🖥 Web app<small>board · project page · team · reminders</small><b class="tool">⚙ Cloudflare Pages · free</b></div></div>
+        <div class="vlinks"><div class="vlink"><span>sign in · files</span></div><div class="vlink"><span>data · live updates</span></div><div class="vlink ghost"></div></div>
+        <div class="cols">
+          <div class="grp ms"><h4>Microsoft 365 <em>already paid</em></h4>
+            <div class="chip">Entra ID<small>work sign-in</small></div>
+            <div class="chip">Outlook – tenders mailbox<small>Inbox ↓ · Sent ↑ · sends reminders</small></div>
+            <div class="chip">SharePoint / OneDrive<small>project folders · uploads</small></div>
+          </div>
+          <div class="hlink"><span>Microsoft Graph</span><i>⇄</i></div>
+          <div class="grp sb"><h4>Supabase <em>free plan</em></h4>
+            <div class="chip">Auth<small>only the 4 users</small></div>
+            <div class="chip">Database<small>projects · dates · update log · closest-match search</small></div>
+            <div class="chip">Realtime<small>everyone's board stays live</small></div>
+            <div class="chip">Scheduler<small>every hour · every 5 minutes</small></div>
+            <div class="chip strong">Edge Functions<small>mail reader · reminders · checks</small></div>
+          </div>
+          <div class="hlink"><span>email + shortlist → filled form</span><i>⇄</i></div>
+          <div class="grp an"><h4>Anthropic <em>pay per email</em></h4>
+            <div class="chip ai">🤖 Claude API<small>reads each email body · picks the closest project · fills the form<br>Opus 5.5 or Haiku 5.5</small></div>
+          </div>
+        </div>
+        <div class="vlinks"><div class="vlink ghost"></div><div class="vlink"><span>sends</span></div><div class="vlink ghost"></div></div>
+        <div class="cols two">
+          <div class="node side">🔔 Web Push<small>desktop and phone notifications to the 4 engineers, even when the app is closed</small><b class="tool">⚙ built into browsers · free</b></div>
+          <div class="node side">GitHub<small>keeps the code · deploys the web app · weekly database backup</small><b class="tool">⚙ GitHub Actions · free</b></div>
+        </div>
+      </div>
+      <table class="tools">
+        <thead><tr><th>Tool</th><th>Does</th><th>Cost</th></tr></thead>
+        <tbody>
+          <tr><td><b>Cloudflare Pages</b></td><td>Hosts the web app; updates automatically from GitHub</td><td>Free</td></tr>
+          <tr><td><b>Supabase</b> – database, Auth, Realtime, Edge Functions, scheduler</td><td>Stores everything, checks sign-in, keeps everyone's board live, runs the hourly mail reader and the 5-minute reminder check, finds the closest projects (pg_trgm)</td><td>Free plan</td></tr>
+          <tr><td><b>Microsoft Graph</b> (Outlook, SharePoint / OneDrive, Entra ID)</td><td>Reads Inbox and Sent, labels emails, sends reminder emails, creates folders and saves uploads, Microsoft sign-in</td><td>Included in Microsoft 365</td></tr>
+          <tr><td><b>Claude API</b> (Anthropic)</td><td>Reads each email body, picks the closest project, fills the form</td><td>~$1 (Haiku 5.5) to ~$25–40 (Opus 5.5) a month</td></tr>
+          <tr><td><b>Web Push</b></td><td>Desktop and phone notifications, even when the app is closed</td><td>Free</td></tr>
+          <tr><td><b>GitHub</b> + GitHub Actions</td><td>Keeps the code; weekly database backup</td><td>Free</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div></main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false,theme:'base',securityLevel:'strict',flowchart:{curve:'basis',htmlLabels:true,nodeSpacing:34,rankSpacing:46,useMaxWidth:false},
+  themeVariables:{fontFamily:'"IBM Plex Sans","IBM Plex Sans Arabic",sans-serif',fontSize:'16px',primaryColor:'#ffffff',primaryBorderColor:'#C7C7C1',primaryTextColor:'#111111',lineColor:'#8A8A85',edgeLabelBackground:'#ffffff',tertiaryColor:'#ffffff'}});
+async function draw(id){const el=document.querySelector('#'+id+' .mermaid');if(!el||el.dataset.processed)return;await mermaid.run({nodes:[el]})}
+draw('mail');
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',async()=>{
+  document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!==b.dataset.tab);
+  await draw(b.dataset.tab);
+}));
+</script>
+</body>
+</html>

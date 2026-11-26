@@ -1,0 +1,44 @@
+{
+  "name": "02-postponed",
+  "description": "Postponement with Arabic-digit dates; the subject names the project differently from the board («خزان المياه الارضي ٥٠٠٠ م٣» vs «إنشاء خزان مياه أرضي سعة 5000 م³»). Plain-text body.",
+  "folder": "inbox",
+  "raw": {
+    "id": "AAMk-02-postponed",
+    "conversationId": "conv-02",
+    "subject": "تأجيل موعد تقديم العطاءات – خزان المياه الارضي ٥٠٠٠ م٣",
+    "from": { "emailAddress": { "name": "إدارة التعاقدات", "address": "contracts@water.example" } },
+    "toRecipients": [ { "emailAddress": { "name": "Tenders", "address": "tenders@redcon.example" } } ],
+    "ccRecipients": [ { "emailAddress": { "name": "", "address": "planning@redcon.example" } } ],
+    "receivedDateTime": "2026-11-24T09:30:00Z",
+    "sentDateTime": "2026-11-24T09:29:10Z",
+    "hasAttachments": true,
+    "webLink": "https://outlook.office365.com/owa/?ItemID=AAMk-02",
+    "body": { "contentType": "text", "content": "السادة / شركة ريدكون للمقاولات\nتحية طيبة وبعد،\nنحيطكم علماً بأنه تقرر تأجيل آخر موعد لتقديم العطاءات للمناقصة رقم ٤٧ لسنة ٢٠٢٦ الخاصة بإنشاء خزان أرضي للمياه بسعة ٥٠٠٠ متر مكعب، ليصبح يوم الأحد الموافق ١٠/١/٢٠٢٧ بدلاً من ٣/١٢/٢٠٢٦.\nالإخطار الرسمي: https://tenders.example/water-tank/postponement-notice\nوتفضلوا بقبول وافر الاحترام،\nإدارة التعاقدات – هيئة مياه الشرب" }
+  },
+  "expect": {
+    "prefilter": null,
+    "shortlistTop": "p-tank",
+    "shortlistIncludes": ["p-tank"],
+    "aiForm": {
+      "direction": "received",
+      "kind": "postponed",
+      "matched_project": "@p-tank",
+      "match_reason": "Body names the same 5000 m³ ground water tank for the drinking-water authority; the subject is worded differently.",
+      "other_possible_projects": [],
+      "project_name": "إنشاء خزان أرضي للمياه بسعة ٥٠٠٠ متر مكعب",
+      "client": "هيئة مياه الشرب",
+      "submission_date": "2027-01-10",
+      "submission_date_source": "نحيطكم علماً بأنه تقرر تأجيل آخر موعد لتقديم العطاءات للمناقصة رقم ٤٧ لسنة ٢٠٢٦ الخاصة بإنشاء خزان أرضي للمياه بسعة ٥٠٠٠ متر مكعب، ليصبح يوم الأحد الموافق ١٠/١/٢٠٢٧ بدلاً من ٣/١٢/٢٠٢٦.",
+      "tender_type": "unknown",
+      "supervisor_first_name": null,
+      "links": [ { "url": "https://tenders.example/water-tank/postponement-notice", "label": "Notice" } ],
+      "suggested_status": "Postponed to 10 Jan 2027",
+      "summary": "Submission postponed – 03 Dec 2026 → 10 Jan 2027",
+      "confidence": { "match": "high", "facts": "high" }
+    },
+    "decision": "apply",
+    "reviewReasons": [],
+    "validated": { "projectId": "p-tank", "kind": "postponed", "submissionDate": "2027-01-10", "tenderId": null, "tenderType": null, "supervisor": null, "linksCount": 1 },
+    "board": { "project": "p-tank", "tagsInclude": ["new", "pp"], "due": "2027-01-10", "status": "Postponed to 10 Jan 2027", "linksAdded": 1, "dateChange": { "from": "2026-12-03", "to": "2027-01-10" } }
+  }
+}

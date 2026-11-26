@@ -1,0 +1,1779 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redcon Tender Planning</title>
+<meta name="description" content="Tender planning board for Rendcon: assign projects to engineers, track tags, sub-tasks, links, files and reminders, with hourly email intake.">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="icon" href="assets/redcon-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9E9E6; --surface:#FFFFFF; --surface-2:#F5F5F3; --surface-3:#EFEFEC;
+  --line:#D8D8D3; --line-2:#C7C7C1;
+  --ink:#111111; --ink-2:#3A3A38; --muted:#74746F;
+  --accent:#EE6A1F; --accent-2:#D4560F; --accent-soft:#FCE5D6; --accent-line:#F6B38A;
+  --dark:#161616; --dark-2:#232323; --dark-line:#333331;
+  --danger:#C8321E; --ok:#2E7D4F;
+  --r-sm:6px; --r:10px; --r-lg:14px;
+  --shadow-1:0 1px 0 rgba(0,0,0,.04),0 1px 3px rgba(0,0,0,.06);
+  --shadow-2:0 6px 18px rgba(0,0,0,.10),0 2px 6px rgba(0,0,0,.06);
+  --shadow-3:0 22px 48px rgba(0,0,0,.22),0 6px 14px rgba(0,0,0,.10);
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --font:"IBM Plex Sans","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 var(--font);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column;height:100vh;height:100dvh}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+[dir=rtl],.ar{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",sans-serif}
+svg.i{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+:where([hidden]){display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- App bar ---------- */
+.appbar{flex:none;height:58px;background:var(--dark);color:#F2F2EF;display:flex;align-items:center;gap:14px;padding:0 20px;position:relative;z-index:20}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.mark{width:30px;height:30px;border-radius:8px;background:var(--accent);display:grid;place-items:center;font-weight:700;color:#fff;font-size:15px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.brand small{display:block;font-weight:500;color:#9A9A95;font-size:11.5px;letter-spacing:.02em}
+.appbar .grow{flex:1}
+.chip-btn{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--dark-line);background:var(--dark-2);color:#E8E8E4;font-size:13px;font-weight:500;transition:background .2s,border-color .2s,transform .15s}
+.chip-btn:hover{background:#2C2C2B;border-color:#444}
+.chip-btn:active{transform:scale(.97)}
+.chip-btn .dot{width:8px;height:8px;border-radius:50%;background:#6B6B67}
+.chip-btn.on .dot{background:#3BC170;box-shadow:0 0 0 3px rgba(59,193,112,.18)}
+.chip-btn .count{background:var(--accent);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px;font-weight:600}
+.sync-btn.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sync-meta{font-size:11.5px;color:#9A9A95;font-family:var(--mono)}
+
+/* ---------- Toolbar ---------- */
+.toolbar{flex:none;display:flex;align-items:center;gap:8px;padding:16px 20px 8px;flex-wrap:wrap}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;height:36px;padding:0 14px;min-width:240px;transition:border-color .2s,box-shadow .2s}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search input{border:0;outline:0;background:none;width:100%}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-left:4px}
+.fchip{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .18s var(--ease)}
+.fchip:hover{border-color:var(--line-2);transform:translateY(-1px)}
+.fchip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.tdot{width:8px;height:8px;border-radius:50%;flex:none}
+.btn{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;height:36px;padding:0 14px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);font-weight:500;font-size:13px;transition:background .18s,border-color .18s,transform .12s,box-shadow .18s}
+a.btn{text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:var(--line-2);background:var(--surface-2)}
+.btn:active{transform:translateY(1px) scale(.98)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)}
+.btn.primary:hover{background:var(--accent-2);border-color:var(--accent-2)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.ghost:hover{background:var(--surface-3)}
+.btn.sm{height:30px;padding:0 10px;font-size:12.5px}
+.btn.icon{width:32px;padding:0;justify-content:center}
+.toolbar .spacer{flex:1}
+
+/* ---------- Board ---------- */
+.board{display:flex;gap:20px;padding:12px 24px 28px;overflow-x:auto;flex:1;min-height:0;align-items:flex-start;scroll-behavior:smooth}
+.board::-webkit-scrollbar{height:10px}
+.board::-webkit-scrollbar-thumb{background:#C9C9C4;border-radius:9px;border:2px solid var(--bg)}
+.col{flex:0 0 336px;max-height:100%;display:flex;flex-direction:column;background:var(--surface-3);border:1px solid var(--line);border-radius:16px;animation:colIn .45s var(--ease) both}
+@keyframes colIn{from{opacity:0;transform:translateY(10px)}}
+.col.unassigned{background:repeating-linear-gradient(135deg,#ECECE8 0 10px,#E6E6E2 10px 20px);border-style:dashed;border-color:var(--line-2)}
+.col-head{display:flex;align-items:center;gap:12px;padding:16px 12px 14px 16px;border-radius:16px 16px 0 0}
+.col-who{display:flex;align-items:center;gap:12px;flex:1;min-width:0;border:0;background:none;padding:4px;margin:-4px;border-radius:10px;text-align:left;transition:background .18s}
+button.col-who:hover{background:rgba(255,255,255,.7)}
+button.col-who:hover .edit-hint{opacity:1}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;font-weight:600;display:grid;place-items:center;flex:none;letter-spacing:.02em}
+.avatar.sm{width:24px;height:24px;font-size:10px}
+.avatar.lg{width:56px;height:56px;font-size:19px}
+.avatar.ghost{background:transparent;border:1.5px dashed var(--line-2);color:var(--muted)}
+.col.unassigned .col-head .avatar{background:var(--accent)}
+.col-title{font-weight:600;font-size:14.5px;line-height:1.25;flex:1;min-width:0}
+.col-title span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.col-title small{display:flex;align-items:center;gap:6px;color:var(--muted);font-weight:500;font-size:12px;margin-top:2px}
+.edit-hint{opacity:0;color:var(--muted);transition:opacity .18s}
+.edit-hint svg.i{width:14px;height:14px}
+.col-count{font:500 12px var(--mono);color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:2px 9px;border-radius:999px}
+.col-list{padding:2px 12px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;min-height:72px;flex:1;transition:background .2s}
+.col-list.over{background:rgba(238,106,31,.06)}
+.col-foot{padding:0 12px 12px}
+.add-card{width:100%;height:40px;justify-content:flex-start;color:var(--muted);background:transparent;border:1px dashed transparent;border-radius:10px}
+.add-card:hover{color:var(--ink);background:var(--surface);border-color:var(--line)}
+.board::after{content:"";flex:0 0 4px}
+.add-col{flex:0 0 280px;height:64px;border:1.5px dashed var(--line-2);border-radius:16px;background:transparent;color:var(--ink-2);font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s var(--ease)}
+.add-col:hover{border-color:var(--accent);color:var(--accent);background:rgba(238,106,31,.05)}
+.empty-col{color:var(--muted);font-size:13px;text-align:center;padding:28px 12px;border:1.5px dashed var(--line-2);border-radius:12px}
+.pill.inv{background:#FFF3E8;color:var(--accent-2)}
+
+/* ---------- Card ---------- */
+.card{flex:none;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;box-shadow:var(--shadow-1);cursor:grab;user-select:none;touch-action:none;position:relative;overflow:hidden;transition:transform .2s var(--ease),box-shadow .2s var(--ease),border-color .2s;animation:cardIn .4s var(--ease) both}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-2);border-color:var(--line-2)}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);transform:scaleY(0);transform-origin:top;transition:transform .3s var(--ease)}
+.card:hover::before,.card:focus-visible::before{transform:none}
+.card.is-late::before{background:var(--danger)}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px) scale(.98)}}
+.card.dropped{animation:pop .42s var(--ease)}
+@keyframes pop{0%{transform:scale(.96)}55%{transform:scale(1.025)}100%{transform:scale(1)}}
+.card.fresh{animation:fresh 2.4s var(--ease)}
+@keyframes fresh{0%,40%{box-shadow:0 0 0 3px var(--accent-line),var(--shadow-2)}100%{box-shadow:var(--shadow-1)}}
+.card.ghost{position:fixed;z-index:1000;pointer-events:none;box-shadow:var(--shadow-3);transform:scale(1.03);cursor:grabbing;transition:none;animation:none;border-color:var(--accent-line)}
+.placeholder{border:2px dashed var(--accent-line);background:rgba(238,106,31,.07);border-radius:14px;flex:none;animation:ph .2s var(--ease)}
+@keyframes ph{from{opacity:0}}
+.c-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.c-ref{font:500 11.5px var(--mono);color:var(--muted);display:flex;gap:6px;align-items:center;min-width:0;white-space:nowrap}
+.duepill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap;flex:none}
+.duepill svg.i{width:13px;height:13px}
+.duepill.soon{background:var(--accent-soft);color:var(--accent-2)}
+.duepill.late{background:#FBE3DF;color:var(--danger)}
+.card h3{margin:0;font-size:15px;font-weight:600;line-height:1.42;letter-spacing:-.008em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.c-client{margin-top:4px;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-status{margin-top:14px;padding:9px 12px;border-left:3px solid var(--accent);background:var(--surface-2);border-radius:0 8px 8px 0;font-size:13px;line-height:1.5;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 10px 3px 8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.c-foot{display:flex;align-items:center;gap:14px;margin-top:16px;padding-top:12px;border-top:1px solid var(--surface-3);color:var(--muted);font-size:12px}
+.c-foot span{display:inline-flex;align-items:center;gap:4px}
+.c-foot .avatar{display:grid;gap:0}
+.c-foot .na{font-size:12px;color:var(--muted);font-style:italic}
+.c-foot svg.i{width:14px;height:14px}
+.c-foot .bell{color:var(--accent)}
+.c-tasks{gap:8px!important;font:500 11.5px var(--mono);color:var(--ink-2)}
+.c-bar{width:44px;height:5px;border-radius:5px;background:var(--surface-3);overflow:hidden;display:block}
+.c-bar i{display:block;height:100%;background:var(--accent);border-radius:5px;transition:width .5s var(--ease)}
+.c-foot .grow{flex:1}
+.prog{height:4px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-top:12px}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .5s var(--ease)}
+.src{font:600 10px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--accent-2);background:var(--accent-soft);padding:1px 6px;border-radius:4px}
+
+/* ---------- Team, profile, reminders ---------- */
+.me-btn{border:0;background:none;padding:0;border-radius:50%;display:grid;place-items:center;transition:transform .15s}
+.me-btn:hover{transform:scale(1.05)}
+.me-btn .avatar{box-shadow:0 0 0 2px var(--dark),0 0 0 3.5px var(--accent)}
+.member{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--surface-3);animation:cardIn .3s var(--ease) both}
+.member .b{flex:1;min-width:0}
+.member .b b{display:flex;align-items:center;gap:8px;font-weight:600}
+.member .b small{display:block;color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.member .acts{display:flex;gap:4px}
+.invite-box{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--surface-2)}
+.invite-box .formgrid{margin-bottom:12px}
+.lbl-sm{font-size:12px;color:var(--muted);font-weight:500;display:block;margin-bottom:6px}
+.prof-head{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.prof-head h3{margin:0}
+.prof-head small{color:var(--muted)}
+.swatches{display:flex;gap:8px}
+.swatches button{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);padding:0;transition:transform .15s}
+.swatches button.on{box-shadow:0 0 0 2px var(--ink)}
+.swatches button:hover{transform:scale(1.1)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stats div{background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.stats b{display:block;font-size:20px;font-weight:600}
+.stats small{color:var(--muted);font-size:12px}
+.chk-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13.5px}
+.chk-row input{accent-color:var(--accent);width:16px;height:16px}
+.recips{display:flex;flex-wrap:wrap;gap:6px}
+.recips button{height:30px;padding:0 10px 0 4px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .18s var(--ease)}
+.recips button.txt{padding:0 12px}
+.recips button:hover{border-color:var(--line-2)}
+.recips button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.recips .avatar.sm{width:22px;height:22px;font-size:9.5px}
+.sent{display:flex;gap:10px;padding:10px 4px;border-bottom:1px solid var(--surface-3);font-size:13px}
+.sent .b{flex:1;min-width:0}
+.sent small{color:var(--muted);display:block}
+.modal .box.wide{width:min(560px,calc(100vw - 32px))}
+.sheet.wide{width:min(600px,100vw)}
+.view-banner{background:var(--accent);color:#fff;font-size:12.5px;font-weight:500;text-align:center;padding:6px 12px;flex:none}
+.view-banner button{background:rgba(0,0,0,.18);border:0;color:#fff;border-radius:6px;padding:2px 8px;margin-left:8px;font-size:12px}
+
+/* ---------- Project page ---------- */
+.scrim{position:fixed;inset:0;background:rgba(17,17,17,.38);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40;backdrop-filter:blur(2px)}
+.scrim.show{opacity:1;pointer-events:auto}
+.page{position:fixed;top:0;right:0;bottom:0;width:min(1120px,100vw);background:var(--bg);z-index:50;transform:translateX(100%);transition:transform .42s var(--ease),box-shadow .42s;display:flex;flex-direction:column}
+.page.show{transform:none;box-shadow:var(--shadow-3)}
+.page-head{background:var(--surface);border-bottom:1px solid var(--line);padding:16px 24px;display:flex;gap:12px;align-items:center}
+.page-head .t{flex:1;min-width:0}
+.crumb{font:500 12px var(--mono);color:var(--muted);display:flex;gap:8px;align-items:center;margin-bottom:2px;flex-wrap:wrap}
+.title-in{width:100%;border:1px solid transparent;border-radius:8px;padding:4px 8px;margin-left:-8px;font-size:22px;font-weight:600;letter-spacing:-.015em;background:transparent;text-align:left;transition:border-color .2s,background .2s}
+.title-in:hover{border-color:var(--line)}
+.title-in:focus{border-color:var(--accent);background:#fff;outline:0}
+.page-body{flex:1;overflow:auto;display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:16px;padding:16px 24px 40px;align-content:start}
+.page-body>div{min-width:0;display:flex;flex-direction:column;gap:16px}
+.page-body>div:last-child{position:sticky;top:0;align-self:start}
+.addrow .in,.formgrid .in{min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px 18px;animation:cardIn .45s var(--ease) both}
+.panel h4{margin:0 0 12px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
+.panel h4 .grow{flex:1}
+.field{display:grid;grid-template-columns:112px 1fr;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid var(--surface-3)}
+.field:last-child{border-bottom:0}
+.field label{color:var(--muted);font-size:12.5px;font-weight:500}
+.in{width:100%;height:34px;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 10px;background:var(--surface);transition:border-color .2s,box-shadow .2s}
+.in:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);outline:0}
+textarea.in{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
+.tagpick{display:flex;flex-wrap:wrap;gap:6px}
+.tagpick button{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .18s var(--ease)}
+.tagpick button:hover{transform:translateY(-1px);border-color:var(--line-2)}
+.tagpick button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tagpick .newtag{width:120px;height:28px;border-radius:999px;border:1px dashed var(--line-2);padding:0 10px;font-size:12px;background:transparent}
+.folder{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2)}
+.folder .gd{width:26px;height:26px;flex:none}
+.folder a{color:var(--ink);font-weight:500;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;background:linear-gradient(var(--accent),var(--accent)) 0 100%/0 1.5px no-repeat;transition:background-size .3s var(--ease)}
+.folder a:hover{background-size:100% 1.5px}
+
+/* sub-tasks */
+.sub-head{cursor:pointer;user-select:none}
+.sub-head .chev{transition:transform .3s var(--ease)}
+.sub-head.closed .chev{transform:rotate(-90deg)}
+.collapse{display:grid;grid-template-rows:1fr;transition:grid-template-rows .35s var(--ease)}
+.collapse.closed{grid-template-rows:0fr}
+.collapse > div{overflow:hidden}
+.sub{border:1px solid var(--line);border-radius:var(--r);margin-bottom:8px;background:var(--surface);transition:border-color .2s,box-shadow .2s;animation:cardIn .3s var(--ease) both}
+.sub:hover{border-color:var(--line-2)}
+.sub-row{display:flex;align-items:center;gap:9px;padding:7px 8px 7px 10px}
+.chk{width:18px;height:18px;border-radius:5px;border:1.6px solid var(--line-2);display:grid;place-items:center;flex:none;background:#fff;transition:all .2s var(--ease);padding:0}
+.chk svg{width:12px;height:12px;stroke:#fff;stroke-width:3;opacity:0;transform:scale(.4);transition:all .25s var(--ease)}
+.sub.done .chk{background:var(--accent);border-color:var(--accent)}
+.sub.done .chk svg{opacity:1;transform:none}
+.sub-text{flex:1;border:0;background:transparent;padding:3px 4px;border-radius:5px;min-width:0}
+.sub-text:focus{background:var(--surface-2);outline:0}
+.sub.done .sub-text{text-decoration:line-through;color:var(--muted)}
+.sub-due{font:500 11px var(--mono);color:var(--muted);white-space:nowrap}
+.sub-x{opacity:0;transition:opacity .15s}
+.sub:hover .sub-x{opacity:1}
+.sub-tog svg{transition:transform .3s var(--ease)}
+.sub.open .sub-tog svg{transform:rotate(180deg)}
+.sub-more{padding:0 10px 10px 38px;display:grid;gap:8px;grid-template-columns:1fr 150px}
+.sub-more textarea{min-height:56px;grid-column:1/2}
+.addrow{display:flex;gap:8px;margin-top:8px}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);position:relative;margin:-16px -18px 16px;padding:0 10px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:0;padding:12px 7px;flex:none;font-size:13px;font-weight:500;color:var(--muted);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:color .2s}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink)}
+.tab .n{font:500 10.5px var(--mono);background:var(--surface-3);border-radius:999px;padding:0 6px}
+.tab.on .n{background:var(--accent-soft);color:var(--accent-2)}
+.tab-ink{position:absolute;bottom:-1px;height:2px;background:var(--accent);border-radius:2px;transition:left .35s var(--ease),width .35s var(--ease)}
+.tabpane{animation:paneIn .35s var(--ease)}
+@keyframes paneIn{from{opacity:0;transform:translateY(6px)}}
+.list-item{display:flex;align-items:center;gap:11px;padding:10px 4px;border-bottom:1px solid var(--surface-3);transition:background .15s}
+.list-item:hover{background:var(--surface-2)}
+.list-item:last-child{border-bottom:0}
+.ico{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--surface-3);color:var(--ink-2);font:700 9.5px var(--mono)}
+.ico.pdf{background:#FBE3DF;color:#B42318}
+.ico.dwg{background:#E4E9F2;color:#2D4A7A}
+.ico.xls{background:#DFF1E5;color:#1D6B3B}
+.ico.doc{background:#E1E9FB;color:#1E4FB8}
+.ico.img{background:#F3E9D7;color:#7A5410}
+.list-item .body{flex:1;min-width:0}
+.list-item .body b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list-item .body a{color:var(--ink);text-decoration:none}
+.list-item .body a:hover{color:var(--accent-2)}
+.list-item .body small{color:var(--muted);font-size:12px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{color:var(--muted);text-align:center;padding:26px 10px;font-size:13px}
+.comment{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--surface-3);animation:cardIn .3s var(--ease) both}
+.comment .avatar{width:30px;height:30px}
+.comment .b{flex:1;min-width:0}
+.comment .who{font-weight:600;font-size:13px}
+.comment .who time{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.comment p{margin:3px 0 0;white-space:pre-wrap;word-wrap:break-word}
+.comment.sys .avatar{background:var(--accent-soft);color:var(--accent-2)}
+.comment.sys p{color:var(--ink-2);font-size:13px}
+.drop{display:block;cursor:pointer;border:1.5px dashed var(--line-2);border-radius:var(--r);padding:24px;text-align:center;color:var(--muted);transition:all .2s var(--ease);background:var(--surface-2)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-2);transform:scale(1.01)}
+.drop b{color:var(--ink)}
+.up{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--surface-3)}
+.up .bar{height:4px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-top:5px}
+.up .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s linear}
+.up.done .bar i{background:var(--ok)}
+.rem{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--surface-3)}
+.rem.fired{opacity:.55}
+.rem .when{font:500 12px var(--mono);color:var(--ink-2)}
+.pill{font:600 10.5px var(--mono);padding:1px 7px;border-radius:999px;background:var(--surface-3);color:var(--ink-2);text-transform:uppercase;letter-spacing:.03em}
+.pill.o{background:var(--accent-soft);color:var(--accent-2)}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.formgrid .full{grid-column:1/-1}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+
+/* ---------- Side sheets (email, reminders) ---------- */
+.sheet{position:fixed;top:0;right:0;bottom:0;width:min(500px,100vw);background:var(--surface);z-index:60;transform:translateX(100%);transition:transform .4s var(--ease),box-shadow .4s;display:flex;flex-direction:column}
+.sheet.show{transform:none;box-shadow:var(--shadow-3)}
+.sheet-head{padding:18px 20px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.sheet-head h2{margin:0;font-size:17px;flex:1}
+.sheet-body{flex:1;overflow:auto;padding:16px 20px 30px}
+.mail{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;animation:cardIn .35s var(--ease) both;background:var(--surface)}
+.mail .subj{font-weight:600;font-size:14px}
+.mail .from{color:var(--muted);font-size:12px;margin-top:2px}
+.mail .snip{color:var(--ink-2);font-size:13px;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mail .res{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:9px;font-size:12px;color:var(--ink-2)}
+.mail.pending{background:var(--surface-2);border-style:dashed}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:8px 10px;align-items:center;margin-bottom:16px}
+.kv label{color:var(--muted);font-size:12.5px}
+.switch{width:38px;height:22px;border-radius:999px;background:var(--line-2);border:0;position:relative;transition:background .25s;padding:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s var(--ease);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.switch.on{background:var(--accent)}
+.switch.on::after{transform:translateX(16px)}
+.section-label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:18px 0 10px}
+.scan{height:3px;border-radius:3px;background:var(--surface-3);overflow:hidden;margin:4px 0 14px;opacity:0;transition:opacity .2s}
+.scan.on{opacity:1}
+.scan i{display:block;height:100%;width:35%;background:var(--accent);border-radius:3px;animation:scan 1.1s var(--ease) infinite}
+@keyframes scan{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
+
+/* ---------- Modal ---------- */
+.modal{position:fixed;inset:0;display:grid;place-items:center;z-index:70;pointer-events:none}
+.modal .box{width:min(460px,calc(100vw - 32px));background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:20px;opacity:0;transform:translateY(12px) scale(.98);transition:all .3s var(--ease)}
+.modal.show{pointer-events:auto}
+.modal.show .box{opacity:1;transform:none}
+.modal h3{margin:0 0 14px;font-size:17px}
+.modal .row{display:grid;gap:6px;margin-bottom:12px}
+.modal .row label{font-size:12.5px;color:var(--muted);font-weight:500}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+
+/* ---------- Toasts ---------- */
+.toasts{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--dark);color:#F2F2EF;padding:10px 14px 10px 12px;border-radius:10px;box-shadow:var(--shadow-3);display:flex;align-items:center;gap:10px;font-size:13px;animation:toastIn .4s var(--ease) both;pointer-events:auto;max-width:min(520px,calc(100vw - 32px))}
+.toast .ti{width:24px;height:24px;border-radius:6px;background:var(--accent);display:grid;place-items:center;flex:none}
+.toast .ti svg{stroke:#fff;width:14px;height:14px}
+.toast b{font-weight:600}
+.toast.out{animation:toastOut .3s var(--ease) both}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px) scale(.96)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(8px) scale(.97)}}
+
+/* ---------- Menu ---------- */
+.menu{position:fixed;z-index:80;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-2);padding:5px;min-width:180px;animation:menuIn .18s var(--ease)}
+@keyframes menuIn{from{opacity:0;transform:translateY(-4px) scale(.98)}}
+.menu button{display:flex;align-items:center;gap:9px;width:100%;border:0;background:none;padding:8px 10px;border-radius:6px;text-align:left;font-size:13px}
+.menu button:hover{background:var(--surface-2)}
+.menu button.danger{color:var(--danger)}
+
+@media (max-width:1180px){.tab>svg.i{display:none}}
+@media (max-width:960px){.page-body{grid-template-columns:1fr}.page-body>div:last-child{position:static}.tab>svg.i{display:inline}}
+@media (max-width:860px){
+  .page-body{grid-template-columns:1fr;padding:12px}
+  .page-body>div:last-child{position:static}
+  .page-head{padding:12px}
+  .title-in{font-size:18px}
+  .panel{padding:14px 14px 16px}
+  .tabs{margin:-14px -14px 14px;-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
+  .appbar{padding:0 12px;gap:8px}
+  .brand small,.sync-meta,.chip-btn .lbl{display:none}
+  .toolbar{padding:12px 12px 4px}
+  .search{min-width:0;flex:1}
+  .col{flex-basis:86vw}
+  .board{gap:14px;padding:10px 12px 20px}
+  .field{grid-template-columns:88px 1fr;gap:8px}
+  .addrow{flex-wrap:wrap}
+  #subIn{flex:1 1 100%}
+  #subDue{flex:1;width:auto!important}
+  .formgrid{grid-template-columns:1fr}
+  .sub-more{grid-template-columns:1fr;padding-left:10px}
+  .brand>div:last-child{display:none}
+  .appbar{gap:6px}
+  .chip-btn{padding:0 9px;gap:6px}
+  .chip-btn .dot{display:none}
+  .view-banner button{display:block;margin:4px auto 0}
+  .filters{flex-wrap:nowrap;overflow-x:auto;width:100%;order:3;padding-bottom:2px}
+  .fchip{flex:none}
+  #resetBtn{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+/* ---------- v3: type, submission date, team, last update ---------- */
+.c-top{justify-content:flex-start}
+.ttype{font-size:11px;font-weight:600;letter-spacing:.02em;padding:2px 9px;border-radius:999px;border:1px solid var(--line-2);color:var(--ink);background:var(--surface)}
+.ttype.priv{background:var(--ink);border-color:var(--ink);color:#fff}
+.c-upd{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.c-upd i{width:6px;height:6px;border-radius:50%;background:var(--line-2)}
+.c-upd.fresh i{background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.c-upd svg.i{width:12px;height:12px}
+.c-due{position:relative;margin-top:14px;display:flex;align-items:center;gap:10px;padding:10px 8px 10px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.c-due-main{flex:1;min-width:0}
+.c-due small{display:flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+.c-due small em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:600;color:var(--accent-2);display:inline-flex;align-items:center;gap:3px}
+.c-due small em svg.i{width:11px;height:11px}
+.c-due b{display:block;font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.25;margin-top:2px;color:var(--ink);font-variant-numeric:tabular-nums}
+.c-rel{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.c-due.soon{background:var(--accent-soft);border-color:var(--accent-line)}
+.c-due.soon .c-rel{background:var(--accent);border-color:var(--accent);color:#fff}
+.c-due.late{background:#FCEBE7;border-color:#F2B8AC}
+.c-due.late b{color:var(--danger)}
+.c-due.late .c-rel{background:var(--danger);border-color:var(--danger);color:#fff}
+.c-due.none b{color:var(--muted);font-weight:500}
+.c-due-edit{width:32px;height:32px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--ink-2);display:grid;place-items:center;flex:none;transition:all .18s var(--ease);cursor:pointer}
+.c-due-edit:hover{background:var(--surface);border-color:var(--line-2);color:var(--ink)}
+.c-due-edit svg.i{width:15px;height:15px}
+.due-in{position:absolute;right:8px;bottom:6px;width:1px;height:1px;opacity:0;border:0;padding:0;pointer-events:none}
+.c-status{margin-top:12px}
+.c-team{display:inline-flex;align-items:center;gap:6px}
+.c-team .lead{display:inline-flex;align-items:center;gap:5px;padding:2px 8px 2px 2px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line)}
+.c-team .lead b{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.c-team .stack{display:inline-flex}
+.c-team .stack .avatar{margin-left:-6px;box-shadow:0 0 0 2px var(--surface)}
+.c-team .stack .avatar:first-child{margin-left:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:0 14px;height:32px;font-weight:500;font-size:13px;color:var(--ink-2);transition:all .18s}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--ink);color:#fff}
+.due-field{background:var(--surface-2);border-radius:10px;padding:12px;margin:6px 0 4px;border-bottom:0!important}
+.due-field label{color:var(--ink)!important;font-weight:600!important}
+.due-field .in{height:40px;font-size:16px;font-weight:600}
+.due-hist{grid-column:1/-1;font-size:12.5px;color:var(--muted);display:grid;gap:4px}
+.due-hist div{display:flex;gap:6px;align-items:center}
+.due-hist svg.i{width:13px;height:13px}
+.fsep{width:1px;height:22px;background:var(--line-2);margin:0 4px}
+
+.provs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.prov{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;padding:14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);transition:all .18s var(--ease)}
+.prov:hover{border-color:var(--line-2);transform:translateY(-1px)}
+.prov.on{border-color:var(--accent);background:#FFF8F3;box-shadow:0 0 0 3px var(--accent-soft)}
+.prov .pi{width:28px;height:28px;grid-row:1/3}
+.prov b{font-size:14px}
+.prov small{color:var(--muted);font-size:12px;line-height:1.3}
+.dot-st{width:8px;height:8px;border-radius:50%;background:var(--line-2);flex:none}
+.dot-st.on{background:#3BC170;box-shadow:0 0 0 3px rgba(59,193,112,.18)}
+.folder .gd{width:26px;height:26px;flex:none}
+@media (max-width:520px){.provs{grid-template-columns:1fr}}
+
+.c-due{display:block;padding:10px 8px 10px 14px}
+.c-due-r1{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-right:6px}
+.c-due-r2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px}
+.c-due-r2 b{margin:0;white-space:nowrap}
+.c-due-note{display:flex;align-items:center;gap:5px;margin-top:4px;font-size:11.5px;color:var(--muted)}
+.c-due-note.em{color:var(--accent-2);font-weight:500}
+.c-due-note svg.i{width:12px;height:12px}
+.filters{flex:1;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:2px 0;-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
+.filters::-webkit-scrollbar{display:none}
+.fchip{flex:none}
+.fsep{flex:none}
+
+/* ---------- v4 refinement: compact date row, lighter card ---------- */
+body{background:#E7E7E3}
+.board{background-image:radial-gradient(rgba(17,17,17,.07) 1px,transparent 1.2px);background-size:18px 18px;background-position:-2px -2px}
+.col{background:rgba(244,244,241,.92);border-color:#DCDCD7;box-shadow:0 1px 0 rgba(255,255,255,.6) inset;backdrop-filter:blur(2px)}
+.col.unassigned{background:repeating-linear-gradient(135deg,rgba(236,236,232,.95) 0 10px,rgba(230,230,226,.95) 10px 20px)}
+.col-head{padding:14px 12px 12px 14px}
+.col-title small{flex-wrap:wrap;row-gap:0}
+.wl{color:var(--ink-2);font-weight:500}
+.wl.late{color:var(--danger);font-weight:600}
+.col-list{gap:10px}
+.card{padding:14px 14px 12px;border-radius:12px;border-color:#E1E1DC;box-shadow:0 1px 2px rgba(17,17,17,.05),0 1px 0 rgba(17,17,17,.02)}
+.card:hover{box-shadow:0 10px 24px -8px rgba(17,17,17,.18),0 2px 6px rgba(17,17,17,.06)}
+.card.is-late::before{transform:none;width:3px}
+.c-top{margin-bottom:8px;gap:6px}
+.ttype{font-size:10.5px;padding:1px 8px}
+.c-upd{font-size:11px}
+.card h3{font-size:14.5px;line-height:1.4}
+.c-client{margin-top:2px;font-size:12px}
+.c-due{display:flex;align-items:center;gap:7px;margin-top:10px;padding:5px 4px 5px 10px;height:auto;min-height:34px;border-radius:8px;background:var(--surface-2);border:1px solid #E6E6E1;color:var(--ink-2)}
+.c-due>svg.i{width:14px;height:14px;color:var(--muted)}
+.c-due b{display:inline;font-size:13.5px;font-weight:600;margin:0;line-height:1.2;white-space:nowrap;color:var(--ink);letter-spacing:0}
+.c-rel{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.c-due.soon{background:#FEF1E8;border-color:#F8CDB0}
+.c-due.soon>svg.i{color:var(--accent-2)}
+.c-due.soon .c-rel{background:var(--accent);border-color:var(--accent);color:#fff}
+.c-due.late{background:#FCEDEA;border-color:#F2C2B8}
+.c-due.late>svg.i,.c-due.late b{color:var(--danger)}
+.c-due.late .c-rel{background:var(--danger);border-color:var(--danger);color:#fff}
+.c-due.none b{color:var(--muted);font-weight:500}
+.c-due-src{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;color:var(--muted);margin-left:auto}
+.c-due-src.em{color:var(--accent-2);background:#fff}
+.c-due-src svg.i{width:12px;height:12px}
+.c-due-edit{width:26px;height:26px;border-radius:6px;margin-left:auto;opacity:.55}
+.c-due-src+.c-due-edit{margin-left:0}
+.card:hover .c-due-edit,.c-due-edit:focus-visible{opacity:1}
+.c-due-edit svg.i{width:13px;height:13px}
+.c-status{margin-top:10px;padding:0 0 0 10px;background:none;border-left:2px solid var(--accent-line);border-radius:0;font-size:12.5px;line-height:1.5;color:var(--ink-2);-webkit-line-clamp:2}
+.card-tags{margin-top:10px;gap:5px}
+.tag{font-size:11px;padding:2px 9px 2px 7px;background:#fff}
+.c-foot{margin-top:12px;padding-top:10px;gap:12px}
+.c-team .lead{padding:1px 7px 1px 1px}
+.c-team .lead b{font-size:10px}
+.c-due.done .c-rel{background:var(--ok);border-color:var(--ok);color:#fff}
+@media (max-width:860px){.filters{flex:1 1 100%;order:3;margin-left:0}.search{flex:1}}
+
+/* ---------- v5: tender team, email update log ---------- */
+.c-tender{font-size:11.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.c-upd-btn{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 6px 0 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:11px;color:var(--muted);cursor:pointer;transition:all .18s var(--ease)}
+.c-upd-btn:hover{border-color:var(--line-2);color:var(--ink);background:var(--surface-2)}
+.c-upd-btn svg.i{width:12px;height:12px}
+.c-upd-btn .chev{transition:transform .3s var(--ease)}
+.c-upd-btn.open .chev{transform:rotate(180deg)}
+.c-upd-btn.new{border-color:var(--accent-line);background:#FFF5EE;color:var(--accent-2)}
+.c-upd-btn.new i{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.8s ease-in-out infinite}
+.c-upd-btn b{font-weight:600}
+@keyframes pulse{50%{box-shadow:0 0 0 4px rgba(238,106,31,.18)}}
+.c-log{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s var(--ease)}
+.c-log.open{grid-template-rows:1fr}
+.c-log>div{overflow:hidden;min-height:0}
+.c-log-in{margin:2px 0 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);padding:8px 10px 4px;cursor:default}
+.c-log-h{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line)}
+.c-log-h svg.i{width:12px;height:12px}
+.c-log-it{padding:8px 0;border-bottom:1px dashed var(--line);opacity:0;transform:translateY(-4px);transition:opacity .25s,transform .25s var(--ease)}
+.c-log.open .c-log-it{opacity:1;transform:none}
+.c-log.open .c-log-it:nth-child(3){transition-delay:.04s}.c-log.open .c-log-it:nth-child(4){transition-delay:.08s}.c-log.open .c-log-it:nth-child(5){transition-delay:.12s}
+.c-log-it:last-child{border-bottom:0}
+.c-log-it .r{display:flex;align-items:center;gap:6px}
+.c-log-it time{margin-left:auto;font-size:11px;color:var(--muted)}
+.c-log-it p{margin:4px 0 2px;font-size:12.5px;line-height:1.4;color:var(--ink)}
+.c-log-it small{display:block;font-family:"IBM Plex Sans Arabic",sans-serif;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-log-it .ln{display:inline-flex;align-items:center;gap:3px;color:var(--muted);font-size:11.5px}
+.c-log-it .ln svg.i{width:11px;height:11px}
+.c-log-more{font-size:11.5px;color:var(--muted);padding:6px 0}
+.k{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;border-radius:4px;background:var(--surface-3);color:var(--ink-2)}
+.k-new,.k-upd{background:var(--accent-soft);color:var(--accent-2)}
+.k-qa{background:#DCEEED;color:#2A6F6C}
+.k-pp{background:#E6E6E2;color:#4A4A47}
+.nw{font-size:9.5px;font-weight:700;color:#fff;background:var(--accent);padding:1px 5px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+.c-eng{display:inline-flex!important;align-items:center;gap:6px!important;font-size:11.5px;font-weight:500;color:var(--ink-2)}
+.tt-row{display:grid;grid-template-columns:1.2fr 1fr 110px 32px;gap:6px;align-items:center;margin-bottom:6px}
+.tt-row .in{height:32px;font-size:13px}
+@media (max-width:520px){.tt-row{grid-template-columns:1fr 1fr;}.tt-row select{grid-column:1}}
+
+/* ---------- v6: Redcon logo on a light bar, column sort, name search ---------- */
+.appbar{background:#fff;color:var(--ink);border-bottom:1px solid var(--line);height:64px;box-shadow:0 1px 0 rgba(17,17,17,.03)}
+.brand{gap:14px}
+.brand .logo{height:36px;width:auto;color:#111;display:block}
+.app-name{padding-left:14px;border-left:1px solid var(--line);font-weight:600;font-size:14px;line-height:1.25;letter-spacing:-.005em}
+.app-name small{display:block;font-weight:500;color:var(--muted);font-size:11.5px}
+.app-name::first-letter{color:var(--ink)}
+.chip-btn{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+.chip-btn:hover{background:var(--surface-3);border-color:var(--line-2)}
+.sync-meta{color:var(--muted)}
+.me-btn .avatar{box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--accent)}
+.col-sort{padding:0 12px 8px}
+.sort-btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 8px 0 9px;border-radius:8px;border:1px solid transparent;background:transparent;font-size:12px;font-weight:500;color:var(--ink-2);transition:all .18s var(--ease)}
+.sort-btn:hover{background:var(--surface);border-color:var(--line)}
+.sort-btn svg.i{width:13px;height:13px;color:var(--muted)}
+.sort-btn .chev{width:12px;height:12px}
+.menu button.cur{font-weight:600;color:var(--accent-2)}
+.searchwrap{position:relative}
+.qlist{position:absolute;top:calc(100% + 6px);left:0;width:min(440px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-2);padding:6px;z-index:30;display:none;animation:menuIn .18s var(--ease)}
+.qlist.show{display:block}
+.qi{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:8px;cursor:pointer}
+.qi:hover,.qi.on{background:var(--surface-2)}
+.qi b{display:block;font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qi small{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;margin-top:2px}
+.qi small .late{color:var(--danger);font-weight:600}.qi small .soon{color:var(--accent-2);font-weight:600}
+.qe{padding:10px;color:var(--muted);font-size:13px}
+@media (max-width:860px){.brand .logo{height:26px}.appbar{height:56px}.searchwrap{flex:1}.searchwrap .search{width:100%}}
+.p-close{background:var(--ink);border-color:var(--ink);color:#fff}
+.p-close:hover{background:var(--accent);border-color:var(--accent)}
+.page-head .btn.icon{width:36px;height:36px}
+
+.team-sec .sec-h{display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 12px}
+.team-sec h3{margin:0;font-size:16px;letter-spacing:-.01em}
+.team-sec .sec-h small{color:var(--muted);font-size:12.5px}
+.team-sec .members{margin-top:8px}
+.team-sec.second{margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
+.team-sec.second h3{font-size:14px}
+
+.member{gap:10px}
+.member .grip{color:var(--line-2);cursor:grab;display:grid;place-items:center;width:16px}
+.member .grip svg.i{width:16px;height:16px;fill:currentColor;stroke:none}
+.member:hover .grip{color:var(--muted)}
+.member .mv{display:flex;flex-direction:column;gap:0}
+.member .mv .btn{width:26px;height:20px;padding:0}
+.member .mv .btn svg.i{width:13px;height:13px}
+.member .mv .btn[disabled]{opacity:.25;pointer-events:none}
+.member.dragging{opacity:.45}
+.member.drop-a{box-shadow:inset 0 2px 0 var(--accent)}
+.member.drop-b{box-shadow:inset 0 -2px 0 var(--accent)}
+.qi b{font-size:13.5px}
+
+/* ---------- v8: filters inside the search bar ---------- */
+.toolbar{flex-wrap:nowrap}
+.searchwrap{flex:1;min-width:0;max-width:820px}
+.sbar{width:100%;height:42px;padding:0 5px 0 14px;gap:8px;cursor:text}
+.sbar input{flex:1;min-width:120px}
+.qchips{display:flex;gap:5px;flex:none;max-width:60%;overflow-x:auto;scrollbar-width:none}
+.qchips::-webkit-scrollbar{display:none}
+.qchip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 3px 0 10px;border-radius:999px;background:var(--ink);color:#fff;font-size:12px;font-weight:500;white-space:nowrap;animation:menuIn .18s var(--ease)}
+.qchip .tdot{box-shadow:0 0 0 1.5px #fff}
+.qchip button{width:20px;height:20px;border:0;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer}
+.qchip button:hover{background:var(--accent)}
+.qchip button svg.i{width:11px;height:11px;stroke-width:2.4}
+.fbtn{flex:none;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .18s var(--ease)}
+.fbtn:hover,.fbtn.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.fbtn svg.i{width:14px;height:14px}
+.fbtn b{min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;display:grid;place-items:center;padding:0 5px}
+.fpanel{position:absolute;top:calc(100% + 8px);right:0;width:min(560px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-3);padding:16px;z-index:35;display:none;animation:menuIn .2s var(--ease)}
+.fpanel.show{display:block}
+.fgrp{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--surface-3)}
+.fgrp:first-child{padding-top:0}
+.fgrp>span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--muted);padding-top:8px}
+.fgrp>div{display:flex;flex-wrap:wrap;gap:6px}
+.fopt{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s var(--ease)}
+.fopt:hover{border-color:var(--line-2);background:var(--surface-2)}
+.fopt.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.fopt .tt{font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.03em;padding:1px 4px;border-radius:4px;border:1px solid currentColor;opacity:.75}
+.fopt .tt.private{background:var(--ink);color:#fff;border-color:var(--ink);opacity:1}
+.fopt.on .tt.private{background:#fff;color:var(--ink)}
+.ffoot{display:flex;justify-content:flex-end;gap:8px;padding-top:12px}
+@media (max-width:860px){.toolbar{flex-wrap:wrap}.searchwrap{flex:1 1 100%;max-width:none;order:2}.fbtn span{display:none}.fgrp{grid-template-columns:1fr}.fgrp>span{padding-top:0}.fpanel{left:0;right:auto}}
+#resetBtn{margin-left:auto}
+@media (max-width:860px){.searchwrap{order:-1}#newBtn{margin-left:auto}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 20h16"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+  <symbol id="i-sync" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m14 6 4 4"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 10 14"/><path d="m21 3-7 18-4-7-7-4z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/></symbol>
+  <symbol id="i-up1" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 5h16l-6 7.5V19l-4 1.5v-8z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-onedrive" viewBox="0 0 32 20"><path d="M12.6 6.2A8 8 0 0 1 26.4 9a5.6 5.6 0 0 1 1.4 10.9H13z" fill="#0364B8" stroke="none"/><path d="M12.6 6.2 13 19.9H6.5a5.4 5.4 0 0 1-1-10.7 7.6 7.6 0 0 1 7.1-3z" fill="#0078D4" stroke="none"/><path d="M26.4 9a5.6 5.6 0 0 1 4.3 8.2l-4.2-1.9-9.1 4.6H13l4.2-10.5z" fill="#1490DF" stroke="none"/><path d="M5.5 9.2 13 12.6l4.2-2.2-4.2 9.5H6.5a5.4 5.4 0 0 1-1-10.7z" fill="#28A8EA" stroke="none"/></symbol>
+  <symbol id="i-gdrive" viewBox="0 0 87.3 78"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da" stroke="none"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47" stroke="none"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335" stroke="none"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d" stroke="none"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc" stroke="none"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00" stroke="none"/></symbol>
+</svg>
+
+<a class="sr" href="#board">Skip to board</a>
+<div class="view-banner" id="viewBanner" hidden></div>
+<header class="appbar">
+  <div class="brand"><svg class="logo" viewBox="12 4 170 57" role="img" aria-label="REDCON Construction"><path fill="currentColor" fill-rule="evenodd" d="M32.230,57.924 C30.432,57.250 29.142,55.885 28.599,54.081 C28.155,52.606 28.161,52.141 28.642,50.522 C29.458,47.773 31.941,46.064 34.693,46.357 C35.481,46.440 36.651,46.504 37.294,46.498 C38.581,46.486 38.595,46.503 38.854,48.500 C39.105,50.446 38.417,50.717 37.250,49.131 C36.517,48.135 35.792,47.750 34.651,47.750 C32.446,47.750 31.286,49.082 31.062,51.873 C30.898,53.921 31.615,55.499 33.051,56.247 C34.451,56.977 35.336,56.885 36.897,55.849 C38.102,55.049 39.015,54.867 38.992,55.430 C38.980,55.734 37.934,56.813 37.016,57.469 C35.994,58.199 33.579,58.429 32.230,57.924 Z M44.125,58.082 C43.529,57.915 42.310,57.100 41.654,56.430 C39.999,54.740 39.480,51.604 40.526,49.621 C41.598,47.588 43.252,46.377 45.348,46.090 C47.558,45.787 50.672,47.934 51.229,50.144 C52.280,54.320 49.976,57.945 46.144,58.143 C45.309,58.186 44.400,58.158 44.125,58.082 Z M47.346,56.228 C48.431,55.374 48.750,54.472 48.750,52.252 C48.750,49.115 47.839,47.750 45.745,47.750 C43.761,47.750 42.898,48.994 42.884,51.875 C42.873,54.368 43.051,55.013 44.019,55.981 C44.967,56.928 46.327,57.029 47.346,56.228 Z M53.157,57.929 C52.746,57.629 52.759,57.564 53.359,56.916 C53.991,56.234 54.000,56.168 54.000,52.267 L54.000,48.309 53.125,47.642 C52.644,47.275 52.250,46.814 52.250,46.617 C52.250,46.141 53.285,45.904 54.430,46.119 C55.482,46.316 56.065,46.876 59.027,50.534 C60.126,51.890 61.188,53.000 61.387,53.000 C61.680,53.000 61.750,52.523 61.750,50.544 C61.750,48.247 61.709,48.049 61.125,47.500 C59.948,46.394 60.214,46.186 62.821,46.173 C64.423,46.165 64.633,46.439 63.877,47.550 C63.284,48.424 63.259,48.629 63.193,53.163 C63.130,57.504 63.089,57.875 62.665,57.957 C62.118,58.062 61.802,57.740 58.912,54.135 C57.332,52.164 56.546,51.375 56.162,51.375 C55.650,51.375 55.625,51.486 55.625,53.793 C55.625,55.957 55.684,56.274 56.188,56.809 C56.972,57.644 56.894,57.911 55.812,58.090 C54.381,58.326 53.638,58.281 53.157,57.929 Z M67.314,58.066 C65.798,57.960 65.670,57.741 65.798,55.487 C65.864,54.322 65.951,54.114 66.402,54.050 C66.789,53.994 67.013,54.178 67.247,54.742 C67.673,55.772 68.881,56.750 69.726,56.750 C70.521,56.750 71.500,55.834 71.500,55.090 C71.500,54.376 70.589,53.610 68.599,52.651 C66.579,51.677 66.031,51.136 65.834,49.920 C65.580,48.353 65.915,47.377 66.957,46.655 C67.816,46.060 68.120,46.000 70.295,46.000 C72.050,46.000 72.767,46.094 72.981,46.352 C73.160,46.568 73.245,47.370 73.199,48.415 C73.134,49.913 73.065,50.125 72.641,50.125 C72.333,50.125 71.921,49.720 71.503,49.006 C70.699,47.631 69.624,47.197 68.633,47.847 C67.232,48.764 67.996,49.822 71.250,51.471 C73.110,52.414 73.749,53.136 73.932,54.503 C74.106,55.798 73.323,57.049 71.912,57.732 C70.858,58.242 70.356,58.279 67.314,58.066 Z M77.562,58.084 C77.030,57.870 77.216,57.308 78.006,56.746 L78.762,56.207 78.694,52.193 C78.634,48.688 78.570,48.144 78.188,47.903 C77.566,47.511 76.978,47.934 76.381,49.201 C75.813,50.410 75.098,50.602 74.849,49.611 C74.608,48.652 74.884,46.477 75.278,46.227 C75.469,46.106 77.674,46.006 80.179,46.004 C85.469,45.999 85.325,45.926 85.199,48.568 C85.129,50.042 85.092,50.125 84.500,50.125 C84.022,50.125 83.816,49.943 83.625,49.350 C83.300,48.347 82.795,47.750 82.269,47.750 C81.361,47.750 81.250,48.247 81.250,52.294 L81.250,56.238 81.938,56.676 C82.908,57.294 83.052,57.579 82.573,57.938 C82.163,58.244 78.242,58.359 77.562,58.084 Z M86.728,57.848 C86.444,57.507 86.464,57.395 86.857,57.107 C87.112,56.921 87.412,56.736 87.522,56.697 C87.633,56.657 87.744,54.742 87.769,52.441 C87.815,48.270 87.813,48.254 87.153,47.390 C86.505,46.540 86.502,46.517 86.991,46.255 C87.739,45.855 92.672,46.092 93.783,46.582 C95.139,47.180 96.000,48.331 96.000,49.549 C96.000,50.394 95.837,50.722 95.000,51.559 C94.450,52.109 94.000,52.787 94.000,53.065 C94.000,53.729 96.057,56.122 97.305,56.909 C98.109,57.417 98.233,57.595 97.988,57.890 C97.659,58.286 95.357,58.390 94.796,58.034 C94.616,57.919 93.716,56.825 92.796,55.601 C91.877,54.378 90.928,53.341 90.688,53.295 C90.307,53.224 90.250,53.427 90.250,54.851 C90.250,56.322 90.314,56.530 90.875,56.898 C91.587,57.365 91.685,57.876 91.105,58.098 C90.887,58.182 89.888,58.250 88.885,58.250 C87.514,58.250 86.978,58.150 86.728,57.848 Z M92.618,50.860 C93.422,50.115 93.429,49.156 92.636,48.364 C91.978,47.705 91.037,47.563 90.550,48.050 C90.385,48.215 90.250,48.938 90.250,49.657 C90.250,51.724 91.177,52.195 92.618,50.860 Z M102.096,57.968 C100.830,57.680 99.348,56.269 99.002,55.021 C98.865,54.528 98.752,52.817 98.751,51.218 C98.750,48.851 98.675,48.249 98.347,47.977 C97.778,47.504 97.512,46.682 97.809,46.312 C98.071,45.987 101.112,45.867 101.855,46.152 C102.401,46.361 102.350,47.082 101.750,47.625 C101.302,48.030 101.250,48.395 101.250,51.127 C101.250,53.882 101.305,54.257 101.817,55.017 C102.941,56.685 105.431,56.595 106.369,54.853 C106.774,54.102 106.862,53.439 106.868,51.119 C106.875,48.336 106.866,48.291 106.188,47.756 C105.342,47.089 105.287,46.313 106.073,46.116 C106.388,46.037 107.315,46.006 108.133,46.048 C109.905,46.140 110.129,46.536 109.142,47.830 C108.559,48.595 108.499,48.889 108.494,51.024 C108.484,54.790 107.885,56.427 106.129,57.487 C105.175,58.062 103.426,58.270 102.096,57.968 Z M114.115,57.984 C112.963,57.649 111.320,56.106 110.755,54.828 C109.355,51.664 110.815,48.128 114.151,46.603 C115.653,45.915 116.814,45.841 117.824,46.368 C118.209,46.569 118.828,46.673 119.199,46.601 C119.574,46.528 120.065,46.615 120.301,46.797 C120.791,47.174 121.143,49.443 120.792,49.963 C120.477,50.430 119.659,49.971 119.090,49.009 C118.514,48.033 117.534,47.659 115.949,47.811 C114.455,47.955 113.685,48.678 113.219,50.375 C112.859,51.686 113.074,54.249 113.613,55.072 C114.203,55.973 115.608,56.750 116.644,56.750 C117.457,56.750 119.254,55.850 119.619,55.260 C119.837,54.906 120.678,54.931 120.905,55.298 C121.163,55.716 118.657,57.906 117.702,58.097 C116.667,58.304 115.039,58.253 114.115,57.984 Z M124.610,57.866 C124.133,57.489 124.133,57.477 124.603,57.179 C125.986,56.300 126.000,56.251 126.000,52.270 C126.000,50.219 125.932,48.363 125.848,48.145 C125.669,47.678 124.485,47.615 124.050,48.050 C123.885,48.215 123.750,48.591 123.750,48.886 C123.750,49.443 123.043,50.250 122.555,50.250 C122.401,50.250 122.167,50.058 122.036,49.823 C121.755,49.321 121.958,46.765 122.314,46.312 C122.496,46.083 123.777,46.000 127.150,46.000 C131.638,46.000 131.746,46.012 132.089,46.562 C132.282,46.872 132.506,47.646 132.586,48.282 C132.705,49.225 132.643,49.519 132.250,49.875 C131.586,50.476 131.059,50.194 130.859,49.129 C130.663,48.084 129.653,47.380 128.930,47.784 C128.551,47.996 128.500,48.502 128.500,52.012 C128.500,55.667 128.542,56.042 129.000,56.500 C129.275,56.775 129.613,57.000 129.750,57.000 C130.158,57.000 130.034,57.933 129.605,58.098 C128.747,58.427 125.106,58.258 124.610,57.866 Z M143.598,58.050 C142.568,57.707 141.314,56.650 140.600,55.521 C139.946,54.487 139.875,54.166 139.875,52.238 C139.876,50.577 139.980,49.937 140.345,49.363 C141.634,47.337 143.433,46.250 145.500,46.250 C148.235,46.250 150.780,48.429 151.101,51.046 C151.429,53.717 150.434,56.125 148.464,57.429 C147.636,57.976 147.101,58.124 145.778,58.169 C144.869,58.200 143.888,58.147 143.598,58.050 Z M147.181,56.273 C147.487,56.054 147.923,55.399 148.151,54.817 C148.700,53.412 148.543,50.198 147.870,49.058 C147.144,47.830 145.406,47.398 144.036,48.106 C143.265,48.505 142.973,49.038 142.494,50.918 C142.206,52.050 142.220,52.413 142.603,53.828 C143.368,56.656 145.244,57.658 147.181,56.273 Z M152.086,57.862 C152.003,57.647 152.160,57.230 152.438,56.925 C152.883,56.437 152.954,55.927 153.064,52.437 L153.189,48.499 152.303,47.789 C151.057,46.790 151.311,46.250 153.025,46.250 C154.214,46.250 154.398,46.334 155.354,47.312 C155.924,47.897 156.782,48.863 157.258,49.459 C157.735,50.055 158.354,50.794 158.635,51.102 C158.915,51.410 159.391,51.975 159.693,52.359 C160.628,53.548 161.000,53.083 161.000,50.725 C161.000,49.089 160.896,48.516 160.476,47.836 C159.698,46.577 159.956,46.250 161.727,46.250 C162.549,46.250 163.293,46.367 163.381,46.509 C163.469,46.652 163.301,47.229 163.008,47.792 C162.515,48.736 162.478,49.160 162.518,53.311 C162.552,56.886 162.491,57.852 162.218,58.025 C161.556,58.444 161.609,58.493 158.421,54.573 C156.944,52.756 155.639,51.211 155.521,51.138 C154.954,50.787 154.704,51.813 154.788,54.150 C154.866,56.326 154.931,56.601 155.438,56.938 C156.665,57.752 156.014,58.250 153.722,58.250 C152.609,58.250 152.197,58.152 152.086,57.862 Z M133.599,57.709 C133.494,57.538 133.721,57.177 134.147,56.837 L134.875,56.258 134.954,52.280 C135.030,48.506 135.007,48.284 134.521,47.943 C134.240,47.746 133.979,47.312 133.942,46.980 C133.876,46.380 133.894,46.375 136.122,46.375 C138.104,46.375 138.379,46.429 138.457,46.835 C138.505,47.088 138.306,47.550 138.013,47.861 C137.523,48.383 137.480,48.705 137.476,51.901 C137.474,53.812 137.479,55.507 137.486,55.668 C137.494,55.830 137.789,56.305 138.143,56.726 C138.497,57.146 138.715,57.605 138.628,57.745 C138.402,58.111 133.827,58.078 133.599,57.709 Z M108.000,34.267 C104.164,33.234 101.387,30.948 99.517,27.283 C97.763,23.846 97.839,17.693 99.677,14.250 C101.822,10.232 104.925,7.736 108.875,6.853 C111.759,6.208 116.373,6.607 117.830,7.628 C118.663,8.211 119.408,8.082 120.000,7.250 C120.605,6.400 121.599,6.242 121.958,6.938 C122.083,7.178 122.255,8.359 122.342,9.562 C122.429,10.766 122.571,12.681 122.657,13.818 C122.786,15.529 122.745,15.943 122.419,16.214 C121.553,16.932 121.103,16.481 119.839,13.625 C119.131,12.028 117.095,10.208 115.362,9.625 C111.738,8.406 107.703,9.778 105.911,12.837 C104.509,15.229 104.140,16.843 104.132,20.625 C104.126,23.738 104.194,24.318 104.750,25.868 C105.249,27.259 105.678,27.916 106.875,29.118 C108.142,30.391 108.650,30.712 110.143,31.188 C112.370,31.896 113.880,31.898 116.063,31.195 C117.811,30.632 118.880,29.801 120.916,27.424 C121.725,26.479 122.417,26.267 122.950,26.800 C123.424,27.274 123.312,27.730 122.380,29.134 C121.355,30.678 119.308,32.583 117.904,33.299 C115.107,34.726 111.142,35.113 108.000,34.267 Z M134.375,34.362 C131.772,33.856 129.668,32.693 127.602,30.620 C124.810,27.817 123.695,24.902 123.686,20.375 C123.676,15.474 125.432,11.832 129.171,9.002 C131.129,7.519 132.767,6.869 135.547,6.471 C139.558,5.897 143.327,7.171 146.216,10.079 C147.621,11.492 149.000,13.249 149.000,13.625 C149.000,13.709 149.224,14.270 149.498,14.872 C149.773,15.473 150.131,17.028 150.295,18.326 C151.295,26.242 146.851,32.866 139.557,34.334 C137.154,34.817 136.725,34.820 134.375,34.362 Z M140.246,31.123 C142.402,30.022 143.725,27.984 144.346,24.807 C144.877,22.090 144.852,19.153 144.275,16.354 C143.553,12.857 142.359,10.958 140.158,9.808 C138.450,8.915 135.656,8.852 134.125,9.672 C130.076,11.841 128.438,17.731 129.886,24.921 C130.409,27.517 132.164,30.298 133.832,31.174 C135.655,32.130 138.314,32.109 140.246,31.123 Z M174.840,34.179 C174.545,34.012 173.364,32.733 172.215,31.337 C171.065,29.941 168.891,27.297 167.383,25.462 C165.875,23.627 164.437,21.903 164.188,21.632 C163.938,21.361 162.810,19.984 161.680,18.573 C160.494,17.092 159.440,16.005 159.188,16.003 C158.781,16.000 158.750,16.515 158.750,23.347 C158.750,31.813 158.708,31.643 160.875,31.953 C162.102,32.128 162.125,32.147 162.125,33.003 L162.125,33.875 157.125,33.875 L152.125,33.875 152.043,33.299 C151.924,32.458 152.364,32.080 153.626,31.938 C154.395,31.851 154.899,31.626 155.239,31.219 C155.713,30.650 155.733,30.222 155.733,21.000 C155.733,12.187 155.696,11.333 155.295,10.875 C154.457,9.917 153.198,9.201 152.067,9.039 C150.769,8.852 150.209,8.267 150.653,7.562 C150.893,7.182 151.430,7.116 154.774,7.056 L158.619,6.986 159.247,7.708 C159.592,8.105 160.737,9.487 161.791,10.778 C162.845,12.069 164.224,13.744 164.855,14.500 C165.486,15.256 167.487,17.703 169.303,19.938 C171.119,22.172 172.738,24.000 172.900,24.000 C173.436,24.000 173.500,23.272 173.500,17.142 C173.500,9.541 173.344,9.000 171.150,9.000 C170.162,9.000 169.608,8.340 169.880,7.485 C170.031,7.010 170.240,6.992 174.956,7.057 L179.875,7.125 179.875,8.000 C179.875,8.858 179.852,8.878 178.685,9.012 C176.498,9.263 176.634,8.440 176.558,21.946 C176.498,32.763 176.453,33.904 176.073,34.188 C175.568,34.564 175.519,34.564 174.840,34.179 Z M15.097,33.643 C15.022,33.447 14.997,33.025 15.043,32.706 C15.114,32.201 15.301,32.107 16.467,31.990 C18.212,31.815 18.751,31.205 18.747,29.410 C18.745,28.703 18.766,24.104 18.793,19.190 L18.842,10.256 18.264,9.640 C17.822,9.170 17.382,9.006 16.405,8.949 L15.125,8.875 15.125,8.000 L15.125,7.125 23.125,7.125 L31.125,7.125 32.523,7.781 C34.131,8.536 35.681,10.039 36.460,11.599 C37.254,13.188 37.206,15.485 36.345,17.127 C35.447,18.840 34.913,19.368 33.013,20.418 C32.112,20.916 31.341,21.351 31.299,21.384 C31.165,21.490 36.427,28.583 37.437,29.659 C38.491,30.781 39.886,31.584 41.226,31.840 C41.694,31.930 42.229,32.129 42.414,32.282 C42.875,32.665 42.837,33.663 42.355,33.848 C41.787,34.066 34.932,34.029 34.582,33.806 C34.301,33.627 33.111,32.060 29.000,26.454 C25.829,22.130 25.108,21.492 24.300,22.300 C24.091,22.509 24.000,23.841 24.000,26.686 C24.000,30.692 24.012,30.785 24.614,31.386 C25.029,31.802 25.507,32.000 26.093,32.000 C26.569,32.000 27.137,32.068 27.355,32.152 C27.876,32.352 27.876,33.648 27.355,33.848 C27.137,33.932 24.321,34.000 21.097,34.000 C16.249,34.000 15.211,33.938 15.097,33.643 Z M27.639,18.970 C29.226,18.571 30.883,16.931 31.121,15.525 C31.505,13.252 30.806,11.618 28.923,10.384 C28.226,9.927 24.901,9.722 24.292,10.099 C23.975,10.295 23.857,18.773 24.167,19.083 C24.427,19.344 26.413,19.279 27.639,18.970 Z M43.846,33.640 C43.473,32.668 43.938,32.195 45.619,31.837 C46.300,31.692 46.713,31.429 46.932,31.000 C47.391,30.101 47.274,9.923 46.806,9.456 C46.631,9.281 45.900,9.079 45.181,9.006 C43.880,8.876 43.875,8.872 43.875,8.000 L43.875,7.125 53.927,7.060 C63.308,6.999 63.995,7.024 64.215,7.435 C64.344,7.677 64.531,9.116 64.629,10.633 C64.781,12.979 64.749,13.440 64.416,13.716 C63.939,14.112 63.249,14.008 62.979,13.500 C62.870,13.294 62.502,12.486 62.162,11.705 C61.619,10.457 61.428,10.253 60.584,10.019 C59.447,9.703 53.022,9.664 52.540,9.970 C52.281,10.134 52.211,11.059 52.233,14.029 C52.258,17.306 52.324,17.921 52.679,18.188 C52.948,18.389 53.987,18.500 55.610,18.500 C58.965,18.499 59.770,18.126 60.133,16.401 C60.418,15.049 61.122,14.530 62.019,15.010 C62.467,15.250 62.500,15.582 62.500,19.834 C62.500,24.642 62.421,25.000 61.356,25.000 C60.692,25.000 60.344,24.611 60.122,23.624 C60.029,23.212 59.904,22.689 59.843,22.462 C59.622,21.641 58.198,21.250 55.430,21.250 C53.445,21.250 52.738,21.338 52.510,21.613 C52.130,22.071 52.140,30.489 52.521,30.872 C52.831,31.182 58.079,31.360 59.986,31.124 C61.187,30.975 61.510,30.810 62.375,29.904 C62.925,29.328 63.539,28.524 63.739,28.116 C64.307,26.957 65.035,26.250 65.660,26.250 C66.663,26.250 66.782,26.974 66.094,28.890 C65.751,29.844 65.318,31.109 65.131,31.700 C64.945,32.291 64.611,33.050 64.390,33.387 L63.988,34.000 53.986,34.000 C45.506,34.000 43.963,33.945 43.846,33.640 Z M67.667,33.833 C67.575,33.742 67.500,33.360 67.500,32.985 C67.500,32.263 67.876,32.000 68.912,32.000 C69.590,32.000 70.519,31.584 70.809,31.150 C70.910,30.999 70.994,26.128 70.996,20.327 L71.000,9.778 70.444,9.389 C70.139,9.175 69.478,9.000 68.975,9.000 C67.933,9.000 67.425,8.539 67.543,7.701 L67.625,7.125 76.250,7.126 C84.389,7.127 84.967,7.157 86.504,7.662 C88.576,8.343 89.816,9.068 91.340,10.491 C93.973,12.949 94.992,15.306 95.179,19.375 C95.251,20.931 95.186,22.768 95.029,23.605 C94.588,25.957 93.173,28.536 91.448,30.133 C89.608,31.837 88.030,32.657 85.138,33.414 C83.031,33.966 82.466,34.000 75.367,34.000 C71.224,34.000 67.758,33.925 67.667,33.833 Z M83.895,30.492 C85.389,29.771 87.331,28.002 88.135,26.630 C89.408,24.458 89.860,20.181 89.139,17.125 C88.437,14.152 86.656,11.951 83.893,10.644 C82.608,10.036 82.128,9.951 79.897,9.938 C78.378,9.928 77.139,10.042 76.803,10.221 L76.244,10.521 76.310,20.565 L76.375,30.610 77.000,30.943 C78.057,31.506 82.381,31.223 83.895,30.492 Z"/></svg><div class="app-name">Tender Planning<small>Planning engineers board</small></div></div>
+  <div class="grow"></div>
+  <span class="sync-meta" id="syncMeta"></span>
+  <button class="chip-btn sync-btn" id="syncBtn" title="Read the tender mailbox now"><svg class="i"><use href="#i-sync"/></svg><span class="lbl">Sync email</span></button>
+  <button class="chip-btn" id="mailBtn" title="Email intake settings and log"><span class="dot" id="mailDot"></span><svg class="i"><use href="#i-mail"/></svg><span class="lbl">Inbox</span></button>
+  <button class="chip-btn" id="driveBtn" title="Cloud storage: Google Drive or OneDrive"><span class="dot" id="driveDot"></span><span id="driveIco"></span><span class="lbl" id="driveLbl">Drive</span></button>
+  <button class="chip-btn" id="remBtn" title="All reminders"><svg class="i"><use href="#i-bell"/></svg><span class="lbl">Reminders</span><span class="count" id="remCount">0</span></button>
+  <button class="chip-btn" id="teamBtn" title="Team and invitations"><svg class="i"><use href="#i-users"/></svg><span class="lbl">Team</span></button>
+  <button class="me-btn" id="meBtn" aria-label="Your profile"></button>
+</header>
+
+<div class="toolbar">
+  <div class="searchwrap"><div class="search sbar"><svg class="i"><use href="#i-search"/></svg><span class="qchips" id="qChips"></span><label class="sr" for="q">Search project names</label><input id="q" placeholder="Search project names…" dir="auto" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="qList"><button type="button" class="fbtn" id="fBtn" aria-expanded="false" aria-controls="fPanel"><svg class="i"><use href="#i-filter"/></svg><span>Filters</span><b id="fCount" hidden></b></button></div><div class="qlist" id="qList" role="listbox"></div><div class="fpanel" id="fPanel" role="dialog" aria-label="Filters"></div></div>
+  <button class="btn" id="resetBtn" title="Reset the demo data">Reset demo</button>
+  <button class="btn primary" id="newBtn"><svg class="i"><use href="#i-plus"/></svg>New project</button>
+</div>
+
+<main class="board" id="board" aria-label="Tender board"></main>
+
+<div class="scrim" id="scrim"></div>
+<section class="page" id="page" aria-label="Project details"></section>
+<aside class="sheet" id="mailSheet" aria-label="Email intake"></aside>
+<aside class="sheet wide" id="remSheet" aria-label="Reminders"></aside>
+<aside class="sheet wide" id="teamSheet" aria-label="Team and invitations"></aside>
+<div class="modal" id="modal"><div class="box" role="dialog" aria-modal="true"></div></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   Redcon Tender Planning — prototype
+   Everything runs in the browser; data is kept in localStorage.
+   Email intake and Google Drive / OneDrive are simulated with the same
+   parsing rules the real integration would use.
+   ============================================================ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const icon=(n,c='')=>`<svg class="i ${c}"><use href="#i-${n}"/></svg>`;
+const KEY='rendcon-tp-v4';
+const HOUR=3600000;
+const fmtDate=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';
+const fmtShort=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'';
+const fmtDT=d=>new Date(d).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const initials=n=>(n||'?').replace(/^Eng\.?\s*/i,'').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const isoIn=days=>{const d=new Date();d.setDate(d.getDate()+days);return d.toISOString().slice(0,10)};
+const localDT=ms=>{const d=new Date(ms);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
+
+const TAGS=[
+  {id:'new',name:'New project',color:'#EE6A1F'},
+  {id:'upd',name:'New updates',color:'#B8860B'},
+  {id:'qa',name:'Queries answers',color:'#2F7D7A'},
+  {id:'pp',name:'Postponed',color:'#8A8A85'},
+  {id:'un',name:'Unassigned',color:'#111111'},
+  {id:'urgent',name:'Urgent',color:'#C8321E'},
+  {id:'sub',name:'Submitted',color:'#2E7D4F'},
+];
+
+const COLORS=['#111111','#EE6A1F','#5B5B57','#9C4A12','#2F7D7A','#B8860B'];
+function seed(){
+  const c1=uid(),c2=uid(),c3=uid(),u0=uid(),u1=uid(),u2=uid(),u3=uid();
+  const P=(o)=>Object.assign({id:uid(),columnId:null,pos:0,tags:[],status:'',received:isoIn(-3),due:isoIn(14),folder:'',client:'',ref:'',type:'public',leader:null,team:[],dueHistory:[],updatedAt:Date.now(),updatedBy:'Mohamed Ibrahim',subtasks:[],links:[],comments:[],notifications:[],files:[],uploads:[],source:'manual',subOpen:true},o);
+  return {
+    me:u0, adminId:u0,
+    users:[
+      {id:u0,name:'Mohamed Ibrahim',email:'mohamed@redcon.example',role:'admin',color:'#EE6A1F',status:'active',prefs:{browser:true,email:true,digest:true}},
+      {id:u1,name:'Eng. Ahmed Hassan',email:'ahmed@redcon.example',role:'engineer',color:'#111111',status:'active',prefs:{browser:true,email:true,digest:false}},
+      {id:u2,name:'Eng. Sara Mostafa',email:'sara@redcon.example',role:'engineer',color:'#2F7D7A',status:'active',prefs:{browser:true,email:true,digest:true}},
+      {id:u3,name:'Eng. Omar Khaled',email:'omar@redcon.example',role:'engineer',color:'#9C4A12',status:'invited',invitedAt:Date.now()-2*24*HOUR,prefs:{browser:true,email:true,digest:false}},
+    ],
+    columns:[{id:c1,userId:u1},{id:c2,userId:u2},{id:c3,userId:u3}],
+    tenderTeam:[
+      {id:'tm1',name:'Eng. Mina',ar:'مينا',type:'private'},
+      {id:'tm2',name:'Eng. Merihan',ar:'ميريهان',type:'private'},
+      {id:'tm3',name:'Eng. Mohamed Mustafa',ar:'محمد مصطفى',type:'public'},
+      {id:'tm4',name:'Eng. Shreine',ar:'شيرين',type:'public'},
+    ],
+    reminders:[{id:uid(),at:Date.now()+26*HOUR,msg:'Weekly tender review meeting',repeat:'weekly',fired:false,to:['all'],email:true}],
+    outbox:[],sentLog:[],
+    tags:TAGS.slice(),
+    drive:{provider:'google',connected:true,account:'tenders@redcon.example',root:'https://drive.google.com/drive/folders/1TendersRoot'},
+    mail:{connected:true,address:'tenders@redcon.example',subject:'ورد الينا',hourly:true,lastSync:Date.now()-38*60000,processed:[],log:[]},
+    projects:[
+      P({title:'توريد وتركيب أعمال الكهرباء – مبنى الإدارة',client:'Ministry of Housing',type:'public',tender:'tm3',mailSeen:Date.now()-30*HOUR,mailLog:[{id:uid(),at:Date.now()-26*HOUR,kind:'upd',summary:'Annex 1 issued · submission date 22 Nov → 29 Nov 2026',subject:'ورد الينا – ملحق رقم 1: توريد وتركيب أعمال الكهرباء – مبنى الإدارة',links:1},{id:uid(),at:Date.now()-4*24*HOUR,kind:'new',summary:'New tender received · submission 22 Nov 2026',subject:'ورد الينا – مناقصة عامة: توريد وتركيب أعمال الكهرباء – مبنى الإدارة',links:1}],leader:u2,team:[u2,u1],tags:['upd'],columnId:c2,pos:0,status:'Pricing MEP BOQ – waiting on lighting supplier quote',due:isoIn(5),folder:'https://drive.google.com/drive/folders/1aEl104',
+        dueHistory:[{from:isoIn(-2),to:isoIn(5),by:'email',at:Date.now()-26*HOUR}],updatedAt:Date.now()-40*60000,updatedBy:'email',
+        subtasks:[{id:uid(),text:'Review specs & drawings',done:true,note:'',due:''},{id:uid(),text:'Request supplier quotes',done:true,note:'3 suppliers contacted',due:''},{id:uid(),text:'Price lighting package',done:false,note:'',due:isoIn(2)},{id:uid(),text:'Final BOQ sign-off',done:false,note:'',due:isoIn(4)}],
+        links:[{id:uid(),title:'Tender portal',url:'https://tenders.example/electrical-admin'}],
+        files:[{id:uid(),name:'Specs_Electrical.pdf',size:'4.2 MB'},{id:uid(),name:'SLD_Rev02.dwg',size:'1.1 MB'},{id:uid(),name:'BOQ_Electrical.xlsx',size:'380 KB'}],
+        comments:[{id:uid(),who:'Eng. Sara Mostafa',text:'Lighting quote expected Thursday.',at:Date.now()-26*HOUR}],
+        notifications:[{id:uid(),at:Date.now()+20*HOUR,msg:'Chase lighting supplier quote',repeat:'none',fired:false,to:['assignee','me'],email:true}]}),
+      P({title:'إنشاء خزان مياه أرضي سعة 5000 م³',client:'Water Authority',type:'public',tender:'tm4',mailSeen:Date.now(),mailLog:[{id:uid(),at:Date.now()-6*24*HOUR,kind:'new',summary:'New tender received · submission 03 Dec 2026',subject:'ورد الينا – إنشاء خزان مياه أرضي سعة 5000 م³',links:0}],leader:u1,team:[u1],tags:['new'],columnId:c1,pos:0,status:'Site visit done – structural take-off in progress',due:isoIn(9),folder:'https://drive.google.com/drive/folders/1aEl097',
+        updatedAt:Date.now()-3*HOUR,updatedBy:'Eng. Ahmed Hassan',
+        subtasks:[{id:uid(),text:'Site visit',done:true,note:'',due:''},{id:uid(),text:'Structural take-off',done:false,note:'',due:isoIn(3)},{id:uid(),text:'Send queries to client',done:true,note:'Sent 12 queries',due:''}],
+        files:[{id:uid(),name:'Tank_GA.pdf',size:'2.7 MB'}]}),
+      P({title:'Rehabilitation of Internal Roads – Phase 2',client:'New Cities Authority',type:'public',tender:'tm3',mailSeen:Date.now(),mailLog:[{id:uid(),at:Date.now()-50*HOUR,kind:'pp',summary:'Submission postponed · 28 Nov → 24 Dec 2026',subject:'تأجيل موعد تقديم العطاءات – إعادة تأهيل الطرق الداخلية – المرحلة الثانية',links:1}],leader:u3,team:[u3],tags:['pp'],columnId:c3,pos:0,status:'Postponed by client – new date to be announced',due:isoIn(30),
+        dueHistory:[{from:isoIn(4),to:isoIn(30),by:'email',at:Date.now()-50*HOUR}],updatedAt:Date.now()-50*HOUR,updatedBy:'email',
+        links:[{id:uid(),title:'Postponement notice',url:'https://tenders.example/roads-phase-2/notice'}]}),
+      P({title:'Fire fighting system – Logistics Hub',client:'Port Logistics Co.',type:'private',tender:'tm1',leader:u2,team:[u2,u0],tags:['new','urgent'],columnId:c2,pos:1,status:'Hydraulic calc pending',due:isoIn(2),
+        updatedAt:Date.now()-20*60000,updatedBy:'Eng. Sara Mostafa',
+        subtasks:[{id:uid(),text:'Hydraulic calculation',done:false,note:'',due:isoIn(1)},{id:uid(),text:'Pump room pricing',done:false,note:'',due:isoIn(2)}]}),
+      P({title:'صيانة شبكات الصرف الصحي – الحي الثالث',client:'Municipality',type:'public',tender:'tm4',mailLog:[{id:uid(),at:Date.now()-5*HOUR,kind:'new',summary:'New tender received · submission 06 Dec 2026',subject:'ورد الينا – صيانة شبكات الصرف الصحي – الحي الثالث',links:0}],tags:['new','un'],status:'Received by email – needs an engineer',source:'email',due:isoIn(12),updatedAt:Date.now()-5*HOUR,updatedBy:'email'}),
+      P({title:'Steel shed – Industrial Zone plot 14',client:'Private client',type:'private',tender:'tm2',tags:['un'],status:'',due:isoIn(18),updatedAt:Date.now()-26*HOUR,updatedBy:'Mohamed Ibrahim'}),
+      P({title:'Boundary wall & gatehouse',client:'Education Directorate',type:'public',tender:'tm3',leader:u1,team:[u1],tags:['sub'],columnId:c1,pos:1,status:'Submitted – awaiting opening',due:isoIn(-1),updatedAt:Date.now()-30*HOUR,updatedBy:'Eng. Ahmed Hassan'}),
+    ]
+  };
+}
+
+let S;
+function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):seed()}catch(e){S=seed()}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+load();
+
+const tagById=id=>S.tags.find(t=>t.id===id);
+const colById=id=>S.columns.find(c=>c.id===id);
+const userById=id=>S.users.find(u=>u.id===id);
+const me=()=>userById(S.me)||S.users[0];
+const isAdmin=()=>me().role==='admin';
+const colUser=c=>c&&userById(c.userId);
+const colName=id=>{const u=colUser(colById(id));return u?u.name:'Engineer'};
+const colOfUser=uid_=>S.columns.find(c=>c.userId===uid_);
+const avatar=(u,cls='')=>u?`<span class="avatar ${cls}" style="background:${u.color}" title="${esc(u.name)}">${esc(initials(u.name))}</span>`:`<span class="avatar ghost ${cls}" title="Unassigned">${icon('user')}</span>`;
+const proj=id=>S.projects.find(p=>p.id===id);
+let filterTags=new Set(), query='';
+
+/* ---------------- Toasts ---------------- */
+function toast(html,ico='check',ms=3200){
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span class="ti">${icon(ico)}</span><span>${html}</span>`;
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300)},ms);
+}
+
+/* ---------------- Board ---------------- */
+function matches(p){
+  if(filterTags.size&&![...filterTags].every(t=>t.startsWith('type:')?projType(p)===t.slice(5):t.startsWith('tm:')?p.tender===t.slice(3):p.tags.includes(t)))return false;
+  if(query&&!norm(p.title).includes(norm(query)))return false;
+  return true;
+}
+function ago(ms){
+  if(!ms)return'';const m=Math.round((Date.now()-ms)/60000);
+  if(m<1)return'just now';if(m<60)return m+'m ago';const h=Math.round(m/60);if(h<24)return h+'h ago';
+  const d=Math.round(h/24);return d<7?d+'d ago':fmtShort(new Date(ms));
+}
+function touch(p,by){p.updatedAt=Date.now();p.updatedBy=by||me().name}
+function setDue(p,val,by){
+  if(!val||val===p.due)return false;
+  (p.dueHistory=p.dueHistory||[]).unshift({from:p.due,to:val,by,at:Date.now()});
+  log(p,`Submission date ${p.due?'changed from '+fmtDate(p.due)+' to ':'set to '}${fmtDate(val)}${by==='email'?' (from email)':''}`);
+  p.due=val;touch(p,by);return true;
+}
+function teamOf(p){const ids=[...new Set([p.leader,...(p.team||[])].filter(Boolean))];return ids.map(userById).filter(Boolean)}
+function dueInfo(d){
+  if(!d)return{cls:'none',rel:'Not set'};
+  const diff=Math.round((new Date(d)-new Date(new Date().toDateString()))/864e5);
+  if(diff<0)return{cls:'late',rel:`${-diff} day${diff===-1?'':'s'} overdue`};
+  if(diff===0)return{cls:'late',rel:'Today'};
+  if(diff<=3)return{cls:'soon',rel:diff===1?'Tomorrow':`In ${diff} days`};
+  return{cls:'',rel:`In ${diff} days`};
+}
+const tenderById=id=>(S.tenderTeam||[]).find(t=>t.id===id);
+const projType=p=>{const t=tenderById(p.tender);return t?t.type:(p.type||'public')};
+const KIND={new:'New project',upd:'New update',pp:'Postponed',qa:'Queries answers'};
+let openLogs=new Set();
+function firstName(v){return String(v||'').replace(/^\s*(و?المهندس[ةه]?|مهندس[ةه]?|م\s*[\/\.]|eng\.?)\s*/i,'').trim().split(/\s+/)[0]||''}
+const tenderLabel=p=>p.supervisor||firstName(((tenderById(p.tender)||{}).name||'').replace(/^Eng\.?\s*/i,''));
+function findTender(txt){return (S.tenderTeam||[]).find(t=>(t.ar&&txt.includes(norm(t.ar)))||txt.includes(norm(t.name.replace(/^Eng\.?\s*/i,''))))}
+const typeBadge=t=>`<span class="ttype ${t==='private'?'priv':'pub'}">${t==='private'?'Private':'Public'}</span>`;
+function cardHTML(p){
+  const done=p.subtasks.filter(s=>s.done).length, tot=p.subtasks.length;
+  const rem=p.notifications.filter(n=>!n.fired).length;
+  const com=p.comments.filter(c=>!c.sys).length, fil=p.files.length+p.uploads.length;
+  const du=p.tags.includes('sub')&&p.due?{cls:'done',rel:'Submitted'}:dueInfo(p.due), eng=colUser(colById(p.columnId)), tnd=tenderById(p.tender);
+  const ml=p.mailLog||[], unread=ml.filter(e=>e.at>(p.mailSeen||0)).length, open=openLogs.has(p.id);
+  const last=(p.dueHistory||[])[0];
+  const fresh=p.updatedAt&&Date.now()-p.updatedAt<24*HOUR;
+  return `<article class="card ${du.cls==='late'?'is-late':''}" data-id="${p.id}" tabindex="0" aria-label="${esc(p.title)}">
+    <div class="c-top">${typeBadge(projType(p))}${tenderLabel(p)?`<span class="c-tender" dir="auto" title="Study supervisor (المشرف على الدراسة)${tnd?' · '+esc(tnd.name):''}">${esc(tenderLabel(p))}</span>`:''}
+      ${ml.length?`<button class="c-upd-btn ${unread?'new':''} ${open?'open':''}" data-nodrag data-log="${p.id}" aria-expanded="${open}" title="Updates from email · last change ${p.updatedAt?fmtDT(p.updatedAt):''}">${unread?`<i></i><b>${unread} new</b>`:icon('mail')+ml.length} · ${ago(p.updatedAt)}${icon('chev','chev')}</button>`
+      :`<span class="c-upd ${fresh?'fresh':''}" title="Last updated ${p.updatedAt?fmtDT(p.updatedAt):''}${p.updatedBy?' by '+esc(p.updatedBy):''}"><i></i>Updated ${ago(p.updatedAt)}</span>`}</div>
+    ${ml.length?`<div class="c-log ${open?'open':''}" data-logbox="${p.id}"><div><div class="c-log-in"><div class="c-log-h">${icon('mail')}Updates from email</div>${ml.slice(0,6).map(e=>`<div class="c-log-it"><div class="r"><span class="k k-${e.kind}">${KIND[e.kind]||'Update'}</span>${e.at>(p.mailSeen||0)?'<span class="nw">new</span>':''}<time title="${fmtDT(e.at)}">${ago(e.at)}</time></div><p>${esc(e.summary)}${e.links?` <span class="ln">${icon('link')}${e.links}</span>`:''}</p><small dir="rtl" title="${esc(e.subject)}">${esc(e.subject)}</small></div>`).join('')}${ml.length>6?`<div class="c-log-more">+ ${ml.length-6} older in the project</div>`:''}</div></div></div>`:''}
+    <h3 dir="auto">${esc(p.title)}</h3>
+    ${p.client?`<div class="c-client" dir="auto">${esc(p.client)}</div>`:''}
+    <div class="c-due ${du.cls}" title="Submission date">
+      ${icon('cal')}<b>${p.due?fmtDate(p.due):'No submission date'}</b>
+      ${p.due?`<span class="c-rel">${du.rel}</span>`:''}
+      ${last&&Date.now()-last.at<7*24*HOUR?`<span class="c-due-src ${last.by==='email'?'em':''}" title="${last.by==='email'?'Date updated from email':'Date changed by '+esc(last.by)} · ${ago(last.at)}${last.from?' (was '+fmtDate(last.from)+')':''}">${icon(last.by==='email'?'mail':'user')}</span>`:''}
+      <button class="c-due-edit" data-nodrag data-due="${p.id}" aria-label="Change submission date" title="Change submission date">${icon('edit')}</button>
+      <input type="date" class="due-in" data-duein="${p.id}" value="${p.due||''}" tabindex="-1" aria-hidden="true">
+    </div>
+    ${p.status?`<div class="c-status" dir="auto">${esc(p.status)}</div>`:''}
+    ${p.tags.length?`<div class="card-tags">${p.tags.map(id=>{const t=tagById(id);return t?`<span class="tag"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</span>`:''}).join('')}</div>`:''}
+    ${tot||p.links.length||com||fil||rem||eng?`<div class="c-foot">
+      ${tot?`<span class="c-tasks" title="${done} of ${tot} sub-tasks done"><span class="c-bar"><i style="width:${done/tot*100}%"></i></span>${done}/${tot}</span>`:''}
+      ${p.links.length?`<span title="Links">${icon('link')}${p.links.length}</span>`:''}
+      ${com?`<span title="Comments">${icon('msg')}${com}</span>`:''}
+      ${fil?`<span title="Files">${icon('file')}${fil}</span>`:''}
+      ${rem?`<span class="bell" title="Reminders set">${icon('bell')}${rem}</span>`:''}
+      <span class="grow"></span>
+      ${eng?`<span class="c-eng" title="Planning engineer: ${esc(eng.name)}">${avatar(eng,'sm')}<span>${esc(eng.name.replace(/^Eng\.\s*/,'').split(' ')[0])}</span></span>`:''}
+    </div>`:''}
+  </article>`;
+}
+function workload(items){
+  const t=new Date(new Date().toDateString());const d=x=>(new Date(x.due)-t)/864e5;
+  const late=items.filter(x=>x.due&&d(x)<0&&!x.tags.includes('sub')).length, wk=items.filter(x=>x.due&&d(x)>=0&&d(x)<=7).length;
+  return (late?`<span class="wl late">· ${late} overdue</span>`:'')+(wk?`<span class="wl">· ${wk} due this week</span>`:'');
+}
+const SORTS={due:['Submission date · earliest first','Submission date ↑'],dueDesc:['Submission date · latest first','Submission date ↓'],updated:['Latest update first','Latest update'],received:['Newest received first','Newest received'],name:['Project name · A–Z','Name A–Z'],manual:['Manual · drag to arrange','Manual order']};
+const sortKey=k=>(S.sort&&S.sort[k])||'due';
+function sortItems(items,key){
+  const t=x=>x.due?new Date(x.due).getTime():Infinity;
+  const by={due:(a,b)=>t(a)-t(b)||a.title.localeCompare(b.title),
+    dueDesc:(a,b)=>(b.due?t(b):-Infinity)-(a.due?t(a):-Infinity),
+    updated:(a,b)=>(b.updatedAt||0)-(a.updatedAt||0),
+    received:(a,b)=>String(b.received||'').localeCompare(String(a.received||'')),
+    name:(a,b)=>a.title.localeCompare(b.title,['ar','en']),
+    manual:(a,b)=>a.pos-b.pos}[key]||((a,b)=>a.pos-b.pos);
+  return items.sort(by);
+}
+function sortMenu(btn,k){
+  const r=btn.getBoundingClientRect(),cur=sortKey(k);
+  menu(r.left,r.bottom+4,Object.entries(SORTS).map(([id,[label]])=>[label,id===cur?'check':'sort',()=>{(S.sort=S.sort||{})[k]=id;save();renderBoard();toast(`Sorted by <b>${label.toLowerCase()}</b>`,'sort')},id===cur?'cur':'']));
+  $('#menu').style.minWidth='250px';
+}
+function colHTML(col,unassigned){
+  const sk=col?col.id:'un', skey=sortKey(sk);
+  const items=sortItems(S.projects.filter(p=>(p.columnId||null)===(col?col.id:null)),skey);
+  const shown=items.filter(matches);
+  const u=colUser(col);
+  const canEdit=!unassigned&&(isAdmin()||u.id===S.me);
+  return `<section class="col ${unassigned?'unassigned':''}" data-col="${col?col.id:''}">
+    <div class="col-head">
+      ${unassigned?`<div class="col-who"><div class="avatar">${icon('mail')}</div><div class="col-title"><span>Unassigned projects</span><small>New jobs land here${workload(items)}</small></div></div>`
+      :`<${canEdit?'button':'div'} class="col-who" ${canEdit?`data-profile="${u.id}" title="Edit ${esc(u.name)}'s profile"`:''}>${avatar(u)}<div class="col-title"><span dir="auto">${esc(u.name)}</span><small>${items.length} project${items.length===1?'':'s'}${workload(items)}${u.status==='invited'?' <span class="pill inv">invited</span>':''}${canEdit?`<span class="edit-hint">${icon('edit')}</span>`:''}</small></div></${canEdit?'button':'div'}>`}
+      <span class="col-count">${shown.length}</span>
+      ${unassigned||!isAdmin()?'':`<button class="btn ghost icon sm" data-colmenu="${col.id}" aria-label="Column options">${icon('dots')}</button>`}
+    </div>
+    <div class="col-sort"><button class="sort-btn" data-sort="${sk}" title="Sort this column">${icon('sort')}<span>${SORTS[skey][1]}</span>${icon('chev','chev')}</button></div>
+    <div class="col-list" data-list="${col?col.id:''}">${shown.map(cardHTML).join('')||`<div class="empty-col">${unassigned?'No unassigned projects':'Drag a project here to assign it'}</div>`}</div>
+    <div class="col-foot"><button class="btn sm add-card" data-add="${col?col.id:''}">${icon('plus')}Add project</button></div>
+  </section>`;
+}
+function renderBoard(){
+  const b=$('#board'), sl=b.scrollLeft;
+  b.innerHTML=colHTML(null,true)+S.columns.filter(c=>colUser(c)).sort((a,b)=>S.users.indexOf(colUser(a))-S.users.indexOf(colUser(b))).map(c=>colHTML(c,false)).join('')+(isAdmin()?`<button class="add-col" id="addCol">${icon('plus')}Add engineer</button>`:'');
+  b.scrollLeft=sl;
+  renderFilters(); renderHeader();
+}
+function filterLabel(id){
+  if(id.startsWith('type:'))return{txt:id==='type:public'?'Public':'Private',dot:''};
+  if(id.startsWith('tm:')){const t=tenderById(id.slice(3));return{txt:t?firstName(t.name.replace(/^Eng\.?\s*/i,'')):'—',dot:''}}
+  const t=tagById(id);return{txt:t?t.name:id,dot:t?t.color:''};
+}
+function renderFilters(){
+  const act=[...filterTags].filter(id=>!id.startsWith('tm:')||tenderById(id.slice(3)));
+  $('#qChips').innerHTML=act.map(id=>{const l=filterLabel(id);return `<span class="qchip">${l.dot?`<i class="tdot" style="background:${l.dot}"></i>`:''}${esc(l.txt)}<button type="button" data-unfilter="${esc(id)}" aria-label="Remove filter ${esc(l.txt)}">${icon('x')}</button></span>`}).join('');
+  $('#fCount').hidden=!act.length;$('#fCount').textContent=act.length;
+  $('#q').placeholder=act.length?'Search within filters…':'Search project names…';
+  const opt=(id,html)=>`<button type="button" class="fopt ${filterTags.has(id)?'on':''}" data-filter="${esc(id)}">${html}</button>`;
+  $('#fPanel').innerHTML=`
+    <div class="fgrp"><span>Tender type</span><div>${opt('type:public','Public')}${opt('type:private','Private')}</div></div>
+    <div class="fgrp"><span>Tender team</span><div>${(S.tenderTeam||[]).map(t=>opt('tm:'+t.id,`<em class="tt ${t.type}">${t.type==='private'?'Pr':'Pu'}</em><bdi>${esc(firstName(t.name.replace(/^Eng\.?\s*/i,'')))}</bdi>`)).join('')}</div></div>
+    <div class="fgrp"><span>Tags</span><div>${S.tags.map(t=>opt(t.id,`<i class="tdot" style="background:${t.color}"></i>${esc(t.name)}`)).join('')}</div></div>
+    <div class="ffoot"><button type="button" class="btn sm ghost" id="fClear" ${act.length?'':'disabled'}>Clear all</button><button type="button" class="btn sm dark" id="fDone">Done</button></div>`;
+}
+function upcomingCount(){return S.projects.reduce((a,p)=>a+p.notifications.filter(n=>!n.fired).length,0)+S.reminders.filter(n=>!n.fired).length}
+function renderHeader(){
+  $('#driveDot').parentElement.classList.toggle('on',S.drive.connected);
+  $('#driveIco').innerHTML=provIcon(S.drive.provider);$('#driveLbl').textContent=prov().short;$('#driveBtn').title=`${driveName()} – ${S.drive.connected?'connected':'not connected'}`;
+  $('#mailDot').parentElement.classList.toggle('on',S.mail.connected);
+  $('#remCount').textContent=upcomingCount();
+  $('#teamBtn').hidden=!isAdmin();
+  $('#meBtn').innerHTML=avatar(me());
+  const vb=$('#viewBanner');
+  if(S.me!==S.adminId){vb.hidden=false;vb.innerHTML=`Preview: you are seeing the app as <b>${esc(me().name)}</b> (engineer) <button id="backAdmin">Back to admin</button>`;$('#backAdmin').onclick=()=>switchUser(S.adminId)}
+  else vb.hidden=true;
+  updateSyncMeta();
+}
+function updateSyncMeta(){
+  if(!S.mail.connected||!S.mail.hourly){$('#syncMeta').textContent=S.mail.connected?'auto-sync off':'mail not connected';return}
+  const next=Math.max(0,S.mail.lastSync+HOUR-Date.now());
+  const ago=Math.round((Date.now()-S.mail.lastSync)/60000);
+  $('#syncMeta').textContent=`synced ${ago}m ago · next in ${Math.ceil(next/60000)}m`;
+}
+
+/* ---------------- Drag & drop (mouse + touch, pointer events) ---------------- */
+let drag=null;
+$('#board').addEventListener('pointerdown',e=>{
+  if(e.target.closest('[data-nodrag]'))return;
+  const card=e.target.closest('.card'); if(!card||e.button>0)return;
+  drag={card,id:card.dataset.id,x:e.clientX,y:e.clientY,started:false,from:card.closest('.col-list').dataset.list};
+});
+document.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  if(!drag.started){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<6)return;startDrag(e)}
+  const g=drag.ghost; g.style.left=(e.clientX-drag.ox)+'px'; g.style.top=(e.clientY-drag.oy)+'px';
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  const col=el&&el.closest('.col'); $$('.col-list.over').forEach(l=>l.classList.remove('over'));
+  if(col){
+    const list=$('.col-list',col); list.classList.add('over');
+    const emp=$('.empty-col',list); if(emp)emp.style.display='none';
+    const cards=$$('.card',list).filter(c=>c!==drag.card);
+    const before=cards.find(c=>{const r=c.getBoundingClientRect();return e.clientY<r.top+r.height/2});
+    if(before)list.insertBefore(drag.ph,before);else list.appendChild(drag.ph);
+  }
+  const b=$('#board'),br=b.getBoundingClientRect();
+  if(e.clientX>br.right-60)b.scrollLeft+=14; else if(e.clientX<br.left+60)b.scrollLeft-=14;
+});
+function startDrag(e){
+  drag.started=true;
+  const r=drag.card.getBoundingClientRect();
+  drag.ox=e.clientX-r.left; drag.oy=e.clientY-r.top;
+  const g=drag.card.cloneNode(true); g.classList.add('ghost'); g.style.width=r.width+'px'; g.style.left=r.left+'px'; g.style.top=r.top+'px';
+  document.body.appendChild(g); drag.ghost=g;
+  const ph=document.createElement('div'); ph.className='placeholder'; ph.style.height=r.height+'px'; drag.ph=ph;
+  drag.card.replaceWith(ph); document.body.style.cursor='grabbing';
+  $('#board').style.scrollBehavior='auto';
+}
+document.addEventListener('pointerup',()=>{
+  if(!drag)return;
+  const d=drag; drag=null;
+  if(!d.started){openProject(d.id);return}
+  document.body.style.cursor=''; $('#board').style.scrollBehavior='';
+  const list=d.ph.parentElement; const target=list.dataset.list||null;
+  const ids=[...list.children].map(n=>n===d.ph?d.id:n.dataset.id).filter(Boolean);
+  const p=proj(d.id); const prev=p.columnId||null;
+  p.columnId=target;
+  if(prev!==target)touch(p);
+  else if(sortKey(target||'un')!=='manual')toast('This column is sorted automatically. Choose <b>Sort → Manual order</b> to arrange it by hand.','sort',4500);
+  ids.forEach((id,i)=>{const x=proj(id);if(x)x.pos=i});
+  if(prev!==target){
+    if(target){p.tags=p.tags.filter(t=>t!=='un'); const n=colName(target);
+      log(p,`Assigned to ${n}`); toast(`<b dir="auto">${esc(p.title)}</b> assigned to <b>${esc(n)}</b>`,'user');}
+    else{if(!p.tags.includes('un'))p.tags.push('un'); log(p,'Moved back to unassigned'); toast('Moved to <b>Unassigned</b>','user')}
+  }
+  d.ghost.remove(); save(); renderBoard();
+  const nc=$(`.card[data-id="${d.id}"]`); if(nc){nc.style.animation='none';nc.offsetHeight;nc.style.animation='';nc.classList.add('dropped')}
+});
+document.addEventListener('pointercancel',()=>{if(drag&&drag.started){drag.ghost.remove();drag=null;renderBoard()}else drag=null});
+
+function log(p,text){p.comments.push({id:uid(),who:'System',text,at:Date.now(),sys:true})}
+
+/* ---------------- Board clicks ---------------- */
+$('#board').addEventListener('click',e=>{
+  const a=e.target.closest('[data-add]'); if(a){newProject(a.dataset.add||null);return}
+  if(e.target.closest('#addCol')){addColumn();return}
+  const m=e.target.closest('[data-colmenu]'); if(m){colMenu(m,m.dataset.colmenu);return}
+  const pr=e.target.closest('[data-profile]'); if(pr){editProfile(pr.dataset.profile);return}
+  const so=e.target.closest('[data-sort]'); if(so){sortMenu(so,so.dataset.sort);return}
+  const lg=e.target.closest('[data-log]'); if(lg){toggleLog(lg.dataset.log);return}
+  const dd=e.target.closest('[data-due]'); if(dd){const i=$(`[data-duein="${dd.dataset.due}"]`);try{i.showPicker()}catch(_){editDue(dd.dataset.due)}return}
+});
+$('#board').addEventListener('keydown',e=>{const c=e.target.closest('.card');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openProject(c.dataset.id)}});
+
+$('#board').addEventListener('change',e=>{const i=e.target.closest('[data-duein]');if(!i)return;const p=proj(i.dataset.duein);if(setDue(p,i.value,me().name)){save();renderBoard();flash(p.id);toast(`Submission date set to <b>${fmtDate(p.due)}</b>`,'cal')}});
+function toggleLog(id){
+  const p=proj(id),card=$(`.card[data-id="${id}"]`);if(!p||!card)return;
+  const open=!openLogs.has(id);open?openLogs.add(id):openLogs.delete(id);
+  $('.c-log',card).classList.toggle('open',open);
+  const btn=$('.c-upd-btn',card);btn.classList.toggle('open',open);btn.setAttribute('aria-expanded',open);
+  if(open&&btn.classList.contains('new')){p.mailSeen=Date.now();save();
+    btn.classList.remove('new');btn.innerHTML=`${icon('mail')}${p.mailLog.length} · ${ago(p.updatedAt)}${icon('chev','chev')}`;}
+}
+function editDue(id){const p=proj(id);modal(`<h3>Submission date</h3><div class="row"><label for="eD">Latest submission date</label><input class="in" type="date" id="eD" value="${p.due||''}"></div><div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="eOk">Save date</button></div>`,()=>{$('#eOk').onclick=()=>{if(setDue(p,$('#eD').value,me().name)){save();renderBoard()}closeModal()}})}
+function setPanel(open){$('#fPanel').classList.toggle('show',open);$('#fBtn').classList.toggle('on',open);$('#fBtn').setAttribute('aria-expanded',open);if(open)$('#qList').classList.remove('show')}
+$('#fBtn').addEventListener('click',e=>{e.stopPropagation();setPanel(!$('#fPanel').classList.contains('show'))});
+$('#fPanel').addEventListener('click',e=>{e.stopPropagation();
+  const b=e.target.closest('[data-filter]');if(b){const id=b.dataset.filter;filterTags.has(id)?filterTags.delete(id):filterTags.add(id);renderBoard();return}
+  if(e.target.closest('#fClear')){filterTags.clear();renderBoard();return}
+  if(e.target.closest('#fDone'))setPanel(false)});
+$('#qChips').addEventListener('click',e=>{const b=e.target.closest('[data-unfilter]');if(!b)return;e.stopPropagation();filterTags.delete(b.dataset.unfilter);renderBoard()});
+document.addEventListener('click',e=>{if(!e.target.closest('.searchwrap'))setPanel(false)});
+$('.sbar').addEventListener('click',e=>{if(!e.target.closest('button'))$('#q').focus()});
+$('#q').addEventListener('keydown',e=>{if(e.key==='Backspace'&&!e.target.value&&filterTags.size){const last=[...filterTags].pop();filterTags.delete(last);renderBoard()}});
+let qSel=0;
+function qMatches(v){const n=norm(v);return S.projects.filter(p=>norm(p.title).includes(n)).slice(0,8)}
+function renderQList(){
+  const v=$('#q').value.trim(),L=$('#qList');
+  if(!v){L.classList.remove('show');$('#q').setAttribute('aria-expanded','false');return}
+  const ms=qMatches(v);qSel=Math.min(qSel,Math.max(ms.length-1,0));
+  L.innerHTML=ms.length?ms.map((p,i)=>`<button class="qi ${i===qSel?'on':''}" role="option" data-qo="${p.id}"><b dir="auto">${esc(p.title)}</b></button>`).join(''):'<div class="qe">No project with that name</div>';
+  L.classList.add('show');$('#q').setAttribute('aria-expanded','true');
+}
+$('#q').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();qSel=0;renderBoard();renderQList()});
+$('#q').addEventListener('focus',renderQList);
+$('#q').addEventListener('blur',()=>setTimeout(()=>$('#qList').classList.remove('show'),150));
+$('#q').addEventListener('keydown',e=>{const ms=$$('#qList .qi');if(!ms.length)return;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();qSel=(qSel+(e.key==='ArrowDown'?1:-1)+ms.length)%ms.length;renderQList()}
+  if(e.key==='Enter'){e.preventDefault();$('#qList').classList.remove('show');openProject(ms[qSel].dataset.qo)}
+  if(e.key==='Escape'){$('#qList').classList.remove('show')}});
+$('#qList').addEventListener('mousedown',e=>{const b=e.target.closest('[data-qo]');if(!b)return;e.preventDefault();$('#qList').classList.remove('show');openProject(b.dataset.qo)});
+$('#newBtn').onclick=()=>newProject(null);
+$('#resetBtn').onclick=()=>{if(confirm('Reset the board to the demo data?')){S=seed();save();renderBoard();toast('Demo data restored')}};
+
+function addColumn(){
+  const free=S.users.filter(u=>u.role==='engineer'&&!colOfUser(u.id));
+  modal(`<h3>Add engineer</h3>
+    ${free.length?`<span class="lbl-sm">Team members without a column</span><div class="recips" style="margin-bottom:16px">${free.map(u=>`<button data-existing="${u.id}">${avatar(u,'sm')}${esc(u.name)}</button>`).join('')}</div><span class="lbl-sm">Or add someone new</span>`:''}
+    ${inviteFormHTML('m')}
+    <div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="mOk">${icon('plus')}Add engineer</button></div>`,()=>{
+    $$('[data-existing]').forEach(b=>b.onclick=()=>{S.columns.push({id:uid(),userId:b.dataset.existing});save();closeModal();renderBoard();$('#board').scrollLeft=$('#board').scrollWidth;toast(`Column added for <b>${esc(userById(b.dataset.existing).name)}</b>`)});
+    $('#mOk').onclick=()=>{if(sendInvite('m',true)){closeModal();$('#board').scrollLeft=$('#board').scrollWidth}};
+  });
+}
+function colMenu(btn,id){
+  const r=btn.getBoundingClientRect(), u=colUser(colById(id));
+  menu(r.right-200,r.bottom+4,[
+    ['Edit profile','edit',()=>editProfile(u.id)],
+    ['Add project here','plus',()=>newProject(id)],
+    ['Remove column','trash',()=>{if(!confirm(`Remove ${u.name}'s column? Their projects move to Unassigned. They stay on the team.`))return;
+      S.projects.filter(p=>p.columnId===id).forEach(p=>{p.columnId=null;if(!p.tags.includes('un'))p.tags.push('un')});
+      S.columns=S.columns.filter(x=>x.id!==id);save();renderBoard();toast('Column removed – projects moved to Unassigned')},'danger'],
+  ]);
+}
+function menu(x,y,items){
+  closeMenu(); const m=document.createElement('div'); m.className='menu'; m.id='menu';
+  m.style.left=Math.max(8,x)+'px'; m.style.top=y+'px';
+  m.innerHTML=items.map((it,i)=>`<button data-i="${i}" class="${it[3]||''}">${icon(it[1])}${it[0]}</button>`).join('');
+  document.body.appendChild(m);
+  m.onclick=e=>{const b=e.target.closest('[data-i]');if(b){closeMenu();items[b.dataset.i][2]()}};
+  setTimeout(()=>document.addEventListener('click',closeMenu,{once:true}),0);
+}
+function closeMenu(){const m=$('#menu');if(m)m.remove()}
+
+/* ---------------- Modal ---------------- */
+function modal(html,after){const m=$('#modal');$('.box',m).className='box';$('.box',m).innerHTML=html;m.classList.add('show');$('#scrim').classList.add('show');
+  $$('[data-close]',m).forEach(b=>b.onclick=closeModal);after&&after();const f=$('input,textarea,select',m);f&&f.focus()}
+function closeModal(){$('#modal').classList.remove('show');if(!$('#page').classList.contains('show')&&!$('.sheet.show'))$('#scrim').classList.remove('show')}
+
+function tenderOptions(sel){
+  const g=t=>(S.tenderTeam||[]).filter(x=>x.type===t).map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${esc(x.name)}</option>`).join('');
+  return `<option value="">— Not set —</option><optgroup label="Private">${g('private')}</optgroup><optgroup label="Public">${g('public')}</optgroup>`;
+}
+function newProject(colId){
+  modal(`<h3>New project</h3>
+    <div class="row"><label for="nT">Project title</label><input class="in" id="nT" dir="auto" placeholder="Project name (Arabic or English)"></div>
+    <div class="formgrid"><div class="row"><label for="nTm">Tender team</label><select class="in" id="nTm">${tenderOptions('')}</select></div>
+    <div class="row"><label for="nD">Submission date</label><input class="in" type="date" id="nD" value="${isoIn(14)}"></div>
+    <div class="row full"><label for="nC">Client</label><input class="in" id="nC" dir="auto"></div></div>
+    <div class="acts"><button class="btn" data-close>Cancel</button><button class="btn primary" id="nOk">Create project</button></div>`,()=>{
+    $('#nOk').onclick=()=>{const t=$('#nT').value.trim();if(!t)return $('#nT').focus();
+      const tm=tenderById($('#nTm').value);
+      const p=mkProject({title:t,tender:tm?tm.id:null,type:tm?tm.type:'public',due:$('#nD').value,client:$('#nC').value.trim(),columnId:colId,tags:colId?['new']:['new','un']});
+      log(p,'Project created manually');save();closeModal();renderBoard();flash(p.id);toast('Project created')};
+  });
+}
+function mkProject(o){
+  const p=Object.assign({id:uid(),columnId:null,pos:-1,tags:[],status:'',received:new Date().toISOString().slice(0,10),due:'',folder:'',client:'',ref:'',type:'public',leader:null,team:[],dueHistory:[],updatedAt:Date.now(),updatedBy:me().name,subtasks:[],links:[],comments:[],notifications:[],files:[],uploads:[],source:'manual',subOpen:true},o);
+  S.projects.forEach(x=>{if((x.columnId||null)===(p.columnId||null))x.pos++}); p.pos=0;
+  S.projects.push(p); return p;
+}
+function flash(id){requestAnimationFrame(()=>{const c=$(`.card[data-id="${id}"]`);if(c){c.classList.add('fresh');c.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'})}})}
+
+/* ---------------- Project page ---------------- */
+let cur=null, curTab='files';
+function openProject(id){location.hash='#p/'+id}
+function route(){
+  const m=location.hash.match(/^#p\/(\w+)/);
+  if(m&&proj(m[1])){cur=m[1];renderPage();$('#page').classList.add('show');$('#scrim').classList.add('show')}
+  else{cur=null;$('#page').classList.remove('show');if(!$('.sheet.show'))$('#scrim').classList.remove('show')}
+}
+window.addEventListener('hashchange',route);
+function closePage(){if(location.hash)history.pushState('',document.title,location.pathname+location.search);route()}
+
+function renderPage(){
+  const p=proj(cur); if(!p)return;
+  const done=p.subtasks.filter(s=>s.done).length;
+  $('#page').innerHTML=`
+  <div class="page-head">
+    <button class="btn icon" id="back" aria-label="Back to board">${icon('left')}</button>
+    <div class="t">
+      <div class="crumb">${typeBadge(projType(p))}${tenderById(p.tender)?' '+esc(tenderById(p.tender).name)+' ·':''} received ${fmtDate(p.received)} · updated ${ago(p.updatedAt)}${p.updatedBy?' by '+esc(p.updatedBy):''}${p.source==='email'?' <span class="src">from email</span>':''}</div>
+      <input class="title-in" id="pTitle" value="${esc(p.title)}" dir="auto" aria-label="Project title">
+    </div>
+    <button class="btn icon" id="pMore" aria-label="More">${icon('dots')}</button>
+    <button class="btn icon p-close" id="pClose" aria-label="Close project" title="Close (Esc)">${icon('x')}</button>
+  </div>
+  <div class="page-body">
+    <div>
+      <div class="panel">
+        <h4>Details</h4>
+        <div class="field"><label for="pCol">Assigned to</label><select class="in" id="pCol"><option value="">— Unassigned —</option>${S.columns.filter(c=>colUser(c)).map(c=>`<option value="${c.id}" ${c.id===p.columnId?'selected':''}>${esc(colName(c.id))}</option>`).join('')}</select></div>
+        <div class="field"><label for="pStatus">Status</label><input class="in" id="pStatus" value="${esc(p.status)}" dir="auto" placeholder="Write the current status…" list="statusList"></div>
+        <datalist id="statusList"><option>Reviewing documents</option><option>Site visit scheduled</option><option>Queries sent to client</option><option>Pricing in progress</option><option>Waiting supplier quotes</option><option>Ready for submission</option><option>Submitted</option></datalist>
+        <div class="field due-field"><label for="pDue">Submission date</label><div style="display:flex;gap:8px;align-items:center"><input class="in" type="date" id="pDue" value="${p.due||''}"><span class="c-rel" style="${dueInfo(p.due).cls==='late'?'background:var(--danger);color:#fff;border-color:var(--danger)':dueInfo(p.due).cls==='soon'?'background:var(--accent);color:#fff;border-color:var(--accent)':''}">${dueInfo(p.due).rel}</span></div>
+          ${(p.dueHistory||[]).length?`<div class="due-hist">${p.dueHistory.slice(0,3).map(h=>`<div>${icon(h.by==='email'?'mail':'user')}${h.from?fmtDate(h.from)+' → ':''}<b style="color:var(--ink-2)">${fmtDate(h.to)}</b> · ${h.by==='email'?'from email':esc(h.by)} · ${ago(h.at)}</div>`).join('')}</div>`:'<div class="due-hist">Updates automatically when an email gives a new date. You can change it here at any time.</div>'}</div>
+        <div class="field"><label for="pTender">Tender team</label><div style="display:flex;gap:8px;align-items:center"><select class="in" id="pTender">${tenderOptions(p.tender)}</select>${typeBadge(projType(p))}</div></div>
+        ${tenderById(p.tender)?'':`<div class="field"><label>Tender type</label><div class="seg" id="pType"><button type="button" data-v="public" class="${p.type!=='private'?'on':''}">Public</button><button type="button" data-v="private" class="${p.type==='private'?'on':''}">Private</button></div></div>`}
+        <div class="field"><label for="pClient">Client</label><input class="in" id="pClient" value="${esc(p.client)}" dir="auto"></div>
+        <div class="field"><label for="pRec">Received</label><input class="in" type="date" id="pRec" value="${p.received||''}"></div>
+      </div>
+      <div class="panel">
+        <h4>Tags</h4>
+        <div class="tagpick" id="tagpick">${S.tags.map(t=>`<button data-tag="${t.id}" class="${p.tags.includes(t.id)?'on':''}"><i class="tdot" style="background:${t.color}"></i>${esc(t.name)}</button>`).join('')}<input class="newtag" id="newTag" placeholder="+ New tag" dir="auto" aria-label="New tag"></div>
+      </div>
+      <div class="panel">
+        <h4>Project folder</h4>
+        ${p.folder?`<div class="folder">${provIcon(folderProv(p.folder)||S.drive.provider,"gd")}<a href="${esc(p.folder)}" target="_blank" rel="noopener">${esc(p.folder.replace(/^https?:\/\//,''))}</a><button class="btn sm ghost" id="unlink">Unlink</button></div>`
+        :`<div class="addrow"><input class="in" id="folderIn" placeholder="Paste a Google Drive or OneDrive folder link"><button class="btn sm" id="folderLink">Link</button><button class="btn sm dark" id="folderNew">${icon('folder')}Create in ${esc(prov().short)}</button></div>`}
+      </div>
+      <div class="panel">
+        <h4 class="sub-head ${p.subOpen?'':'closed'}" id="subHead">${icon('chev','chev')}Sub-tasks <span class="pill">${done}/${p.subtasks.length}</span><span class="grow"></span></h4>
+        <div class="collapse ${p.subOpen?'':'closed'}" id="subWrap"><div>
+          <div class="prog" style="margin:0 0 12px"><i style="width:${p.subtasks.length?done/p.subtasks.length*100:0}%"></i></div>
+          <div id="subs">${p.subtasks.map(subHTML).join('')}</div>
+          <form class="addrow" id="subAdd"><input class="in" id="subIn" placeholder="Add a sub-task…" dir="auto"><input class="in" type="date" id="subDue" style="width:150px" aria-label="Sub-task date"><button class="btn primary sm" style="height:34px">${icon('plus')}Add</button></form>
+        </div></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="animation-delay:.06s">
+        <div class="tabs" id="tabs">
+          ${[['files','file','Files',p.files.length],['links','link','Links',p.links.length],['comments','msg','Comments',p.comments.filter(c=>!c.sys).length],['notifications','bell','Notifications',p.notifications.filter(n=>!n.fired).length],['uploads','up','Uploads',p.uploads.length]]
+            .map(([k,ic,l,n])=>`<button class="tab ${curTab===k?'on':''}" data-tab="${k}">${icon(ic)}${l}${n?`<span class="n">${n}</span>`:''}</button>`).join('')}
+          <span class="tab-ink" id="tabInk"></span>
+        </div>
+        <div id="pane"></div>
+      </div>
+    </div>
+  </div>`;
+  bindPage(p); renderPane(); moveInk();
+}
+function subHTML(s){
+  return `<div class="sub ${s.done?'done':''} ${s.open?'open':''}" data-sub="${s.id}">
+    <div class="sub-row">
+      <button class="chk" data-act="toggle" aria-label="Done"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10" fill="none"/></svg></button>
+      <input class="sub-text" value="${esc(s.text)}" dir="auto" data-act="text" aria-label="Sub-task">
+      ${s.due?`<span class="sub-due">${fmtShort(s.due)}</span>`:''}
+      ${s.note?`<span title="Has notes" style="color:var(--muted)">${icon('msg')}</span>`:''}
+      <button class="btn ghost icon sm sub-tog" data-act="open" aria-label="Expand">${icon('chev')}</button>
+      <button class="btn ghost icon sm sub-x" data-act="del" aria-label="Delete">${icon('x')}</button>
+    </div>
+    <div class="collapse ${s.open?'':'closed'}"><div><div class="sub-more">
+      <textarea class="in" data-act="note" placeholder="Notes, details…" dir="auto">${esc(s.note||'')}</textarea>
+      <input class="in" type="date" data-act="due" value="${s.due||''}" aria-label="Due date">
+    </div></div></div>
+  </div>`;
+}
+function bindPage(p){
+  const upd=()=>{touch(p);save();renderBoard()};
+  $('#back').onclick=closePage;
+  $('#pClose').onclick=closePage;
+  $('#pMore').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();menu(r.right-190,r.bottom+4,[
+    ['Delete project','trash',()=>{if(!confirm('Delete this project?'))return;S.projects=S.projects.filter(x=>x.id!==p.id);save();closePage();renderBoard();toast('Project deleted')},'danger']])};
+  $('#pTitle').onchange=e=>{p.title=e.target.value;upd()};
+  $('#pStatus').onchange=e=>{p.status=e.target.value;log(p,'Status: '+p.status);upd();toast('Status updated')};
+  $('#pClient').onchange=e=>{p.client=e.target.value;upd()};
+  $('#pRec').onchange=e=>{p.received=e.target.value;upd()};
+  $('#pDue').onchange=e=>{if(setDue(p,e.target.value,me().name)){save();renderBoard();renderPage();toast(`Submission date set to <b>${fmtDate(p.due)}</b>`,'cal')}};
+  const pt=$('#pType');if(pt)pt.onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;p.type=b.dataset.v;$$('#pType button').forEach(x=>x.classList.toggle('on',x===b));upd()};
+  $('#pTender').onchange=e=>{const t=tenderById(e.target.value);p.tender=t?t.id:null;if(t)p.type=t.type;log(p,'Tender team: '+(t?t.name+' ('+t.type+')':'not set'));upd();renderPage()};
+  $('#pCol').onchange=e=>{const v=e.target.value||null;p.columnId=v;p.pos=-1;
+    if(v){p.tags=p.tags.filter(t=>t!=='un');log(p,'Assigned to '+colName(v));toast(`Assigned to <b>${esc(colName(v))}</b>`,'user')}else{if(!p.tags.includes('un'))p.tags.push('un')}
+    upd();renderPage()};
+  $('#tagpick').onclick=e=>{const b=e.target.closest('[data-tag]');if(!b)return;const id=b.dataset.tag;
+    p.tags.includes(id)?p.tags=p.tags.filter(t=>t!==id):p.tags.push(id);b.classList.toggle('on');upd()};
+  $('#newTag').onkeydown=e=>{if(e.key!=='Enter')return;const n=e.target.value.trim();if(!n)return;
+    const pal=['#EE6A1F','#5B5B57','#9C4A12','#2F7D7A','#B8860B'];const t={id:uid(),name:n,color:pal[S.tags.length%pal.length]};
+    S.tags.push(t);p.tags.push(t.id);upd();renderPage();toast(`Tag <b>${esc(n)}</b> created`)};
+  if(p.folder) $('#unlink').onclick=()=>{p.folder='';upd();renderPage()};
+  else{
+    $('#folderLink').onclick=()=>{const v=$('#folderIn').value.trim();if(!/^https?:\/\//.test(v))return toast('Paste the full folder link (https://…)','x');const fp=folderProv(v);p.folder=v;log(p,'Folder linked: '+v);upd();renderPage();toast(fp?`${PROV[fp].name} folder linked`:'Folder linked','folder')};
+    $('#folderNew').onclick=()=>{if(!S.drive.connected)return driveSettings();
+      p.folder=newFolderUrl();log(p,driveName()+' folder created');upd();renderPage();toast(`Folder <b>Tenders/${esc(p.title.slice(0,30))}</b> created in ${esc(driveName())}`,'folder')};
+  }
+  $('#subHead').onclick=()=>{p.subOpen=!p.subOpen;save();$('#subHead').classList.toggle('closed');$('#subWrap').classList.toggle('closed')};
+  $('#subAdd').onsubmit=e=>{e.preventDefault();const t=$('#subIn').value.trim();if(!t)return;
+    p.subtasks.push({id:uid(),text:t,done:false,note:'',due:$('#subDue').value,open:false});upd();renderPage();$('#subIn').focus()};
+  $('#subs').addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(!a)return;const el=a.closest('.sub');const s=p.subtasks.find(x=>x.id===el.dataset.sub);
+    if(a.dataset.act==='toggle'){s.done=!s.done;el.classList.toggle('done');upd();refreshSubProg(p);if(s.done)toast('Sub-task completed')}
+    if(a.dataset.act==='open'){s.open=!s.open;el.classList.toggle('open');$('.collapse',el).classList.toggle('closed');save()}
+    if(a.dataset.act==='del'){p.subtasks=p.subtasks.filter(x=>x!==s);el.style.transition='opacity .2s,transform .2s';el.style.opacity=0;el.style.transform='translateX(10px)';setTimeout(()=>{upd();renderPage()},200)}
+  });
+  $('#subs').addEventListener('change',e=>{const a=e.target.closest('[data-act]');if(!a)return;const s=p.subtasks.find(x=>x.id===a.closest('.sub').dataset.sub);
+    if(a.dataset.act==='text')s.text=a.value;if(a.dataset.act==='note')s.note=a.value;if(a.dataset.act==='due')s.due=a.value;upd()});
+  $('#tabs').onclick=e=>{const t=e.target.closest('[data-tab]');if(!t)return;curTab=t.dataset.tab;$$('.tab').forEach(x=>x.classList.toggle('on',x===t));moveInk();renderPane()};
+}
+function refreshSubProg(p){const d=p.subtasks.filter(s=>s.done).length,t=p.subtasks.length;$('#subWrap .prog i').style.width=(t?d/t*100:0)+'%';$('#subHead .pill').textContent=`${d}/${t}`}
+function moveInk(){const t=$('.tab.on'),ink=$('#tabInk');if(!t||!ink)return;ink.style.left=t.offsetLeft+'px';ink.style.width=t.offsetWidth+'px'}
+window.addEventListener('resize',moveInk);
+
+function fileIco(n){const e=(n.split('.').pop()||'').toLowerCase();const map={pdf:'pdf',dwg:'dwg',dxf:'dwg',xls:'xls',xlsx:'xls',csv:'xls',doc:'doc',docx:'doc',png:'img',jpg:'img',jpeg:'img'};return `<span class="ico ${map[e]||''}">${esc(e.slice(0,4).toUpperCase()||'FILE')}</span>`}
+
+function renderPane(){
+  const p=proj(cur), pane=$('#pane'); pane.className='tabpane'; void pane.offsetWidth;
+  const refresh=()=>{touch(p);save();renderBoard();renderPage()};
+  if(curTab==='files'){
+    const all=[...p.files,...p.uploads.filter(u=>u.done).map(u=>({...u,up:true}))];
+    pane.innerHTML=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;color:var(--muted);font-size:12.5px">
+      ${provIcon(folderProv(p.folder)||S.drive.provider)}${p.folder?`Files in the linked ${PROV[folderProv(p.folder)||S.drive.provider].name} folder`:'No folder linked – showing files attached to this project'}<span style="flex:1"></span>
+      ${p.folder?`<a class="btn sm" href="${esc(p.folder)}" target="_blank" rel="noopener">${icon('ext')}Open folder</a>`:''}</div>
+      ${all.length?all.map(f=>`<div class="list-item">${fileIco(f.name)}<div class="body"><b>${esc(f.name)}</b><small>${esc(f.size||'')}${f.up?' · uploaded '+fmtDT(f.at):''}</small></div><button class="btn ghost icon sm" data-delf="${f.id}" aria-label="Remove">${icon('x')}</button></div>`).join('')
+      :`<div class="empty">No files yet. Use <b>Uploads</b> to save files to ${esc(driveName())}.</div>`}`;
+    pane.onclick=e=>{const b=e.target.closest('[data-delf]');if(!b)return;p.files=p.files.filter(f=>f.id!==b.dataset.delf);p.uploads=p.uploads.filter(f=>f.id!==b.dataset.delf);refresh()};
+  }
+  if(curTab==='links'){
+    pane.innerHTML=`<form class="addrow" id="lf" style="margin-bottom:10px"><input class="in" id="lt" placeholder="Title" style="max-width:160px" dir="auto"><input class="in" id="lu" placeholder="https://…" type="url" required><button class="btn primary sm" style="height:34px">${icon('plus')}Add</button></form>
+      ${p.links.length?p.links.map(l=>`<div class="list-item"><span class="ico">${icon('link')}</span><div class="body"><b><a href="${esc(l.url)}" target="_blank" rel="noopener" dir="auto">${esc(l.title||l.url)}</a></b><small>${esc(l.url)}${l.src?' · from email':''}</small></div><button class="btn ghost icon sm" data-dell="${l.id}" aria-label="Remove">${icon('x')}</button></div>`).join('')
+      :`<div class="empty">No links yet. Links found in emails are added here automatically.</div>`}`;
+    $('#lf').onsubmit=e=>{e.preventDefault();p.links.push({id:uid(),title:$('#lt').value.trim(),url:$('#lu').value.trim()});refresh();toast('Link added','link')};
+    pane.onclick=e=>{const b=e.target.closest('[data-dell]');if(!b)return;p.links=p.links.filter(l=>l.id!==b.dataset.dell);refresh()};
+  }
+  if(curTab==='comments'){
+    const list=[...p.comments].sort((a,b)=>b.at-a.at);
+    pane.innerHTML=`<form id="cf"><textarea class="in" id="ct" placeholder="Write a comment…" dir="auto"></textarea><div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 6px"><small style="color:var(--muted)">Posting as ${esc(me().name)}</small><button class="btn primary sm">Post comment</button></div></form>
+      ${list.map(c=>`<div class="comment ${c.sys?'sys':''}"><div class="avatar">${c.sys?icon('clock'):esc(initials(c.who))}</div><div class="b"><div class="who">${esc(c.who)}<time>${fmtDT(c.at)}</time></div><p dir="auto">${esc(c.text)}</p></div></div>`).join('')||'<div class="empty">No comments yet.</div>'}`;
+    $('#cf').onsubmit=e=>{e.preventDefault();const t=$('#ct').value.trim();if(!t)return;p.comments.push({id:uid(),who:me().name,text:t,at:Date.now()});refresh()};
+  }
+  if(curTab==='notifications'){
+    const perm=('Notification' in window)?Notification.permission:'unsupported';
+    const list=[...p.notifications].sort((a,b)=>a.at-b.at);
+    pane.innerHTML=`${perm!=='granted'?`<div class="folder" style="margin-bottom:12px"><span style="color:var(--accent)">${icon('bell')}</span><span style="flex:1;font-size:13px">${perm==='denied'?'Desktop notifications are blocked in this browser. Reminders will still show inside the app.':perm==='unsupported'?'This browser has no desktop notifications; reminders show inside the app.':'Allow desktop notifications to get reminders even when this tab is in the background.'}</span>${perm==='default'?'<button class="btn sm primary" id="perm">Allow</button>':''}</div>`:''}
+      <div class="presets">
+        <button class="btn sm" data-pre="1m">In 1 min (test)</button>
+        <button class="btn sm" data-pre="1h">In 1 hour</button>
+        <button class="btn sm" data-pre="tom9">Tomorrow 09:00</button>
+        ${p.due?'<button class="btn sm" data-pre="due1">1 day before submission</button><button class="btn sm" data-pre="due3">3 days before</button>':''}
+      </div>
+      <form class="formgrid" id="nf">
+        <input class="in full" id="nm" placeholder="Reminder message" dir="auto" value="${esc(p.title.slice(0,60))}">
+        <input class="in" type="datetime-local" id="nat" value="${localDT(Date.now()+HOUR)}" required aria-label="Date and time">
+        <select class="in" id="nrep" aria-label="Repeat"><option value="none">Once</option><option value="hourly">Every hour</option><option value="daily">Every day</option><option value="weekly">Every week</option></select>
+        <div class="full"><span class="lbl-sm">Send to</span>${recipPicker('nto',['assignee'],true)}</div>
+        <label class="chk-row full"><input type="checkbox" id="nemail" checked>Also send by email</label>
+        <button class="btn primary full">${icon('bell')}Set reminder</button>
+      </form>
+      ${list.length?list.map(n=>remRow(n,p,`data-deln="${n.id}"`,true)).join('')
+      :'<div class="empty">No reminders for this project.</div>'}`;
+    const pb=$('#perm'); if(pb)pb.onclick=async()=>{await Notification.requestPermission();renderPane()};
+    $('.presets',pane).onclick=e=>{const b=e.target.closest('[data-pre]');if(!b)return;const k=b.dataset.pre;let t;
+      if(k==='1m')t=Date.now()+60000;if(k==='1h')t=Date.now()+HOUR;
+      if(k==='tom9'){const d=new Date();d.setDate(d.getDate()+1);d.setHours(9,0,0,0);t=+d}
+      if(k.startsWith('due')){const d=new Date(p.due);d.setDate(d.getDate()-(k==='due1'?1:3));d.setHours(9,0,0,0);t=+d;$('#nm').value=`Submission ${k==='due1'?'tomorrow':'in 3 days'}: ${p.title}`}
+      $('#nat').value=localDT(t)};
+    const npick=bindPicker('nto');
+    $('#nf').onsubmit=e=>{e.preventDefault();const at=new Date($('#nat').value).getTime();const to=npick();
+      if(!to.length)return toast('Choose who gets the reminder','x');
+      p.notifications.push({id:uid(),at,msg:$('#nm').value.trim()||p.title,repeat:$('#nrep').value,fired:false,to,email:$('#nemail').checked});
+      refresh();toast(`Reminder set for <b>${fmtDT(at)}</b>`,'bell');
+      if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()};
+    pane.onclick=e=>{const b=e.target.closest('[data-deln]');if(!b)return;p.notifications=p.notifications.filter(n=>n.id!==b.dataset.deln);refresh()};
+  }
+  if(curTab==='uploads'){
+    pane.innerHTML=`<label class="drop" id="drop"><input type="file" multiple id="fi" class="sr">
+      <div style="margin-bottom:6px;color:var(--accent)">${icon('up')}</div><b>Drop files here</b> or click to browse<br>
+      <small>${S.drive.connected?`Uploads go to <b>${p.folder?'the linked folder':'Tenders/'+esc(p.title.slice(0,30))}</b> on ${esc(driveName())}`:`${esc(driveName())} is not connected – use the ${esc(prov().short)} button at the top`}</small></label>
+      <div id="ups" style="margin-top:10px">${[...p.uploads].reverse().map(upHTML).join('')}</div>`;
+    const drop=$('#drop');
+    ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+    ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+    drop.addEventListener('drop',e=>uploadFiles(p,e.dataTransfer.files));
+    $('#fi').onchange=e=>uploadFiles(p,e.target.files);
+  }
+}
+const upHTML=u=>`<div class="up ${u.done?'done':''}" data-up="${u.id}">${fileIco(u.name)}<div style="flex:1;min-width:0"><b style="font-weight:500;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.name)}</b><small style="color:var(--muted)">${esc(u.size)} · <span class="st">${u.done?'Saved to '+driveName():'Uploading…'}</span></small><div class="bar"><i style="width:${u.done?100:0}%"></i></div></div></div>`;
+function uploadFiles(p,files){
+  if(!S.drive.connected)return driveSettings();
+  if(!p.folder){p.folder=newFolderUrl();log(p,driveName()+' folder created for uploads')}
+  [...files].forEach((f,i)=>{
+    const kb=f.size/1024;const u={id:uid(),name:f.name,size:kb>1024?(kb/1024).toFixed(1)+' MB':Math.max(1,Math.round(kb))+' KB',done:false,at:Date.now()};
+    p.uploads.push(u); $('#ups').insertAdjacentHTML('afterbegin',upHTML(u));
+    const el=$(`[data-up="${u.id}"]`); let pct=0;
+    const tick=setInterval(()=>{pct=Math.min(100,pct+8+Math.random()*18);$('.bar i',el).style.width=pct+'%';
+      if(pct>=100){clearInterval(tick);u.done=true;touch(p);el.classList.add('done');$('.st',el).textContent='Saved to '+driveName();log(p,`Uploaded ${u.name} to ${driveName()}`);save();renderBoard();
+        if(i===files.length-1)toast(`${files.length} file${files.length>1?'s':''} saved to ${esc(driveName())}`,'up')}},160+i*40);
+  });
+  save();
+}
+
+/* ---------------- Email intake ----------------
+   Rules (same as the real integration):
+   • subject/body contains "ورد الينا" (any alef form) → new project, or "New updates" if tender no. already exists
+   • contains تأجيل / مؤجل → tag Postponed, status + new date
+   • contains استفسار → tag Queries answers, status updated
+   • every URL in the body → Links tab
+   ------------------------------------------------ */
+const MAILBOX=[
+  {id:'m1',from:'procurement@nca.example',subject:'ورد الينا – مناقصة عامة: إنشاء مبنى إداري بالمنطقة الصناعية',received:-50,
+   body:'السادة / إدارة المناقصات\nورد الينا طلب تسعير للمشروع التالي:\nاسم المشروع: إنشاء مبنى إداري بالمنطقة الصناعية\nنوع المناقصة: عامة\nوالمشرف علي الدراسه : م/ شيرين محمود\nالجهة المالكة: هيئة المجتمعات العمرانية\nآخر موعد للتقديم: ٢٠٢٦-١٢-٢٠\nرابط كراسة الشروط: https://tenders.example/admin-building/specs.pdf\nوتفضلوا بقبول فائق الاحترام'},
+  {id:'m2',from:'tenders@moh.example',subject:'تأجيل موعد تقديم العطاءات – توريد وتركيب أعمال الكهرباء – مبنى الإدارة',received:-44,
+   body:'نحيطكم علماً بأنه تم تأجيل موعد تقديم العطاءات لمشروع: توريد وتركيب أعمال الكهرباء – مبنى الإدارة ليصبح 2027-01-10 بدلاً من الموعد السابق.\nالإخطار الرسمي: https://tenders.example/electrical-admin/postponement'},
+  {id:'m3',from:'wa-procurement@water.example',subject:'الرد على الاستفسارات – إنشاء خزان مياه أرضي سعة 5000 م³',received:-31,
+   body:'مرفق لسيادتكم الرد على استفسارات السادة المتقدمين لمشروع إنشاء خزان مياه أرضي سعة 5000 م³.\nملف الردود: https://tenders.example/water-tank/answers.pdf\nملحق رقم 1: https://tenders.example/water-tank/addendum-1.pdf'},
+  {id:'m4',from:'newsletter@supplier.example',subject:'النشرة الشهرية – عروض نوفمبر',received:-20,
+   body:'تعرف على أحدث عروضنا لمواد البناء لهذا الشهر.'},
+  {id:'m5',from:'procurement@city.example',subject:'ورد إلينا – ممارسة محدودة: تطوير شبكة الطرق الداخلية',received:-12,
+   body:'ورد إلينا من الجهة التالية دعوة لتقديم عطاء:\nاسم المشروع: تطوير شبكة الطرق الداخلية – المرحلة الثالثة\nنوع المناقصة: محدودة\nوالمشرف علي الدراسه : م/ مينا عادل\nالجهة المالكة: محافظة المدينة\nآخر موعد للتقديم: 28/12/2026\nالمستندات: https://tenders.example/roads-phase-3/docs'},
+  {id:'m6',from:'procurement@nca.example',subject:'ورد الينا – ملحق: إنشاء مبنى إداري بالمنطقة الصناعية',received:-5,
+   body:'ورد الينا ملحق جديد لمشروع إنشاء مبنى إداري بالمنطقة الصناعية يتضمن جداول كميات معدلة، وتم تعديل آخر موعد للتقديم ليصبح 2026-12-27.\nالملحق: https://tenders.example/admin-building/boq-rev1.xlsx'},
+];
+const digits=s=>s.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+const norm=s=>digits(s).replace(/[إأآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').toLowerCase();
+const field=(b,labels)=>{for(const l of labels){const m=b.match(new RegExp(l+'\\s*[:：]\\s*(.+)'));if(m)return m[1].trim()}return''};
+const findDate=s=>{let m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  m=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m)return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;return''};
+/* match an email to a project by its name: exact phrase first, then 75% of the name's words */
+function findProject(txt){
+  const words=s=>norm(s).split(/[\s–\-:،,.()]+/).filter(w=>w.length>2);
+  let best=null,score=0;
+  S.projects.forEach(p=>{
+    const t=norm(p.title);if(t.length>6&&txt.includes(t)){if(score<2){best=p;score=2}return}
+    const w=words(p.title);if(!w.length)return;
+    const hit=w.filter(x=>txt.includes(x)).length/w.length;
+    if(hit>=.75&&hit>score&&score<2){best=p;score=hit}
+  });
+  return best;
+}
+function parseMail(m){
+  const txt=norm(m.subject+'\n'+m.body);
+  const urls=(m.body.match(/https?:\/\/[^\s)،]+/g)||[]);
+  let kind='ignore';
+  if(/تاجيل|مؤجل|موجل/.test(txt))kind='postpone';
+  else if(/استفسار/.test(txt))kind='queries';
+  else if(/ورد\s*الينا/.test(txt))kind='new';
+  const typeTxt=norm(field(digits(m.body),['نوع المناقصة','نوع الطرح'])||m.subject);
+  const type=/محدود|خاص|ممارس/.test(typeTxt)?'private':/عام/.test(typeTxt)?'public':'';
+  const dueField=field(digits(m.body),['[اأإآ]خر موعد للتقديم','موعد التقديم']);
+  return {kind,urls,txt,type,
+    supervisor:firstName(field(digits(m.body),['و?المشرف\\s+عل[يى]\\s+الدراس[ةه]'])),
+    title:field(digits(m.body),['اسم المشروع']),client:field(digits(m.body),['الجهة المالكة','الجهة']),
+    due:findDate(dueField||digits(m.subject+'\n'+m.body))};
+}
+function applyMail(m){
+  const r=parseMail(m); const existing=findProject(r.txt);
+  const addLinks=p=>r.urls.forEach(u=>{if(!p.links.some(l=>l.url===u))p.links.push({id:uid(),title:(u.split('/').pop()||'Link'),url:u,src:true})});
+  const short=p=>p.title.length>38?p.title.slice(0,36)+'…':p.title;
+  const dateNote=p=>{const ch=r.due&&setDue(p,r.due,'email');return ch?' · submission date now '+fmtDate(p.due):''};
+  let res={kind:r.kind,label:'Ignored – not a tender email',pid:null};
+  if(r.kind==='new'){
+    if(existing){if(!existing.tags.includes('upd'))existing.tags.push('upd');existing.status='New update received by email';addLinks(existing);
+      const dn=dateNote(existing);touch(existing,'email');log(existing,'Email: '+m.subject);res={kind:'upd',label:`New update → ${short(existing)}${dn}`,pid:existing.id}}
+    else{const p=mkProject({title:r.title||m.subject.replace(/ورد\s*[اإ]لينا\s*[–-]?\s*/,''),client:r.client,type:r.type||'public',due:r.due,tags:['new','un'],status:'Received by email – needs an engineer',source:'email',updatedBy:'email'});
+      addLinks(p);log(p,'Created from email: '+m.subject);res={kind:'new',label:`New ${p.type} tender created${p.due?' · submission '+fmtDate(p.due):''}`,pid:p.id}}
+  }
+  if(r.kind==='postpone'){
+    if(existing){if(!existing.tags.includes('pp'))existing.tags.push('pp');
+      const nd=findDate(digits(m.body));if(nd)setDue(existing,nd,'email');
+      existing.status='Postponed'+(nd?' to '+fmtDate(nd):'');addLinks(existing);touch(existing,'email');log(existing,'Email: '+m.subject);
+      res={kind:'pp',label:`Postponed → ${short(existing)}${nd?' · new submission date '+fmtDate(nd):''}`,pid:existing.id}}
+    else res={kind:'ignore',label:'Postponement for a project not on the board – review manually',pid:null};
+  }
+  if(r.kind==='queries'){
+    if(existing){if(!existing.tags.includes('qa'))existing.tags.push('qa');existing.status='Answers to queries received – review';addLinks(existing);
+      const dn=dateNote(existing);touch(existing,'email');log(existing,'Email: '+m.subject);
+      res={kind:'qa',label:`Queries answers → ${short(existing)} · ${r.urls.length} link${r.urls.length!==1?'s':''} added${dn}`,pid:existing.id}}
+    else res={kind:'ignore',label:'Queries answers for a project not on the board – review manually',pid:null};
+  }
+  if(res.pid){const pj=proj(res.pid);
+    if(r.supervisor){
+      pj.supervisor=r.supervisor;
+      let te=(S.tenderTeam||[]).find(t=>firstName(t.ar)===r.supervisor||norm(firstName(t.ar))===norm(r.supervisor));
+      if(!te){te={id:uid(),name:r.supervisor,ar:r.supervisor,type:r.type||projType(pj)};(S.tenderTeam=S.tenderTeam||[]).push(te)}
+      pj.tender=te.id;pj.type=te.type;
+    }else{const te=findTender(r.txt);if(te&&!pj.tender){pj.tender=te.id;pj.type=te.type}}
+    const h=(pj.dueHistory||[])[0];const dch=h&&h.by==='email'&&Date.now()-h.at<2000;
+    const sum={new:`New tender received${pj.due?' · submission '+fmtDate(pj.due):''}`,upd:'Update / annex received',pp:'Submission postponed',qa:'Answers to queries received'}[res.kind]
+      +(dch&&res.kind!=='new'?` · ${h.from?fmtDate(h.from)+' → ':''}${fmtDate(h.to)}`:'');
+    (pj.mailLog=pj.mailLog||[]).unshift({id:uid(),at:Date.now(),kind:res.kind,summary:sum,subject:m.subject,links:r.urls.length});}
+  S.mail.processed.push(m.id); S.mail.log.unshift({id:m.id,...res,at:Date.now()});
+  return res;
+}
+let syncing=false;
+async function syncMail(auto=false){
+  if(syncing)return; if(!S.mail.connected)return toast('Connect the mailbox first','x');
+  syncing=true; $('#syncBtn').classList.add('spin'); const sc=$('#scanBar'); sc&&sc.classList.add('on');
+  await new Promise(r=>setTimeout(r,1400));
+  const pending=MAILBOX.filter(m=>!S.mail.processed.includes(m.id));
+  const results=pending.map(applyMail);
+  S.mail.lastSync=Date.now(); save(); syncing=false; $('#syncBtn').classList.remove('spin');
+  renderBoard(); if(cur)renderPage(); if($('#mailSheet').classList.contains('show'))renderMailSheet();
+  results.forEach(r=>r.pid&&flash(r.pid));
+  const made=results.filter(r=>r.kind==='new').length, upd=results.filter(r=>r.pid&&r.kind!=='new').length;
+  toast(pending.length?`Email ${auto?'auto-':''}sync: <b>${pending.length}</b> read · ${made} new · ${upd} updated`:'Inbox up to date – no new emails','mail',4200);
+  if(made&&'Notification' in window&&Notification.permission==='granted')new Notification('Rendcon – new tender'+(made>1?'s':''),{body:`${made} new project${made>1?'s':''} added to Unassigned`});
+}
+$('#syncBtn').onclick=()=>syncMail(false);
+const kindPill={new:'<span class="pill o">New project</span>',upd:'<span class="pill o">New updates</span>',pp:'<span class="pill">Postponed</span>',qa:'<span class="pill o">Queries answers</span>',ignore:'<span class="pill">Ignored</span>'};
+function renderMailSheet(){
+  const sh=$('#mailSheet'); const m=S.mail;
+  sh.innerHTML=`<div class="sheet-head"><span style="color:var(--accent)">${icon('mail')}</span><h2>Email intake</h2><button class="btn icon" data-x aria-label="Close">${icon('x')}</button></div>
+  <div class="sheet-body">
+    <div class="kv">
+      <label>Mailbox</label><div style="display:flex;gap:8px"><input class="in" id="mAddr" value="${esc(m.address)}"><button class="btn sm" id="mConn" style="height:34px">${m.connected?'Disconnect':'Connect'}</button></div>
+      <label>Subject contains</label><input class="in ar" id="mSubj" value="${esc(m.subject)}" dir="rtl">
+      <label>Hourly auto-sync</label><div><button class="switch ${m.hourly?'on':''}" id="mHourly" aria-label="Hourly auto-sync" aria-pressed="${m.hourly}"></button></div>
+      <label>Last sync</label><span style="font:500 12.5px var(--mono)">${fmtDT(m.lastSync)}</span>
+    </div>
+    <button class="btn primary" id="mSync" style="width:100%;justify-content:center">${icon('sync')}Read inbox now</button>
+    <div class="scan ${syncing?'on':''}" id="scanBar"><i></i></div>
+    <div class="section-label">Rules</div>
+    <div style="font-size:13px;color:var(--ink-2);display:grid;gap:6px;margin-bottom:8px">
+      <div><span class="ar" dir="rtl">«ورد الينا»</span> → new project in <b>Unassigned</b>, tagged <b>New project</b> (existing tender no. → <b>New updates</b>)</div>
+      <div><span class="ar" dir="rtl">«تأجيل»</span> → tag <b>Postponed</b>, status and submission date updated</div>
+      <div><span class="ar" dir="rtl">«استفسارات»</span> → tag <b>Queries answers</b>, status updated</div>
+      <div>Every link in the body → project's <b>Links</b> tab</div>
+    </div>
+    <div class="section-label">Inbox</div>
+    ${MAILBOX.map(x=>{const L=m.log.find(l=>l.id===x.id);return `<div class="mail ${L?'':'pending'}"><div class="subj ar" dir="rtl">${esc(x.subject)}</div><div class="from">${esc(x.from)}</div><div class="snip ar" dir="rtl">${esc(x.body)}</div>
+      <div class="res">${L?`${kindPill[L.kind]||''}<span>${esc(L.label)}</span>${L.pid?`<button class="btn sm ghost" data-open="${L.pid}" style="margin-left:auto">Open ${icon('ext')}</button>`:''}`:'<span class="pill">Waiting for next sync</span>'}</div></div>`}).join('')}
+  </div>`;
+  $('[data-x]',sh).onclick=()=>sheet(null);
+  $('#mSync').onclick=()=>syncMail(false);
+  $('#mAddr').onchange=e=>{m.address=e.target.value;save()};
+  $('#mSubj').onchange=e=>{m.subject=e.target.value;save()};
+  $('#mHourly').onclick=()=>{m.hourly=!m.hourly;save();renderMailSheet();renderHeader()};
+  $('#mConn').onclick=()=>{m.connected=!m.connected;save();renderMailSheet();renderHeader();toast(m.connected?'Mailbox connected':'Mailbox disconnected','mail')};
+  sh.onclick=e=>{const o=e.target.closest('[data-open]');if(o){sheet(null);openProject(o.dataset.open)}};
+}
+function remRow(n,p,del,inProject=false){
+  const who=resolveTo(n,p);
+  return `<div class="rem ${n.fired?'fired':''}"><span class="ico" style="background:var(--accent-soft);color:var(--accent-2)">${icon('bell')}</span>
+    <div style="flex:1;min-width:0"><div dir="auto" style="font-weight:500">${esc(n.msg)}</div>
+      ${p&&!inProject?`<small dir="auto" style="color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.title)}</small>`:''}
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px"><span class="when">${fmtDT(n.at)}</span>${n.repeat!=='none'?`<span class="pill o">${n.repeat}</span>`:''}${n.email?'<span class="pill">+ email</span>':''}${n.fired?'<span class="pill">sent</span>':''}<span style="color:var(--muted);font-size:12px">→ ${esc(toLabel(n,p))}</span></div></div>
+    <span style="display:flex">${who.slice(0,3).map(u=>avatar(u,'sm')).join('')}</span>
+    ${p&&!inProject?`<button class="btn sm ghost" data-open="${p.id}">Open</button>`:''}
+    <button class="btn ghost icon sm" ${del} aria-label="Delete reminder">${icon('x')}</button></div>`;
+}
+function renderRemSheet(){
+  const sh=$('#remSheet');
+  const perm=('Notification' in window)?Notification.permission:'unsupported';
+  const up=[...S.projects.flatMap(p=>p.notifications.filter(n=>!n.fired).map(n=>({n,p}))),...S.reminders.filter(n=>!n.fired).map(n=>({n,p:null}))].sort((a,b)=>a.n.at-b.n.at);
+  sh.innerHTML=`<div class="sheet-head"><span style="color:var(--accent)">${icon('bell')}</span><h2>Reminders</h2><button class="btn icon" data-x aria-label="Close">${icon('x')}</button></div>
+  <div class="sheet-body">
+    <div class="folder" style="margin-bottom:16px"><span style="flex:1;font-size:13px">Desktop notifications on this computer: <b>${perm==='granted'?'allowed':perm==='denied'?'blocked in browser settings':perm==='default'?'not allowed yet':'not supported'}</b></span>${perm==='default'?'<button class="btn sm primary" id="rPerm">Allow</button>':''}<button class="btn sm" id="rTest">Test</button></div>
+    <div class="invite-box">
+      <div style="font-weight:600;margin-bottom:12px">New reminder</div>
+      <div class="formgrid">
+        <div class="full"><label class="lbl-sm" for="rMsg">Message</label><input class="in" id="rMsg" placeholder="e.g. Submit pricing for 2026/104" dir="auto"></div>
+        <div class="full"><label class="lbl-sm" for="rProj">Project</label><select class="in" id="rProj"><option value="">General (no project)</option>${S.projects.map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('')}</select></div>
+        <div><label class="lbl-sm" for="rAt">When</label><input class="in" type="datetime-local" id="rAt" value="${localDT(Date.now()+HOUR)}"></div>
+        <div><label class="lbl-sm" for="rRep">Repeat</label><select class="in" id="rRep"><option value="none">Once</option><option value="hourly">Every hour</option><option value="daily">Every day</option><option value="weekly">Every week</option></select></div>
+        <div class="full"><span class="lbl-sm">Send to</span>${recipPicker('rTo',['all'],true)}</div>
+        <label class="chk-row full"><input type="checkbox" id="rEmail" checked>Also send by email</label>
+      </div>
+      <div style="display:flex;gap:8px"><button class="btn" id="rNow" style="flex:1;justify-content:center">${icon('send')}Send now</button><button class="btn primary" id="rAdd" style="flex:1;justify-content:center">${icon('bell')}Schedule reminder</button></div>
+    </div>
+    <div class="section-label">Upcoming · ${up.length}</div>
+    ${up.length?up.map(({n,p})=>remRow(n,p,p?`data-delp="${p.id}" data-n="${n.id}"`:`data-delg="${n.id}"`)).join(''):'<div class="empty">Nothing scheduled.</div>'}
+    <div class="section-label">Recently sent</div>
+    ${S.sentLog.length?S.sentLog.slice(0,10).map(l=>`<div class="sent"><span style="color:var(--accent)">${icon('check')}</span><div class="b"><b style="font-weight:500" dir="auto">${esc(l.msg)}</b><small>to ${esc(l.names.join(', '))}${l.email?' · '+l.email+' email'+(l.email>1?'s':''):''} · ${fmtDT(l.at)}</small></div></div>`).join(''):'<div class="empty">No reminders sent yet.</div>'}
+  </div>`;
+  $('[data-x]',sh).onclick=()=>sheet(null);
+  const rp=$('#rPerm'); if(rp)rp.onclick=async()=>{await Notification.requestPermission();renderRemSheet()};
+  $('#rTest').onclick=()=>notify('Test reminder','Notifications are working for Redcon Tender Planning.');
+  const picks=bindPicker('rTo');
+  $('#rProj').onchange=e=>{const p=proj(e.target.value);if(p&&!$('#rMsg').value)$('#rMsg').value=p.title.slice(0,70)};
+  const build=()=>{const msg=$('#rMsg').value.trim();if(!msg){toast('Write a reminder message','x');$('#rMsg').focus();return null}
+    const to=picks();if(!to.length){toast('Choose who gets the reminder','x');return null}
+    return{n:{id:uid(),msg,at:new Date($('#rAt').value).getTime(),repeat:$('#rRep').value,fired:false,to,email:$('#rEmail').checked},p:proj($('#rProj').value)}};
+  $('#rNow').onclick=()=>{const r=build();if(!r)return;deliver(r.n,r.p);save();renderRemSheet()};
+  $('#rAdd').onclick=()=>{const r=build();if(!r)return;(r.p?r.p.notifications:S.reminders).push(r.n);save();renderBoard();renderRemSheet();toast(`Reminder scheduled for <b>${fmtDT(r.n.at)}</b>`,'bell');
+    if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()};
+  sh.onclick=e=>{
+    const o=e.target.closest('[data-open]');if(o){sheet(null);curTab='notifications';openProject(o.dataset.open);return}
+    const d=e.target.closest('[data-delp],[data-delg]');if(!d)return;
+    if(d.dataset.delg)S.reminders=S.reminders.filter(n=>n.id!==d.dataset.delg);
+    else{const p=proj(d.dataset.delp);p.notifications=p.notifications.filter(n=>n.id!==d.dataset.n)}
+    save();renderBoard();renderRemSheet()};
+}
+function sheet(id){
+  $$('.sheet').forEach(s=>s.classList.toggle('show',s.id===id));
+  if(id==='mailSheet')renderMailSheet(); if(id==='remSheet')renderRemSheet(); if(id==='teamSheet')renderTeamSheet();
+  $('#scrim').classList.toggle('show',!!id||!!cur);
+}
+$('#mailBtn').onclick=()=>sheet('mailSheet');
+$('#remBtn').onclick=()=>sheet('remSheet');
+$('#driveBtn').onclick=driveSettings;
+$('#scrim').onclick=()=>{if($('#modal').classList.contains('show'))return closeModal();if($('.sheet.show'))return sheet(null);closePage()};
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#modal').classList.contains('show'))return closeModal();if($('.sheet.show'))return sheet(null);if(cur)closePage()});
+
+
+/* ---------------- Cloud storage: Google Drive or OneDrive ---------------- */
+const PROV={
+  google:{name:'Google Drive',short:'Drive',icon:'gdrive',vb:'0 0 87.3 78',hint:'https://drive.google.com/drive/folders/…',url:id=>`https://drive.google.com/drive/folders/${id}`},
+  onedrive:{name:'OneDrive',short:'OneDrive',icon:'onedrive',vb:'0 0 32 20',hint:'https://onedrive.live.com/… or https://company.sharepoint.com/…',url:id=>`https://onedrive.live.com/?id=${id}`}
+};
+if(!S.drive.provider)S.drive.provider='google';
+const prov=()=>PROV[S.drive.provider]||PROV.google;
+const driveName=()=>prov().name;
+const provIcon=(k,cls='i')=>{const P=PROV[k]||prov();return `<svg class="${cls}" viewBox="${P.vb}"><use href="#i-${P.icon}"/></svg>`};
+function folderProv(url){
+  if(/drive\.google\.com|docs\.google\.com/i.test(url))return'google';
+  if(/onedrive\.live\.com|1drv\.ms|sharepoint\.com|onedrive\.com/i.test(url))return'onedrive';
+  return null;
+}
+function newFolderUrl(){return prov().url(uid()+uid())}
+function driveSettings(){
+  const d=S.drive;let pick=d.provider;
+  const opt=k=>`<button type="button" class="prov ${pick===k?'on':''}" data-prov="${k}">${provIcon(k,'pi')}<b>${PROV[k].name}</b><small>${k==='google'?'Google Workspace or Gmail account':'Microsoft 365, SharePoint or personal'}</small></button>`;
+  modal(`<h3>Cloud storage</h3>
+    <p style="margin:-6px 0 14px;color:var(--muted);font-size:13px">Choose where project folders and uploads are kept.</p>
+    <div class="provs" id="dProv">${opt('google')}${opt('onedrive')}</div>
+    <div class="row"><label for="dAcc">Account</label><input class="in" id="dAcc" type="email" value="${esc(d.account||'')}" placeholder="tenders@redcon.example"></div>
+    <div class="row"><label for="dRoot">Main tenders folder link</label><input class="in" id="dRoot" value="${esc(d.root||'')}" placeholder="${esc(PROV[pick].hint)}"><small style="color:var(--muted);font-size:12px">New project folders are created inside this folder.</small></div>
+    <div class="folder" style="margin-bottom:14px"><span class="dot-st ${d.connected?'on':''}"></span><span style="flex:1;font-size:13px">${d.connected?`Connected to <b>${esc(PROV[d.provider].name)}</b>${d.account?' as '+esc(d.account):''}`:'Not connected'}</span>${d.root?`<a class="btn sm" href="${esc(d.root)}" target="_blank" rel="noopener">${icon('ext')}Open folder</a>`:''}</div>
+    <div class="acts">${d.connected?'<button class="btn" id="dOff" style="margin-right:auto">Disconnect</button>':''}<button class="btn" data-close>Cancel</button><button class="btn primary" id="dOk">${d.connected?'Save':'Connect'}</button></div>`,()=>{
+    $('#modal .box').classList.add('wide');
+    $('#dProv').onclick=e=>{const b=e.target.closest('[data-prov]');if(!b)return;pick=b.dataset.prov;$$('#dProv .prov').forEach(x=>x.classList.toggle('on',x===b));$('#dRoot').placeholder=PROV[pick].hint};
+    const off=$('#dOff');if(off)off.onclick=()=>{d.connected=false;save();closeModal();renderHeader();toast(`${esc(driveName())} disconnected`,'folder')};
+    $('#dOk').onclick=()=>{
+      const root=$('#dRoot').value.trim();
+      if(root){if(!/^https?:\/\//.test(root))return toast('Paste the full folder link (https://…)','x');
+        const fp=folderProv(root);if(fp&&fp!==pick)return toast(`That link is a ${PROV[fp].name} folder – choose ${PROV[fp].name} above or paste a ${PROV[pick].name} link`,'x',5000)}
+      const changed=d.provider!==pick;
+      d.provider=pick;d.account=$('#dAcc').value.trim();d.root=root;d.connected=true;save();closeModal();renderHeader();if(cur)renderPage();
+      toast(`${changed?'Switched to':'Connected to'} <b>${esc(PROV[pick].name)}</b>`,'folder')};
+  });
+}
+
+/* ---------------- Team, invitations, profiles ---------------- */
+const APP_URL='https://planning.redcon.example';
+function sendEmail(to,subject,body,kind){S.outbox.unshift({id:uid(),to,subject,body,kind,at:Date.now()});S.outbox=S.outbox.slice(0,60)}
+function inviteFormHTML(pre){
+  return `<div class="formgrid">
+    <div class="full"><label class="lbl-sm" for="${pre}Name">Name</label><input class="in" id="${pre}Name" placeholder="Eng. Name Surname" dir="auto" autocomplete="off"></div>
+    <div class="full"><label class="lbl-sm" for="${pre}Email">Email <span style="font-weight:400">(optional – they get an invitation to sign in)</span></label><input class="in" id="${pre}Email" type="email" placeholder="name@redcon.example" autocomplete="off"></div>
+    <div><label class="lbl-sm" for="${pre}Role">Access</label><select class="in" id="${pre}Role"><option value="engineer">Planning engineer</option><option value="admin">Admin</option></select></div>
+    <label class="chk-row" style="align-self:end"><input type="checkbox" id="${pre}Col" checked>Give them a board column</label>
+  </div>`;
+}
+function sendInvite(pre){
+  const name=$('#'+pre+'Name').value.trim(), email=$('#'+pre+'Email').value.trim().toLowerCase();
+  if(!name&&!email){toast('Write the engineer\'s name','x');$('#'+pre+'Name').focus();return false}
+  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('That email address does not look right','x');$('#'+pre+'Email').focus();return false}
+  if(email&&S.users.some(u=>(u.email||'').toLowerCase()===email)){toast('That email is already on the team','x');return false}
+  const nm=name||email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  const u={id:uid(),name:nm,email,role:$('#'+pre+'Role').value,color:COLORS[S.users.length%COLORS.length],status:email?'invited':'active',invitedAt:email?Date.now():null,token:uid()+uid(),prefs:{browser:true,email:!!email,digest:false}};
+  S.users.push(u);
+  if($('#'+pre+'Col').checked)S.columns.push({id:uid(),userId:u.id});
+  if(email)inviteEmail(u);
+  save();renderBoard();
+  toast(email?`<b>${esc(nm)}</b> added · invitation sent to <b>${esc(email)}</b>`:`<b>${esc(nm)}</b> added to the planning team`,email?'send':'user');
+  return true;
+}
+function inviteLink(u){if(!u.token)u.token=uid()+uid();return `${APP_URL}/invite/${u.token}`}
+function inviteEmail(u){
+  sendEmail(u.email,'You are invited to Redcon Tender Planning',
+    `Hello ${u.name},\n\n${me().name} invited you to join Redcon Tender Planning as ${u.role==='admin'?'an admin':'an engineer'}.\nAccept the invitation and set up your profile:\n${inviteLink(u)}\n\nThis link expires in 7 days.`,'invite');
+  u.invitedAt=Date.now();
+}
+function removeMember(id){
+  const u=userById(id);if(!u||id===S.adminId)return;
+  if(!confirm(`Remove ${u.name} from the team? Their projects move to Unassigned.`))return;
+  const c=colOfUser(id);
+  if(c){S.projects.filter(p=>p.columnId===c.id).forEach(p=>{p.columnId=null;if(!p.tags.includes('un'))p.tags.push('un')});S.columns=S.columns.filter(x=>x!==c)}
+  S.users=S.users.filter(x=>x.id!==id);save();renderBoard();renderTeamSheet();toast(`${esc(u.name)} removed`);
+}
+function memberStats(u){
+  const c=colOfUser(u.id);const ps=c?S.projects.filter(p=>p.columnId===c.id):[];
+  const today=new Date(new Date().toDateString());
+  return{active:ps.length,week:ps.filter(p=>p.due&&(new Date(p.due)-today)/864e5>=0&&(new Date(p.due)-today)/864e5<=7).length,late:ps.filter(p=>p.due&&new Date(p.due)<today&&!p.tags.includes('sub')).length};
+}
+function renderTeamSheet(){
+  const sh=$('#teamSheet');if(!sh.classList.contains('show'))return;
+  const order=S.users;
+  sh.innerHTML=`<div class="sheet-head"><span style="color:var(--accent)">${icon('users')}</span><h2>Team</h2><button class="btn icon" data-x aria-label="Close">${icon('x')}</button></div>
+  <div class="sheet-body">
+    <div class="team-sec">
+      <div class="sec-h"><div><h3>Planning team</h3><small>${S.users.length} engineer${S.users.length!==1?'s':''} · drag or use the arrows to reorder – the board columns follow this order</small></div></div>
+      <div class="invite-box">
+        <div style="font-weight:600;margin-bottom:12px">Add a planning engineer</div>
+        ${inviteFormHTML('t')}
+        <button class="btn primary" id="tSend" style="width:100%;justify-content:center">${icon('plus')}Add engineer</button>
+      </div>
+      <div class="members">
+    ${order.map((u,ix)=>{const st=memberStats(u);return `<div class="member" draggable="true" data-mid="${u.id}"><span class="grip" title="Drag to reorder" aria-hidden="true">${icon('grip')}</span><span class="mv"><button class="btn ghost icon sm" data-up="${u.id}" ${ix===0?'disabled':''} aria-label="Move ${esc(u.name)} up" title="Move up">${icon('up1')}</button><button class="btn ghost icon sm" data-down="${u.id}" ${ix===order.length-1?'disabled':''} aria-label="Move ${esc(u.name)} down" title="Move down">${icon('chev')}</button></span>${avatar(u)}
+      <div class="b"><b dir="auto">${esc(u.name)} ${u.role==='admin'?'<span class="pill o">admin</span>':''}${u.status==='invited'?'<span class="pill inv">invited</span>':''}${u.id===S.adminId?'<span class="pill">you</span>':''}</b>
+        <small>${u.email?esc(u.email):'No email – not signed in'}</small>
+        <small>${u.status==='invited'?'Invited '+fmtDT(u.invitedAt):`${st.active} project${st.active!==1?'s':''}${st.late?` · <span style="color:var(--danger)">${st.late} overdue</span>`:''}${colOfUser(u.id)?'':' · no board column'}`}</small></div>
+      <div class="acts">
+        ${u.status==='invited'?`<button class="btn sm" data-resend="${u.id}" title="Send the invitation again">Resend</button><button class="btn ghost icon sm" data-copy="${u.id}" aria-label="Copy invite link" title="Copy invite link">${icon('copy')}</button><button class="btn ghost sm" data-accept="${u.id}" title="Prototype only: pretend they accepted">Mark joined</button>`:''}
+        <button class="btn ghost icon sm" data-edit="${u.id}" aria-label="Edit profile" title="Edit profile">${icon('edit')}</button>
+        ${u.id!==S.adminId?`<button class="btn ghost icon sm" data-rm="${u.id}" aria-label="Remove" title="Remove from team">${icon('trash')}</button>`:''}
+      </div></div>`}).join('')}
+      </div>
+    </div>
+    <div class="team-sec second">
+      <div class="sec-h"><div><h3>Tender team</h3><small>Private and public tender engineers we work with</small></div></div>
+    <div id="ttList">${(S.tenderTeam||[]).map(t=>`<div class="tt-row">
+      <input class="in" data-tt="${t.id}" data-f="name" value="${esc(t.name)}" aria-label="Name">
+      <input class="in ar" dir="rtl" data-tt="${t.id}" data-f="ar" value="${esc(t.ar||'')}" placeholder="الاسم بالعربي" aria-label="Name in Arabic, used to read emails">
+      <select class="in" data-tt="${t.id}" data-f="type" aria-label="Public or private"><option value="private" ${t.type==='private'?'selected':''}>Private</option><option value="public" ${t.type==='public'?'selected':''}>Public</option></select>
+      <button class="btn ghost icon sm" data-ttrm="${t.id}" aria-label="Remove ${esc(t.name)}">${icon('trash')}</button></div>`).join('')}</div>
+    <button class="btn sm" id="ttAdd" style="margin-top:8px">${icon('plus')}Add tender engineer</button>
+    <p style="font-size:12px;color:var(--muted);margin:8px 0 0">The Arabic name is how emails are matched to a tender engineer.</p>
+    </div>
+    <div class="section-label">Emails sent</div>
+    ${S.outbox.length?S.outbox.slice(0,12).map(m=>`<div class="sent"><span style="color:var(--accent)">${icon(m.kind==='invite'?'send':'bell')}</span><div class="b"><b style="font-weight:500">${esc(m.subject)}</b><small>to ${esc(Array.isArray(m.to)?m.to.join(', '):m.to)} · ${fmtDT(m.at)}</small></div></div>`).join(''):'<div class="empty">No emails sent yet.</div>'}
+  </div>`;
+  $('[data-x]',sh).onclick=()=>sheet(null);
+  $('#tSend').onclick=()=>{if(sendInvite('t'))renderTeamSheet()};
+  $('#ttList').onchange=e=>{const el=e.target.closest('[data-tt]');if(!el)return;const t=tenderById(el.dataset.tt);t[el.dataset.f]=el.value.trim();
+    if(el.dataset.f==='type')S.projects.filter(x=>x.tender===t.id).forEach(x=>x.type=t.type);save();renderBoard()};
+  $('#ttAdd').onclick=()=>{S.tenderTeam.push({id:uid(),name:'Eng. ',ar:'',type:'public'});save();renderTeamSheet();renderBoard();const ins=$$('#ttList [data-f="name"]');ins[ins.length-1].focus()};
+  // drag rows to reorder
+  let dragId=null;
+  $$('.member[data-mid]',sh).forEach(row=>{
+    row.addEventListener('dragstart',e=>{dragId=row.dataset.mid;row.classList.add('dragging');e.dataTransfer.effectAllowed='move'});
+    row.addEventListener('dragend',()=>{row.classList.remove('dragging');$$('.member.drop-a,.member.drop-b',sh).forEach(x=>x.classList.remove('drop-a','drop-b'))});
+    row.addEventListener('dragover',e=>{e.preventDefault();const r=row.getBoundingClientRect(),after=e.clientY>r.top+r.height/2;$$('.member.drop-a,.member.drop-b',sh).forEach(x=>x.classList.remove('drop-a','drop-b'));row.classList.add(after?'drop-b':'drop-a')});
+    row.addEventListener('drop',e=>{e.preventDefault();if(!dragId||dragId===row.dataset.mid)return;const r=row.getBoundingClientRect(),after=e.clientY>r.top+r.height/2;
+      const u=userById(dragId);S.users=S.users.filter(x=>x!==u);let i=S.users.findIndex(x=>x.id===row.dataset.mid);S.users.splice(after?i+1:i,0,u);save();renderBoard();renderTeamSheet()});
+  });
+  sh.onclick=async e=>{
+    const t=e.target.closest('button');if(!t)return;const d=t.dataset;
+    if(d.up||d.down){const id=d.up||d.down,i=S.users.findIndex(x=>x.id===id),j=i+(d.up?-1:1);if(j<0||j>=S.users.length)return;[S.users[i],S.users[j]]=[S.users[j],S.users[i]];save();renderBoard();renderTeamSheet();return}
+    if(d.resend){const u=userById(d.resend);inviteEmail(u);save();renderTeamSheet();toast(`Invitation sent again to <b>${esc(u.email)}</b>`,'send')}
+    if(d.copy){const l=inviteLink(userById(d.copy));save();try{await navigator.clipboard.writeText(l);toast('Invite link copied','copy')}catch(_){prompt('Copy this invite link',l)}}
+    if(d.accept){const u=userById(d.accept);u.status='active';u.joinedAt=Date.now();save();renderBoard();renderTeamSheet();toast(`<b>${esc(u.name)}</b> joined the team`,'user')}
+    if(d.edit)editProfile(d.edit);
+    if(d.rm)removeMember(d.rm);
+    if(d.ttrm){const t=tenderById(d.ttrm);if(!confirm(`Remove ${t.name} from the tender team?`))return;S.tenderTeam=S.tenderTeam.filter(x=>x!==t);S.projects.filter(x=>x.tender===t.id).forEach(x=>x.tender=null);save();renderTeamSheet();renderBoard()}
+  };
+}
+function editProfile(id){
+  const u=userById(id);if(!u)return;
+  const canEdit=isAdmin()||id===S.me; if(!canEdit)return;
+  const st=memberStats(u), self=id===S.me;
+  let color=u.color;
+  modal(`<div class="prof-head"><span id="pfAv">${avatar(u,'lg')}</span><div><h3 dir="auto">${esc(u.name)}</h3><small>${esc(u.email)} · ${u.role==='admin'?'Admin':'Engineer'}${u.status==='invited'?' · invitation pending':''}</small></div></div>
+    <div class="stats"><div><b>${st.active}</b><small>Projects</small></div><div><b>${st.week}</b><small>Due this week</small></div><div><b style="${st.late?'color:var(--danger)':''}">${st.late}</b><small>Overdue</small></div></div>
+    <div class="formgrid">
+      <div class="full"><label class="lbl-sm" for="pfName">Full name</label><input class="in" id="pfName" value="${esc(u.name)}" dir="auto"></div>
+      <div><label class="lbl-sm" for="pfEmail">Email</label><input class="in" id="pfEmail" type="email" value="${esc(u.email)}" ${isAdmin()?'':'disabled'}></div>
+      ${isAdmin()&&!self?`<div><label class="lbl-sm" for="pfRole">Access</label><select class="in" id="pfRole"><option value="engineer" ${u.role==='engineer'?'selected':''}>Engineer</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></div>`:''}
+      <div class="full"><span class="lbl-sm">Avatar colour</span><div class="swatches" id="pfSw">${COLORS.map(c=>`<button type="button" data-c="${c}" class="${c===u.color?'on':''}" style="background:${c}" aria-label="Colour ${c}"></button>`).join('')}</div></div>
+    </div>
+    <datalist id="discList2"><option>Civil & structure</option><option>MEP</option><option>Infrastructure</option><option>Architecture</option></datalist>
+    <span class="lbl-sm">Notifications</span>
+    <label class="chk-row"><input type="checkbox" id="pfBr" ${u.prefs.browser?'checked':''}>Desktop / browser notifications</label>
+    <label class="chk-row"><input type="checkbox" id="pfEm" ${u.prefs.email?'checked':''}>Reminders by email</label>
+    <label class="chk-row"><input type="checkbox" id="pfDg" ${u.prefs.digest?'checked':''}>Daily summary email at 08:00</label>
+    <div class="acts" style="margin-top:14px">${u.status==='invited'&&isAdmin()?`<button class="btn" id="pfResend" style="margin-right:auto">${icon('send')}Resend invite</button>`:''}<button class="btn" data-close>Cancel</button><button class="btn primary" id="pfSave">Save profile</button></div>`,()=>{
+    $('#modal .box').classList.add('wide');
+    $('#pfSw').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;color=b.dataset.c;$$('#pfSw button').forEach(x=>x.classList.toggle('on',x===b));$('#pfAv .avatar').style.background=color};
+    const rs=$('#pfResend');if(rs)rs.onclick=()=>{inviteEmail(u);save();toast(`Invitation sent again to <b>${esc(u.email)}</b>`,'send')};
+    $('#pfSave').onclick=()=>{
+      const n=$('#pfName').value.trim();if(!n)return $('#pfName').focus();
+      const em=$('#pfEmail').value.trim();
+      if(isAdmin()&&em&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return toast('Enter a valid email address','x');
+      const old=u.name;u.name=n;if(isAdmin())u.email=em;u.color=color;
+      if($('#pfRole'))u.role=$('#pfRole').value;
+      u.prefs={browser:$('#pfBr').checked,email:$('#pfEm').checked,digest:$('#pfDg').checked};
+      S.projects.forEach(p=>p.comments.forEach(c=>{if(c.who===old)c.who=n}));
+      save();closeModal();renderBoard();renderTeamSheet();if(cur)renderPage();toast('Profile saved');
+    };
+  });
+}
+function switchUser(id){S.me=id;save();if(cur)closePage();sheet(null);renderBoard();toast(id===S.adminId?'Back to your admin view':`Previewing as <b>${esc(me().name)}</b>`,'user')}
+$('#meBtn').onclick=e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  const items=[['My profile','user',()=>editProfile(S.me)]];
+  if(S.me===S.adminId){items.push(['Team & invitations','users',()=>sheet('teamSheet')]);
+    S.users.filter(u=>u.id!==S.adminId).forEach(u=>items.push(['Preview as '+u.name,'ext',()=>switchUser(u.id)]))}
+  else items.push(['Back to admin view','left',()=>switchUser(S.adminId)]);
+  menu(r.right-240,r.bottom+8,items);
+  $('#menu').style.minWidth='240px';
+};
+$('#teamBtn').onclick=()=>sheet('teamSheet');
+
+/* ---------------- Reminders: who gets them ---------------- */
+function recipPicker(id,selected,withAssignee){
+  const opt=(v,html,cls='')=>`<button type="button" class="${cls} ${selected.includes(v)?'on':''}" data-r="${v}">${html}</button>`;
+  return `<div class="recips" id="${id}">${opt('all','Everyone','txt')}${withAssignee?opt('assignee','Assigned engineer','txt'):''}${S.users.map(u=>opt(u.id,avatar(u,'sm')+esc(u.name.replace(/^Eng\.\s*/,'')))).join('')}</div>`;
+}
+function bindPicker(id){
+  const el=$('#'+id);
+  el.onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;
+    if(b.dataset.r==='all'){$$('[data-r]',el).forEach(x=>x.classList.toggle('on',x===b&&!b.classList.contains('on')))}
+    else{b.classList.toggle('on');$('[data-r="all"]',el).classList.remove('on')}};
+  return()=>$$('[data-r].on',el).map(b=>b.dataset.r);
+}
+function resolveTo(n,p){
+  const ids=new Set();
+  (n.to&&n.to.length?n.to:['me']).forEach(t=>{
+    if(t==='all')S.users.forEach(u=>ids.add(u.id));
+    else if(t==='assignee'){const u=p&&colUser(colById(p.columnId));if(u)ids.add(u.id)}
+    else if(t==='me')ids.add(S.adminId);
+    else if(userById(t))ids.add(t);
+  });
+  return[...ids].map(userById);
+}
+function toLabel(n,p){
+  if(!n.to||!n.to.length)return'Just me';
+  if(n.to.includes('all'))return'Everyone';
+  return n.to.map(t=>t==='assignee'?(p&&colUser(colById(p.columnId))?colName(p.columnId):'Assigned engineer'):t==='me'?userById(S.adminId).name:(userById(t)||{}).name).filter(Boolean).join(', ');
+}
+function deliver(n,p){
+  const users=resolveTo(n,p);
+  const title='Reminder'+(p?' · '+(p.title.length>40?p.title.slice(0,38)+'…':p.title):'');
+  const body=n.msg;
+  const viewer=users.find(u=>u.id===S.me);
+  if(viewer&&viewer.prefs.browser)notify(title,body);
+  const mailTo=n.email?users.filter(u=>u.prefs.email&&u.email).map(u=>u.email):[];
+  if(mailTo.length)sendEmail(mailTo,title+': '+n.msg,body+(p?`\n\nOpen the project: ${APP_URL}/#p/${p.id}`:''),'reminder');
+  S.sentLog.unshift({id:uid(),msg:n.msg,project:p?p.title:'',names:users.map(u=>u.name),email:mailTo.length,at:Date.now()});S.sentLog=S.sentLog.slice(0,40);
+  if(!viewer)toast(`Reminder sent to <b>${esc(users.map(u=>u.name).join(', ')||'nobody')}</b>${mailTo.length?' · email':''}`,'bell',5000);
+}
+
+/* ---------------- Reminder engine ---------------- */
+function notify(title,body){
+  toast(`<b>${esc(title)}</b><br><span dir="auto">${esc(body)}</span>`,'bell',7000);
+  try{if('Notification' in window&&Notification.permission==='granted'){const n=new Notification(title,{body,tag:title+body});n.onclick=()=>window.focus()}}catch(e){}
+}
+function fire(n,p,now){
+  deliver(n,p);
+  const step={hourly:HOUR,daily:24*HOUR,weekly:168*HOUR}[n.repeat];
+  if(step){while(n.at<=now)n.at+=step}else n.fired=true;
+}
+function tick(){
+  const now=Date.now(); let changed=false;
+  S.projects.forEach(p=>p.notifications.forEach(n=>{if(!n.fired&&n.at<=now){fire(n,p,now);changed=true}}));
+  S.reminders.forEach(n=>{if(!n.fired&&n.at<=now){fire(n,null,now);changed=true}});
+  if(S.mail.connected&&S.mail.hourly&&now-S.mail.lastSync>=HOUR)syncMail(true);
+  if(changed){save();renderBoard();if(cur&&curTab==='notifications')renderPane();if($('#remSheet').classList.contains('show'))renderRemSheet()}
+  updateSyncMeta();
+}
+setInterval(tick,15000);
+
+renderBoard(); route(); tick();
+</script>
+</body>
+</html>
