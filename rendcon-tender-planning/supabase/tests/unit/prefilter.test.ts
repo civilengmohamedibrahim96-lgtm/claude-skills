@@ -95,18 +95,20 @@ test('always-read senders: domains, subdomains and full addresses', () => {
   assert.equal(isAlwaysReadSender('other@partner.example', list), false);
   assert.equal(isAlwaysReadSender('x@moh.gov.sa', list), false);
   assert.equal(isAlwaysReadSender(null, list), false);
-  assert.deepEqual(parseSenderList(undefined), ['redconcon.com']);
-  assert.deepEqual(parseSenderList('  '), ['redconcon.com']);
+  assert.deepEqual(parseSenderList(undefined), []);
+  assert.deepEqual(parseSenderList('  '), []);
   assert.deepEqual(parseSenderList(' @RedconCon.com, Ali@x.org;bad'), ['redconcon.com', 'ali@x.org']);
 });
 
 test('always-read inbox mail is never skipped except auto-replies', () => {
-  const pf = createPrefilter();
-  const team = (over: Partial<MailMessage>) => msg({ from: { name: null, address: 'no-reply@redconcon.com' }, ...over });
+  const pf = createPrefilter({ alwaysReadSenders: ['ali@redconcon.com'] });
+  const team = (over: Partial<MailMessage>) => msg({ from: { name: null, address: 'Ali@RedconCon.com' }, ...over });
   assert.deepEqual(pf(team({ headers: { 'list-unsubscribe': '<x>' } })), NOT_SKIPPED);
   assert.deepEqual(pf(team({ subject: 'Newsletter', bodyText: 'unsubscribe' })), NOT_SKIPPED);
   assert.deepEqual(pf(team({ isMeetingMessage: true })), NOT_SKIPPED);
   assert.deepEqual(pf(team({ subject: 'Out of office' })), { skip: true, reason: 'auto_reply' });
-  // other senders keep the normal rules
+  // other senders, colleagues outside the team included, keep the normal rules
   assert.deepEqual(pf(msg({ from: { name: null, address: 'no-reply@etenders.gov.eg' } })), { skip: true, reason: 'system_sender' });
+  assert.deepEqual(pf(msg({ from: { name: null, address: 'news@redconcon.com' } })), { skip: true, reason: 'system_sender' });
+  assert.deepEqual(createPrefilter()(msg({ from: { name: null, address: 'news@redconcon.com' } })), { skip: true, reason: 'system_sender' });
 });

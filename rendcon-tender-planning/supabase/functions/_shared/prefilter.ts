@@ -27,14 +27,11 @@ const TENDER_MARKERS = [
 const NOT_SKIPPED = (): PrefilterResult => ({ skip: false, reason: null });
 const SKIP = (reason: PrefilterReason): PrefilterResult => ({ skip: true, reason });
 
-// Senders whose inbox mail is always read (sent to the AI), e.g. the company's own
-// Public Sector team. Entries are domains ("redconcon.com", subdomains included) or full
-// addresses ("ali@redconcon.com"). Set by ALWAYS_READ_SENDERS; default: redconcon.com.
-export const DEFAULT_ALWAYS_READ = ['redconcon.com'];
-
+// Senders whose inbox mail is always read (sent to the AI): the Public Sector team, i.e.
+// the active people of the app, plus ALWAYS_READ_SENDERS. Entries are full addresses
+// ("ali@redconcon.com") or domains ("partner.example", subdomains included).
 export function parseSenderList(raw: string | undefined): string[] {
-  if (raw === undefined || raw.trim() === '') return [...DEFAULT_ALWAYS_READ];
-  return raw
+  return String(raw ?? '')
     .split(/[\s,;]+/)
     .map((d) => d.trim().toLowerCase().replace(/^@/, '').replace(/^\.+/, ''))
     .filter((d) => d !== '' && d.includes('.'));
@@ -52,7 +49,7 @@ export type PrefilterOptions = { alwaysReadSenders?: string[] };
 // Mail from an always-read sender skips the bulk/system/newsletter/meeting rules; only
 // automatic replies / out-of-office notices from them are still skipped.
 export function createPrefilter(opts: PrefilterOptions = {}): (m: MailMessage) => PrefilterResult {
-  const senders = opts.alwaysReadSenders ?? DEFAULT_ALWAYS_READ;
+  const senders = opts.alwaysReadSenders ?? [];
   return (m) => {
     if (m.folder === 'inbox' && isAlwaysReadSender(m.from?.address, senders)) {
       const r = prefilter(m);

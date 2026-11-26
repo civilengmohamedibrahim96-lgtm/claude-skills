@@ -40,12 +40,20 @@ Deno.serve(async (req) => {
     const aiOptions = aiOptionsFromEnv(env);
     const timeZone = env.APP_TIMEZONE || 'Africa/Cairo';
 
+    // The Public Sector team = the app's active people; their mail is always read.
+    const { data: team, error: teamError } = await db.from('people').select('email').eq('active', true);
+    if (teamError) console.log('could not load people for always-read senders', teamError.message);
+    const alwaysReadSenders = [
+      ...parseSenderList(env.ALWAYS_READ_SENDERS),
+      ...parseSenderList((team ?? []).map((p: { email: string | null }) => p.email ?? '').join(',')),
+    ];
+
     const summary = await runMailSync({
       repo: createSupabaseMailRepository(db),
       mail,
       ai: (input) => understandEmail(gemini, input, aiOptions),
       normalize: normalizerFor(composio.provider),
-      prefilter: createPrefilter({ alwaysReadSenders: parseSenderList(env.ALWAYS_READ_SENDERS) }),
+      prefilter: createPrefilter({ alwaysReadSenders }),
       shortlist: (m, p, c) => buildShortlist(m, p, c),
       validate: validateForm,
       apply: applyForm,
