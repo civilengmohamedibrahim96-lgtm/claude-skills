@@ -113,11 +113,51 @@ function scheduleRefresh() {
 }
 
 /* ---------------- board ---------------- */
+/* Submission-date ranges. "This week" = the next 7 days (same as the column's "due this week"), "Next week" = the 7 days after. */
+const DUE_RANGES = [['overdue', 'Overdue'], ['today', 'Today'], ['week', 'This week'], ['next', 'Next week'], ['month', 'This month'], ['later', 'Later'], ['none', 'No date']];
+function dueRange(k, now = new Date()) {
+  const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()), add = (n) => { const d = new Date(t0); d.setDate(d.getDate() + n); return d; };
+  if (k === 'week') return [t0, add(7)];
+  if (k === 'next') return [add(8), add(14)];
+  if (k === 'month') return [new Date(now.getFullYear(), now.getMonth(), 1), new Date(now.getFullYear(), now.getMonth() + 1, 0)];
+  return null;
+}
+function dueMatch(p, k, now = new Date()) {
+  if (k === 'none') return !p.due;
+  if (!p.due) return false;
+  const dd = daysUntil(p.due, now);
+  if (k === 'overdue') return dd < 0 && !isSubmitted(p);
+  if (k === 'today') return dd === 0;
+  if (k === 'later') return toDate(p.due) > new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const r = dueRange(k, now), t = toDate(p.due);
+  return t >= r[0] && t <= r[1];
+}
+const rangeHint = (k) => { const r = dueRange(k); return r ? `${fmtShort(r[0])} – ${fmtShort(r[1])}` : ''; };
+const statusKey = (v) => String(v || '').trim().toLowerCase();
+function statusOptions() {
+  const seen = new Map();
+  S.projects.forEach((p) => { const k = statusKey(p.status); if (k && !seen.has(k)) seen.set(k, { label: p.status.trim(), n: 0 }); if (k) seen.get(k).n++; });
+  return [...seen.entries()].sort((a, b) => b[1].n - a[1].n).slice(0, 12);
+}
+/** Filters: AND across groups, OR inside a group (e.g. two engineers = either one). */
 function matches(p) {
-  if (filterTags.size && ![...filterTags].every((t) => (t.startsWith('type:') ? projType(p) === t.slice(5) : t.startsWith('tm:') ? p.tender === t.slice(3) : p.tags.includes(t)))) return false;
+  if (filterTags.size) {
+    const groups = {};
+    filterTags.forEach((t) => { const g = /^(type|tm|eng|due|st):/.test(t) ? t.split(':')[0] : 'tag:' + t; (groups[g] = groups[g] || []).push(t); });
+    const hit = (t) => {
+      if (t.startsWith('type:')) return projType(p) === t.slice(5);
+      if (t.startsWith('tm:')) return p.tender === t.slice(3);
+      if (t.startsWith('eng:')) return (p.columnId || 'un') === t.slice(4);
+      if (t.startsWith('due:')) return dueMatch(p, t.slice(4));
+      if (t.startsWith('st:')) return statusKey(p.status) === t.slice(3);
+      return p.tags.includes(t);
+    };
+    if (!Object.values(groups).every((ts) => ts.some(hit))) return false;
+  }
   if (query && !norm(p.title).includes(norm(query))) return false;
   return true;
 }
+const engFilters = () => [...filterTags].filter((t) => t.startsWith('eng:')).map((t) => t.slice(4));
 
 function cardHTML(p) {
   const done = p.subtasks.filter((s) => s.done).length, tot = p.subtasks.length;
@@ -196,7 +236,8 @@ function colHTML(col, unassigned) {
 function renderBoard() {
   const b = $board(), sl = b.scrollLeft;
   const cols = S.columns.filter((c) => colUser(c)).sort((a, b2) => S.users.indexOf(colUser(a)) - S.users.indexOf(colUser(b2)));
-  b.innerHTML = colHTML(null, true) + cols.map((c) => colHTML(c, false)).join('') + (isAdmin() ? `<button class="add-col" id="addCol">${icon('plus')}Add engineer</button>` : '');
+  const ef = engFilters(), showCol = (id) => !ef.length || ef.includes(id);
+  b.innerHTML = (showCol('un') ? colHTML(null, true) : '') + cols.filter((c) => showCol(c.id)).map((c) => colHTML(c, false)).join('') + (isAdmin() && !ef.length ? `<button class="add-col" id="addCol">${icon('plus')}Add engineer</button>` : '');
   b.scrollLeft = sl;
   renderFilters();
   renderHeader();
@@ -205,17 +246,24 @@ function renderBoard() {
 function filterLabel(id) {
   if (id.startsWith('type:')) return { txt: id === 'type:public' ? 'Public' : 'Private', dot: '' };
   if (id.startsWith('tm:')) { const t = tenderById(id.slice(3)); return { txt: t ? firstName(t.name.replace(/^Eng\.?\s*/i, '')) : '—', dot: '' }; }
+  if (id.startsWith('eng:')) return { txt: id === 'eng:un' ? 'Unassigned' : firstName(colName(id.slice(4)).replace(/^Eng\.?\s*/i, '')), dot: '' };
+  if (id.startsWith('due:')) return { txt: 'Due: ' + ((DUE_RANGES.find((r) => r[0] === id.slice(4)) || [])[1] || ''), dot: '' };
+  if (id.startsWith('st:')) { const o = statusOptions().find((x) => x[0] === id.slice(3)); return { txt: o ? o[1].label : id.slice(3), dot: '' }; }
   const t = tagById(id);
   return { txt: t ? t.name : id, dot: t ? t.color : '' };
 }
 function renderFilters() {
-  const act_ = [...filterTags].filter((id) => !id.startsWith('tm:') || tenderById(id.slice(3)));
+  const act_ = [...filterTags].filter((id) => (!id.startsWith('tm:') || tenderById(id.slice(3))) && (!id.startsWith('eng:') || id === 'eng:un' || colById(id.slice(4))));
   $('#qChips').innerHTML = act_.map((id) => { const l = filterLabel(id); return `<span class="qchip">${l.dot ? `<i class="tdot" style="background:${safeColor(l.dot)}"></i>` : ''}${esc(l.txt)}<button type="button" data-unfilter="${esc(id)}" aria-label="Remove filter ${esc(l.txt)}">${icon('x')}</button></span>`; }).join('');
   $('#fCount').hidden = !act_.length;
   $('#fCount').textContent = act_.length;
   $('#q').placeholder = act_.length ? 'Search within filters…' : 'Search project names…';
   const opt = (id, html) => `<button type="button" class="fopt ${filterTags.has(id) ? 'on' : ''}" data-filter="${esc(id)}">${html}</button>`;
+  const engCols = S.columns.filter((c) => colUser(c)).sort((a, b2) => S.users.indexOf(colUser(a)) - S.users.indexOf(colUser(b2)));
   $('#fPanel').innerHTML = `
+    <div class="fgrp"><span>Submission date</span><div>${DUE_RANGES.map(([k, l]) => opt('due:' + k, `${esc(l)}${rangeHint(k) ? `<small class="fhint">${esc(rangeHint(k))}</small>` : ''}`)).join('')}</div></div>
+    <div class="fgrp"><span>Engineer</span><div>${opt('eng:un', 'Unassigned')}${engCols.map((c) => { const u = colUser(c); return opt('eng:' + c.id, `${avatar(u, 'xs')}<bdi>${esc(firstName(u.name.replace(/^Eng\.?\s*/i, '')))}</bdi>`); }).join('')}</div></div>
+    <div class="fgrp"><span>Status</span><div>${statusOptions().map(([k, o]) => opt('st:' + k, `<bdi>${esc(o.label)}</bdi><small class="fhint">${o.n}</small>`)).join('') || '<em class="fnone">No statuses written yet</em>'}</div></div>
     <div class="fgrp"><span>Tender type</span><div>${opt('type:public', 'Public')}${opt('type:private', 'Private')}</div></div>
     <div class="fgrp"><span>Tender team</span><div>${(S.tenderTeam || []).map((t) => opt('tm:' + t.id, `<em class="tt ${t.type}">${t.type === 'private' ? 'Pr' : 'Pu'}</em><bdi>${esc(firstName(t.name.replace(/^Eng\.?\s*/i, '')))}</bdi>`)).join('')}</div></div>
     <div class="fgrp"><span>Tags</span><div>${S.tags.map((t) => opt(t.id, `<i class="tdot" style="background:${safeColor(t.color)}"></i>${esc(t.name)}`)).join('')}</div></div>
@@ -446,6 +494,9 @@ function bindSearch() {
     if (e.key === 'Escape') $('#qList').classList.remove('show');
   });
   $('#qList').addEventListener('mousedown', (e) => {
+    const sf = e.target.closest('[data-sfilter]');
+    if (sf) { e.preventDefault(); const id = sf.dataset.sfilter; filterTags.has(id) ? filterTags.delete(id) : filterTags.add(id); renderBoard(); renderSuggest(); return; }
+    if (e.target.closest('[data-sall]')) { e.preventDefault(); $('#qList').classList.remove('show'); setPanel(true); return; }
     const b = e.target.closest('[data-qo]');
     if (!b) return;
     e.preventDefault();
@@ -455,11 +506,29 @@ function bindSearch() {
 }
 function renderQList() {
   const v = $('#q').value.trim(), L = $('#qList');
-  if (!v) { L.classList.remove('show'); $('#q').setAttribute('aria-expanded', 'false'); return; }
+  if (!v) { renderSuggest(); return; }
   const n = norm(v);
   const ms = S.projects.filter((p) => norm(p.title).includes(n)).slice(0, 8);
   qSel = Math.min(qSel, Math.max(ms.length - 1, 0));
   L.innerHTML = ms.length ? ms.map((p, i) => `<button class="qi ${i === qSel ? 'on' : ''}" role="option" data-qo="${esc(p.id)}"><b dir="auto">${esc(p.title)}</b></button>`).join('') : '<div class="qe">No project with that name</div>';
+  L.classList.add('show');
+  $('#q').setAttribute('aria-expanded', 'true');
+}
+
+/** Quick filter suggestions shown when the empty search box is focused. */
+function renderSuggest() {
+  const L = $('#qList');
+  const chip = (id, html) => `<button type="button" class="fopt ${filterTags.has(id) ? 'on' : ''}" data-sfilter="${esc(id)}">${html}</button>`;
+  const cnt = (fn) => S.projects.filter((p) => !isSubmitted(p) && fn(p)).length;
+  const dueChips = ['overdue', 'today', 'week', 'next', 'month'].map((k) => [k, cnt((p) => dueMatch(p, k))]).filter(([k, n]) => n || filterTags.has('due:' + k));
+  const engCols = S.columns.filter((c) => colUser(c));
+  const sts = statusOptions().slice(0, 6);
+  L.innerHTML = `<div class="sugg">
+    <div class="sugg-h">Submission date</div><div class="sugg-r">${dueChips.map(([k, n]) => chip('due:' + k, `${esc(DUE_RANGES.find((r) => r[0] === k)[1])}<small class="fhint">${n}</small>`)).join('') || '<em class="fnone">Nothing due soon</em>'}</div>
+    <div class="sugg-h">Engineer</div><div class="sugg-r">${engCols.map((c) => { const u = colUser(c); return chip('eng:' + c.id, `${avatar(u, 'xs')}<bdi>${esc(firstName(u.name.replace(/^Eng\.?\s*/i, '')))}</bdi>`); }).join('')}</div>
+    ${sts.length ? `<div class="sugg-h">Status</div><div class="sugg-r">${sts.map(([k, o]) => chip('st:' + k, `<bdi>${esc(o.label)}</bdi>`)).join('')}</div>` : ''}
+    <div class="sugg-f">Or type to search project names · <button type="button" data-sall>All filters</button></div>
+  </div>`;
   L.classList.add('show');
   $('#q').setAttribute('aria-expanded', 'true');
 }
