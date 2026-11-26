@@ -8,7 +8,7 @@ import { applyForm } from '../_shared/applier.ts';
 import { runMailSync } from '../_shared/mail_sync.ts';
 import { createSupabaseMailRepository } from '../_shared/mail_repo_supabase.ts';
 import { normalizerFor } from '../_shared/mail_normalize.ts';
-import { createPrefilter, parseSenderList } from '../_shared/prefilter.ts';
+import { createPrefilter, DEFAULT_ALWAYS_READ, parseSenderList } from '../_shared/prefilter.ts';
 import { buildShortlist } from '../_shared/shortlist.ts';
 import { validateForm } from '../_shared/validator.ts';
 import { aiOptionsFromEnv, createGeminiClient, understandEmail } from '../_shared/ai_client.ts';
@@ -40,11 +40,11 @@ Deno.serve(async (req) => {
     const aiOptions = aiOptionsFromEnv(env);
     const timeZone = env.APP_TIMEZONE || 'Africa/Cairo';
 
-    // The Public Sector team = the app's active people; their mail is always read.
+    // Public Sector mail (redconcon.com and the app's people), also when forwarded, is always read.
     const { data: team, error: teamError } = await db.from('people').select('email').eq('active', true);
     if (teamError) console.log('could not load people for always-read senders', teamError.message);
     const alwaysReadSenders = [
-      ...parseSenderList(env.ALWAYS_READ_SENDERS),
+      ...(env.ALWAYS_READ_SENDERS === undefined ? DEFAULT_ALWAYS_READ : parseSenderList(env.ALWAYS_READ_SENDERS)),
       ...parseSenderList((team ?? []).map((p: { email: string | null }) => p.email ?? '').join(',')),
     ];
 
