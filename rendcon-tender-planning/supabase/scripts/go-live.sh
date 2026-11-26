@@ -19,7 +19,12 @@ GEN_FILE=scripts/golive.generated.env
 set -a; . "$ENV_FILE"; set +a
 
 need() { [ -n "${!1:-}" ] || { echo "Please set $1 in $ENV_FILE"; exit 1; }; }
-for v in SUPABASE_PROJECT_REF APP_URL ANTHROPIC_API_KEY COMPOSIO_API_KEY COMPOSIO_CONNECTED_ACCOUNT_ID ADMIN_NAME ADMIN_EMAIL; do need "$v"; done
+for v in SUPABASE_PROJECT_REF APP_URL ADMIN_NAME ADMIN_EMAIL; do need "$v"; done
+# Outlook reading (mail-sync) needs these three; they can be added later with
+# `supabase secrets set`. Without them the board and reminders still work.
+for v in ANTHROPIC_API_KEY COMPOSIO_API_KEY COMPOSIO_CONNECTED_ACCOUNT_ID; do
+  [ -n "${!v:-}" ] || echo "Note: $v is empty, so reading Outlook emails stays off for now."
+done
 APP_TIMEZONE=${APP_TIMEZONE:-Africa/Cairo}
 CLAUDE_MODEL=${CLAUDE_MODEL:-claude-opus-5-5}
 VAPID_SUBJECT=${VAPID_SUBJECT:-mailto:$ADMIN_EMAIL}
@@ -52,10 +57,10 @@ trap 'rm -f "$SECRETS_TMP"' EXIT
   echo "CRON_SECRET=$CRON_SECRET"
   echo "APP_URL=$APP_URL"
   echo "APP_TIMEZONE=$APP_TIMEZONE"
-  echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY"
+  [ -n "${ANTHROPIC_API_KEY:-}" ] && echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY"
   echo "CLAUDE_MODEL=$CLAUDE_MODEL"
-  echo "COMPOSIO_API_KEY=$COMPOSIO_API_KEY"
-  echo "COMPOSIO_CONNECTED_ACCOUNT_ID=$COMPOSIO_CONNECTED_ACCOUNT_ID"
+  [ -n "${COMPOSIO_API_KEY:-}" ] && echo "COMPOSIO_API_KEY=$COMPOSIO_API_KEY"
+  [ -n "${COMPOSIO_CONNECTED_ACCOUNT_ID:-}" ] && echo "COMPOSIO_CONNECTED_ACCOUNT_ID=$COMPOSIO_CONNECTED_ACCOUNT_ID"
   [ -n "${COMPOSIO_ARG_MAP:-}" ] && echo "COMPOSIO_ARG_MAP=$COMPOSIO_ARG_MAP"
   echo "VAPID_PUBLIC_KEY=$VAPID_PUBLIC_KEY"
   echo "VAPID_PRIVATE_KEY=$VAPID_PRIVATE_KEY"
