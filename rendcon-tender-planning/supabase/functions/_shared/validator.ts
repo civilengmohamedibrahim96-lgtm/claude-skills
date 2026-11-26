@@ -1,5 +1,6 @@
 // Checks the AI form against the board and decides apply / review / ignore (BUILD_PLAN.md §2.4 validator). Pure.
 
+import { extractSupervisor } from './forwarded.ts';
 import type {
   ActionKind, AiForm, AiLink, Decision, ReviewReason,
   ShortlistEntry, TenderMember, TenderType, ValidateContext, ValidatedForm,
@@ -117,7 +118,10 @@ export function validateForm(form: AiForm, ctx: ValidateContext): Decision {
   }
 
   // 11. supervisor and tender team
-  const supervisorFirst = form.supervisor_first_name ? firstNameAr(form.supervisor_first_name) : '';
+  // The first engineer after «المشرف علي الدراسة» wins over the AI's reading.
+  const written = extractSupervisor(ctx.message.bodyText);
+  const supervisorFirst = written
+    ?? (form.supervisor_first_name ? firstNameAr(form.supervisor_first_name) : '');
   const supervisor = supervisorFirst || null;
   let tenderId: string | null = null;
   let tenderType: TenderType | null = null;

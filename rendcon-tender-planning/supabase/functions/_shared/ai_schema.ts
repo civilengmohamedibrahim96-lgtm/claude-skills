@@ -78,6 +78,8 @@ Either direction:
 WHICH PROJECT
 - <shortlist> lists up to 8 board projects that look closest to this email, each with a ref. Board names are often written differently from the email: shortened, misspelt, in English instead of Arabic, with or without words such as «مشروع», «أعمال», «إنشاء», with tender numbers, or in a different word order. Decide by meaning: the same works, the same site, the same client, the same quantities, the same tender number.
 - Read the whole body, not only the subject. Subjects of replies and forwards (RE:, FW:, رد:، إعادة توجيه:) are often old or name another project.
+- The project name is written at the top: in the original subject («New Tender Notification - <name>», «New Addendum - <name>») and in the first lines of the body («ورد الينا مناقصه جديده – <name>», «بمشروع <name>»). email_json.project_name_hint holds it when found. Compare it with every shortlist title; if one is the same project, even with different spelling, language or extra words, use that ref and not "new".
+- Forwarded Public Sector emails: only the original email is given. Its From is the Public Sector team, not the client.
 - conversation_match true means this email belongs to an email thread already linked to that project. It is a strong hint, but still check the body.
 - matched_project: the ref of the project the email is about; "new" only for kind new_project when no shortlist project is the same tender; "none" only for not_a_tender.
 - If two or more projects fit about equally well (for example two phases of the same roads project and the email does not say which), pick the more likely one, put the others in other_possible_projects (at most 2) and set confidence.match to "medium" or "low".
@@ -86,10 +88,10 @@ WHICH PROJECT
 FACTS
 - project_name: the project name as written in the email body (keep the Arabic as written), else null. Required for new_project.
 - client: the owner or client (الجهة المالكة، الجهة، العميل، صاحب العمل) as written, else null.
-- submission_date: the latest bid submission date that applies after this email (آخر موعد للتقديم، موعد تقديم العطاءات، and فتح المظاريف when it is the submission date), as YYYY-MM-DD. Convert Arabic-Indic digits (٠١٢٣٤٥٦٧٨٩) to 0-9. Dates such as 10/1/2027 or ١٠/١/٢٠٢٧ are day/month/year. If the email states that the date is unchanged, or gives no date, use null. Never guess or compute a date that is not written.
+- submission_date: the latest bid submission date that applies after this email (آخر موعد للتقديم، موعد تقديم العطاءات، and فتح المظاريف when it is the submission date), as YYYY-MM-DD. Convert Arabic-Indic digits (٠١٢٣٤٥٦٧٨٩) to 0-9. Dates such as 10/1/2027, 9– 08– 2026 or ١٠/١/٢٠٢٧ are day/month/year; when the year comes first (2026/8/16) it is year/month/day. If the email states that the date is unchanged, or gives no date, use null. Never guess or compute a date that is not written.
 - submission_date_source: the exact sentence the date came from, copied from the email, else null.
 - tender_type: "public" for عامة / مناقصة عامة; "private" for محدودة / ممارسة / ممارسة محدودة / خاصة; else "unknown".
-- supervisor_first_name: from a line such as «والمشرف علي الدراسه : م/ شيرين محمود» give only the first name without titles (م/، م.، مهندس، المهندس، Eng.), here «شيرين». If it is the same person as someone in <tender_team>, use the spelling of their name_ar. Else null.
+- supervisor_first_name: the first engineer named right after «المشرف علي الدراسة» (same line or the next line), for example «والمشرف علي الدراسه : م/ كريم سامي» gives «كريم». Give only the first name without titles (م/، م.، مهندس، المهندس، Eng.). When email_json.supervisor_hint is set, use it. Never take a name from the To, Cc or signature lines. If it is the same person as someone in <tender_team>, use the spelling of their name_ar. Else null.
 - links: every http or https link in the email, each with a short English label (Specs, BOQ, Addendum, Answers, Portal, Notice, Documents, Offer files, Link).
 - suggested_status: for sent emails a short English status, for example "Queries sent to client – waiting for answers", "Offer submitted", "Extension requested from client". For received emails only when the email clearly changes the stage, for example "Postponed to 10 Jan 2027" or "Answers to queries received – review". Else null.
 - summary: one short English line for the card's update log, at most 120 characters, for example "Annex 2 issued – submission moved to 27 Dec 2026".
@@ -99,7 +101,7 @@ CONFIDENCE
 - confidence.facts: "high" = date and facts stated plainly; "medium" = some interpretation needed; "low" = unclear.
 
 EXAMPLES
-1. Inbox email, subject «ورد الينا – مناقصة عامة: إنشاء مبنى إداري», body has «والمشرف علي الدراسه : م/ شيرين محمود» and «آخر موعد للتقديم: ٢٠/١٢/٢٠٢٦», no similar shortlist project → kind new_project, matched_project "new", tender_type "public", supervisor_first_name "شيرين", submission_date "2026-12-20".
+1. Inbox email, subject «ورد الينا – مناقصة عامة: إنشاء مبنى إداري», body has «والمشرف علي الدراسه : م/ كريم سامي» and «آخر موعد للتقديم: ٢٠/١٢/٢٠٢٦», no similar shortlist project → kind new_project, matched_project "new", tender_type "public", supervisor_first_name "كريم", submission_date "2026-12-20".
 2. Inbox email, subject «تأجيل موعد تقديم العطاءات – خزان المياه الارضي», body «… ليصبح يوم الأحد الموافق ١٠/١/٢٠٢٧ …», shortlist P2 is «إنشاء خزان مياه أرضي سعة 5000 م³» for the same authority → kind postponed, matched_project "P2", submission_date "2027-01-10", suggested_status "Postponed to 10 Jan 2027".
 3. Sent email «استفسارات – صيانة شبكات الصرف الصحي» listing questions to the client → kind queries_sent, suggested_status "Queries sent to client – waiting for answers".
 

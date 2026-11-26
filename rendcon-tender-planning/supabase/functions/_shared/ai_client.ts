@@ -5,6 +5,7 @@
 import type {
   AiForm, AiInput, AiOptions, AiResult, GeminiLike, GeminiResponseLike,
 } from './types.ts';
+import { extractSupervisor, projectNameHint } from './forwarded.ts';
 import { AI_FORM_SCHEMA, SYSTEM_PROMPT, checkAiFormShape } from './ai_schema.ts';
 
 const BODY_LIMIT = 24000;
@@ -55,6 +56,8 @@ export function buildUserPrompt(input: AiInput): string {
     cc: m.cc,
     date: m.date,
     has_attachments: m.hasAttachments,
+    project_name_hint: projectNameHint(m),
+    supervisor_hint: extractSupervisor(bodyText),
     body: bodyText.slice(0, BODY_LIMIT),
     body_truncated: bodyText.length > BODY_LIMIT,
   };

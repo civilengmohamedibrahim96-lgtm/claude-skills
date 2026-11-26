@@ -70,7 +70,7 @@ export function trigramSimilarity(a: string, b: string): number {
   return union === 0 ? 0 : inter / union;
 }
 
-const TITLE_PREFIX = /^\s*(و?المهندس[ةه]?|مهندس[ةه]?|م\s*[\/.]|eng\.?)\s*/i;
+const TITLE_PREFIX = /^\s*(و?المهندس[ةه]?|مهندس[ةه]?|م\s*[\/.]|م(?=\s)|eng\.?)\s*/i;
 
 export function firstNameAr(s: string): string {
   let x = toAsciiDigits(String(s ?? '')).trim();

@@ -1,5 +1,6 @@
 // Mail sync orchestrator: fetch Inbox + Sent through the mail client, then run each
 // new message through prefilter -> shortlist -> AI -> validator -> apply/review.
+import { focusMessage } from './forwarded.ts';
 import type {
   AiInput,
   AiResult,
@@ -250,13 +251,15 @@ async function processOne(
 ): Promise<void> {
   const { repo } = deps;
 
-  const m = await withBody(deps, listed);
-  const pre = deps.prefilter(m);
+  const full = await withBody(deps, listed);
+  const pre = deps.prefilter(full);
   if (pre.skip) {
-    await repo.markProcessed(record(m, { outcome: 'prefiltered', prefilterReason: pre.reason }));
+    await repo.markProcessed(record(full, { outcome: 'prefiltered', prefilterReason: pre.reason }));
     summary.prefiltered += 1;
     return;
   }
+  // Only the forwarded original: no To/Cc lists, signatures or older quoted emails.
+  const m = focusMessage(full);
 
   const projects = await repo.listOpenProjects();
   const convIds = m.conversationId ? await repo.findProjectIdsByConversation(m.conversationId) : [];
