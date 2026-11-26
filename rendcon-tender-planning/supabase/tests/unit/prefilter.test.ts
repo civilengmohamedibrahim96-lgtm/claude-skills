@@ -83,3 +83,30 @@ test('bulk headers apply to the inbox only', () => {
   assert.deepEqual(prefilter(msg({ headers: { 'list-id': '<x>' } })), { skip: true, reason: 'bulk_header' });
   assert.deepEqual(prefilter(msg({ folder: 'sent', headers: { precedence: 'bulk' } })), NOT_SKIPPED);
 });
+
+import { createPrefilter, isPublicSectorSender, parseDomainList } from '../../functions/_shared/prefilter.ts';
+
+test('public-sector senders: gov/mil labels and extra domains', () => {
+  assert.equal(isPublicSectorSender('tenders@moh.gov.sa'), true);
+  assert.equal(isPublicSectorSender('x@etenders.gov.eg'), true);
+  assert.equal(isPublicSectorSender('x@army.mil'), true);
+  assert.equal(isPublicSectorSender('x@gov.uk'), true);
+  assert.equal(isPublicSectorSender('x@governance.com'), false);
+  assert.equal(isPublicSectorSender('x@client.example'), false);
+  assert.equal(isPublicSectorSender('x@proc.nupco.com', ['nupco.com']), true);
+  assert.equal(isPublicSectorSender('x@notnupco.com', ['nupco.com']), false);
+  assert.equal(isPublicSectorSender(null), false);
+  assert.deepEqual(parseDomainList(' @NUPCO.com, .aramco.com;bad  x.org '), ['nupco.com', 'aramco.com', 'x.org']);
+});
+
+test('public-sector inbox mail is never skipped except auto-replies', () => {
+  const pf = createPrefilter({ publicSectorDomains: ['nupco.com'] });
+  const gov = (over: Partial<MailMessage>) => msg({ from: { name: null, address: 'no-reply@etenders.gov.eg' }, ...over });
+  assert.deepEqual(pf(gov({ headers: { 'list-unsubscribe': '<x>' } })), NOT_SKIPPED);
+  assert.deepEqual(pf(gov({ subject: 'Newsletter', bodyText: 'unsubscribe' })), NOT_SKIPPED);
+  assert.deepEqual(pf(gov({ isMeetingMessage: true })), NOT_SKIPPED);
+  assert.deepEqual(pf(gov({ subject: 'Out of office' })), { skip: true, reason: 'auto_reply' });
+  assert.deepEqual(pf(msg({ from: { name: null, address: 'news@nupco.com' } })), NOT_SKIPPED);
+  // other senders keep the normal rules
+  assert.deepEqual(pf(msg({ from: { name: null, address: 'no-reply@shop.example' } })), { skip: true, reason: 'system_sender' });
+});

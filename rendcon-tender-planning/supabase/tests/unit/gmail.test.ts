@@ -142,7 +142,7 @@ describe('normalizeGmailMessage', () => {
     assert.deepEqual(m.to, ['tenders@redcon.com', 'bob@redcon.com']);
     assert.deepEqual(m.cc, ['eve@x.com']);
     assert.equal(m.date, '2026-11-26T08:31:36Z');
-    assert.equal(m.bodyText, 'Hello\nworld');
+    assert.equal(m.bodyText, 'Hello\nworld\n\nLinks:\nhttps://t.example/doc');
     assert.ok(m.bodyHtml?.includes('https://t.example/doc'));
     assert.equal(m.webLink, 'https://mail.google.com/mail/u/0/#inbox/19b1');
     assert.equal(m.headers['auto-submitted'], 'no');

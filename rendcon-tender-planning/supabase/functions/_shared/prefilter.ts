@@ -27,6 +27,39 @@ const TENDER_MARKERS = [
 const NOT_SKIPPED = (): PrefilterResult => ({ skip: false, reason: null });
 const SKIP = (reason: PrefilterReason): PrefilterResult => ({ skip: true, reason });
 
+// Government and military senders: any domain with a 'gov' or 'mil' label (gov.eg,
+// moh.gov.sa, mod.gov.ae, army.mil, ...). Extra agencies come from PUBLIC_SECTOR_DOMAINS.
+const PUBLIC_SECTOR_LABEL = /(^|\.)(gov|mil)(\.|$)/i;
+
+export function parseDomainList(raw: string | undefined): string[] {
+  return String(raw ?? '')
+    .split(/[\s,;]+/)
+    .map((d) => d.trim().toLowerCase().replace(/^@/, '').replace(/^\.+/, ''))
+    .filter((d) => d !== '' && d.includes('.'));
+}
+
+export function isPublicSectorSender(address: string | null | undefined, extraDomains: string[] = []): boolean {
+  const domain = String(address ?? '').trim().toLowerCase().split('@')[1] ?? '';
+  if (!domain) return false;
+  if (PUBLIC_SECTOR_LABEL.test(domain)) return true;
+  return extraDomains.some((d) => domain === d || domain.endsWith(`.${d}`));
+}
+
+export type PrefilterOptions = { publicSectorDomains?: string[] };
+
+// Mail from a public-sector sender is always read (sent to the AI); only automatic
+// replies / out-of-office notices from them are still skipped.
+export function createPrefilter(opts: PrefilterOptions = {}): (m: MailMessage) => PrefilterResult {
+  const extra = opts.publicSectorDomains ?? [];
+  return (m) => {
+    if (m.folder === 'inbox' && isPublicSectorSender(m.from?.address, extra)) {
+      const r = prefilter(m);
+      return r.skip && r.reason === 'auto_reply' ? r : NOT_SKIPPED();
+    }
+    return prefilter(m);
+  };
+}
+
 export function prefilter(m: MailMessage): PrefilterResult {
   const headers = m.headers;
   const has = (name: string): boolean => Object.hasOwn(headers, name);

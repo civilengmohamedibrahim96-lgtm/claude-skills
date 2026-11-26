@@ -8,7 +8,7 @@ import { applyForm } from '../_shared/applier.ts';
 import { runMailSync } from '../_shared/mail_sync.ts';
 import { createSupabaseMailRepository } from '../_shared/mail_repo_supabase.ts';
 import { normalizerFor } from '../_shared/mail_normalize.ts';
-import { prefilter } from '../_shared/prefilter.ts';
+import { createPrefilter, parseDomainList } from '../_shared/prefilter.ts';
 import { buildShortlist } from '../_shared/shortlist.ts';
 import { validateForm } from '../_shared/validator.ts';
 import { aiOptionsFromEnv, createGeminiClient, understandEmail } from '../_shared/ai_client.ts';
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       mail,
       ai: (input) => understandEmail(gemini, input, aiOptions),
       normalize: normalizerFor(composio.provider),
-      prefilter,
+      prefilter: createPrefilter({ publicSectorDomains: parseDomainList(env.PUBLIC_SECTOR_DOMAINS) }),
       shortlist: (m, p, c) => buildShortlist(m, p, c),
       validate: validateForm,
       apply: applyForm,

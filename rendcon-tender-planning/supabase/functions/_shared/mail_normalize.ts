@@ -237,6 +237,10 @@ export function normalizeGmailMessage(raw: unknown, folder: Folder): MailMessage
     bodyText = preview ?? str(raw.snippet) ?? '';
   }
   bodyText = bodyText.replace(/\r\n?/g, '\n');
+  // Gmail's plain-text part often drops the targets of HTML links; list any missing ones
+  // so the AI (and the validator, which only keeps links found in the text) can see them.
+  const missing = extractUrls('', bodyHtml).filter((u) => !bodyText.includes(u));
+  if (missing.length > 0) bodyText = `${bodyText.trimEnd()}\n\nLinks:\n${missing.join('\n')}`;
 
   let date = str(raw.messageTimestamp) ?? '';
   if (!date && str(raw.internalDate)) {
