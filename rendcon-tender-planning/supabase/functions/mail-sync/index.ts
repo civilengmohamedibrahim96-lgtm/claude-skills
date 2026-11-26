@@ -7,8 +7,8 @@ import { composioConfigFromEnv, createComposioMailClient } from '../_shared/comp
 import { applyForm } from '../_shared/applier.ts';
 import { runMailSync } from '../_shared/mail_sync.ts';
 import { createSupabaseMailRepository } from '../_shared/mail_repo_supabase.ts';
-import { normalizeGraphMessage } from '../_shared/mail_normalize.ts';
-import { prefilter } from '../_shared/prefilter.ts';
+import { normalizerFor } from '../_shared/mail_normalize.ts';
+import { createPrefilter, DEFAULT_ALWAYS_READ, parseSenderList } from '../_shared/prefilter.ts';
 import { buildShortlist } from '../_shared/shortlist.ts';
 import { validateForm } from '../_shared/validator.ts';
 import { aiOptionsFromEnv, createGeminiClient, understandEmail } from '../_shared/ai_client.ts';
@@ -35,16 +35,25 @@ Deno.serve(async (req) => {
 
     // short timeout and no retries: the whole run must finish inside the function's time limit
     const gemini = createGeminiClient(env.GEMINI_API_KEY, fetch, 35_000);
-    const mail = createComposioMailClient(composioConfigFromEnv(env), fetchTransport);
+    const composio = composioConfigFromEnv(env);
+    const mail = createComposioMailClient(composio, fetchTransport);
     const aiOptions = aiOptionsFromEnv(env);
     const timeZone = env.APP_TIMEZONE || 'Africa/Cairo';
+
+    // Public Sector mail (redconcon.com and the app's people), also when forwarded, is always read.
+    const { data: team, error: teamError } = await db.from('people').select('email').eq('active', true);
+    if (teamError) console.log('could not load people for always-read senders', teamError.message);
+    const alwaysReadSenders = [
+      ...(env.ALWAYS_READ_SENDERS === undefined ? DEFAULT_ALWAYS_READ : parseSenderList(env.ALWAYS_READ_SENDERS)),
+      ...parseSenderList((team ?? []).map((p: { email: string | null }) => p.email ?? '').join(',')),
+    ];
 
     const summary = await runMailSync({
       repo: createSupabaseMailRepository(db),
       mail,
       ai: (input) => understandEmail(gemini, input, aiOptions),
-      normalize: normalizeGraphMessage,
-      prefilter,
+      normalize: normalizerFor(composio.provider),
+      prefilter: createPrefilter({ alwaysReadSenders }),
       shortlist: (m, p, c) => buildShortlist(m, p, c),
       validate: validateForm,
       apply: applyForm,

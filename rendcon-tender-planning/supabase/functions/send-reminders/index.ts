@@ -73,11 +73,14 @@ Deno.serve(async (req) => {
       })
       : null;
 
+    // The app never sends email unless MAIL_SEND_ENABLED=true (reminders go by push only).
     let mail: MailClient | null = null;
-    try {
-      mail = createComposioMailClient(composioConfigFromEnv(env), fetchTransport);
-    } catch {
-      mail = null;
+    if ((env.MAIL_SEND_ENABLED ?? '').trim().toLowerCase() === 'true') {
+      try {
+        mail = createComposioMailClient(composioConfigFromEnv(env), fetchTransport);
+      } catch {
+        mail = null;
+      }
     }
 
     const summary = await runReminders({

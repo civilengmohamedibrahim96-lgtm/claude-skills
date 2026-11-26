@@ -13,7 +13,7 @@ export type Level = 'high' | 'medium' | 'low';
 export type MailAddress = { name: string | null; address: string };
 
 export type MailMessage = {
-  id: string;                        // Outlook message id (dedupe key)
+  id: string;                        // Outlook or Gmail message id (dedupe key)
   conversationId: string | null;
   folder: Folder;
   subject: string;
@@ -23,7 +23,7 @@ export type MailMessage = {
   date: IsoDateTime;                 // receivedDateTime (inbox) or sentDateTime (sent)
   bodyText: string;                  // plain text (HTML converted)
   bodyHtml: string | null;           // original HTML when the body was HTML
-  webLink: string | null;            // Outlook web link to open the original
+  webLink: string | null;            // Outlook / Gmail web link to open the original
   headers: Record<string, string>;   // lower-case header name -> value
   isMeetingMessage: boolean;
   hasAttachments: boolean;
@@ -320,7 +320,10 @@ export type HttpRequest = { url: string; method: 'POST' | 'GET'; headers: Record
 export type HttpResponse = { status: number; json: unknown };
 export type HttpTransport = (req: HttpRequest) => Promise<HttpResponse>;
 
+export type MailProvider = 'outlook' | 'gmail';
+
 export type ComposioConfig = {
+  provider: MailProvider;                // COMPOSIO_PROVIDER, default 'outlook'
   baseUrl: string;
   executePath: string;                   // contains '{slug}'
   apiKey: string;

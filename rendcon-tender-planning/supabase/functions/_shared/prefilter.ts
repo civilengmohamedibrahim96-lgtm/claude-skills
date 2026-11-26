@@ -27,6 +27,67 @@ const TENDER_MARKERS = [
 const NOT_SKIPPED = (): PrefilterResult => ({ skip: false, reason: null });
 const SKIP = (reason: PrefilterReason): PrefilterResult => ({ skip: true, reason });
 
+// Senders whose inbox mail is always read (sent to the AI), also when the mail was
+// forwarded to the mailbox: default the Public Sector team's domain redconcon.com, plus the
+// app's active people. Entries are full addresses or domains (subdomains included).
+export const DEFAULT_ALWAYS_READ = ['redconcon.com'];
+export function parseSenderList(raw: string | undefined): string[] {
+  return String(raw ?? '')
+    .split(/[\s,;]+/)
+    .map((d) => d.trim().toLowerCase().replace(/^@/, '').replace(/^\.+/, ''))
+    .filter((d) => d !== '' && d.includes('.'));
+}
+
+export function isAlwaysReadSender(address: string | null | undefined, senders: string[]): boolean {
+  const addr = String(address ?? '').trim().toLowerCase();
+  const domain = addr.split('@')[1] ?? '';
+  if (!domain) return false;
+  return senders.some((e) => (e.includes('@') ? addr === e : domain === e || domain.endsWith(`.${e}`)));
+}
+
+const FORWARD_SUBJECT = /^\s*((re|fw|fwd|tr|wg)\s*:\s*)*(fw|fwd|tr|wg|إعادة توجيه|اعاده توجيه)\s*:/i;
+const FORWARD_BODY = /(-{2,}\s*forwarded message\s*-{2,}|-{2,}\s*original message\s*-{2,}|begin forwarded message|الرسالة الأصلية|رسالة معاد توجيهها)/i;
+// "From: Name <a@b.c>", "*From:* a@b.c", "من: ..." lines of a forwarded block
+const FORWARD_FROM_LINE = /^[\s>*]*(from|من|de|von)\s*[*]?\s*:\s*[*]?(.*)$/gim;
+const EMAIL = /[^\s<>"'(),;:\[\]]+@[^\s<>"'(),;:\[\]]+\.[a-z]{2,}/gi;
+
+export function isForwarded(m: Pick<MailMessage, 'subject' | 'bodyText'>): boolean {
+  return FORWARD_SUBJECT.test(m.subject) || FORWARD_BODY.test(m.bodyText);
+}
+
+// Original senders named in the forwarded part of the body (lower-case, in order).
+export function forwardedSenders(bodyText: string): string[] {
+  const out: string[] = [];
+  for (const line of String(bodyText ?? '').matchAll(FORWARD_FROM_LINE)) {
+    for (const a of line[2].matchAll(EMAIL)) {
+      const addr = a[0].toLowerCase().replace(/^mailto:/, '');
+      if (!out.includes(addr)) out.push(addr);
+    }
+  }
+  return out;
+}
+
+export type PrefilterOptions = { alwaysReadSenders?: string[] };
+
+function fromAlwaysRead(m: MailMessage, senders: string[]): boolean {
+  if (senders.length === 0) return false;
+  if (isAlwaysReadSender(m.from?.address, senders)) return true;
+  return isForwarded(m) && forwardedSenders(m.bodyText).some((a) => isAlwaysReadSender(a, senders));
+}
+
+// Mail from an always-read sender skips the bulk/system/newsletter/meeting rules; only
+// automatic replies / out-of-office notices from them are still skipped.
+export function createPrefilter(opts: PrefilterOptions = {}): (m: MailMessage) => PrefilterResult {
+  const senders = opts.alwaysReadSenders ?? [];
+  return (m) => {
+    if (m.folder === 'inbox' && fromAlwaysRead(m, senders)) {
+      const r = prefilter(m);
+      return r.skip && r.reason === 'auto_reply' ? r : NOT_SKIPPED();
+    }
+    return prefilter(m);
+  };
+}
+
 export function prefilter(m: MailMessage): PrefilterResult {
   const headers = m.headers;
   const has = (name: string): boolean => Object.hasOwn(headers, name);

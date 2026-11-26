@@ -83,3 +83,59 @@ test('bulk headers apply to the inbox only', () => {
   assert.deepEqual(prefilter(msg({ headers: { 'list-id': '<x>' } })), { skip: true, reason: 'bulk_header' });
   assert.deepEqual(prefilter(msg({ folder: 'sent', headers: { precedence: 'bulk' } })), NOT_SKIPPED);
 });
+
+import { createPrefilter, isAlwaysReadSender, parseSenderList } from '../../functions/_shared/prefilter.ts';
+
+test('always-read senders: domains, subdomains and full addresses', () => {
+  const list = ['redconcon.com', 'boss@partner.example'];
+  assert.equal(isAlwaysReadSender('ali@redconcon.com', list), true);
+  assert.equal(isAlwaysReadSender('ali@mail.redconcon.com', list), true);
+  assert.equal(isAlwaysReadSender('ali@notredconcon.com', list), false);
+  assert.equal(isAlwaysReadSender('boss@partner.example', list), true);
+  assert.equal(isAlwaysReadSender('other@partner.example', list), false);
+  assert.equal(isAlwaysReadSender('x@moh.gov.sa', list), false);
+  assert.equal(isAlwaysReadSender(null, list), false);
+  assert.deepEqual(parseSenderList(undefined), []);
+  assert.deepEqual(parseSenderList('  '), []);
+  assert.deepEqual(parseSenderList(' @RedconCon.com, Ali@x.org;bad'), ['redconcon.com', 'ali@x.org']);
+});
+
+test('always-read inbox mail is never skipped except auto-replies', () => {
+  const pf = createPrefilter({ alwaysReadSenders: ['ali@redconcon.com'] });
+  const team = (over: Partial<MailMessage>) => msg({ from: { name: null, address: 'Ali@RedconCon.com' }, ...over });
+  assert.deepEqual(pf(team({ headers: { 'list-unsubscribe': '<x>' } })), NOT_SKIPPED);
+  assert.deepEqual(pf(team({ subject: 'Newsletter', bodyText: 'unsubscribe' })), NOT_SKIPPED);
+  assert.deepEqual(pf(team({ isMeetingMessage: true })), NOT_SKIPPED);
+  assert.deepEqual(pf(team({ subject: 'Out of office' })), { skip: true, reason: 'auto_reply' });
+  // other senders, colleagues outside the team included, keep the normal rules
+  assert.deepEqual(pf(msg({ from: { name: null, address: 'no-reply@etenders.gov.eg' } })), { skip: true, reason: 'system_sender' });
+  assert.deepEqual(pf(msg({ from: { name: null, address: 'news@redconcon.com' } })), { skip: true, reason: 'system_sender' });
+  assert.deepEqual(createPrefilter()(msg({ from: { name: null, address: 'news@redconcon.com' } })), { skip: true, reason: 'system_sender' });
+});
+
+import { forwardedSenders, isForwarded } from '../../functions/_shared/prefilter.ts';
+
+test('forwarded mail: detection and original senders', () => {
+  assert.equal(isForwarded({ subject: 'FW: مناقصة', bodyText: '' }), true);
+  assert.equal(isForwarded({ subject: 'Fwd: x', bodyText: '' }), true);
+  assert.equal(isForwarded({ subject: 'RE: FW: x', bodyText: '' }), true);
+  assert.equal(isForwarded({ subject: 'إعادة توجيه: x', bodyText: '' }), true);
+  assert.equal(isForwarded({ subject: 'x', bodyText: 'hi\n---------- Forwarded message ---------\nFrom: a@b.co' }), true);
+  assert.equal(isForwarded({ subject: 'Fwd up the road', bodyText: 'hello' }), false);
+  const body = 'see below\n\n________________________________\nFrom: Ali Hassan <Ali.Hassan@RedconCon.com>\nSent: Monday\n*من:* سارة <sara@redconcon.com>\nTo: me@x.com';
+  assert.deepEqual(forwardedSenders(body), ['ali.hassan@redconcon.com', 'sara@redconcon.com']);
+});
+
+test('mail forwarded from a Public Sector sender is always read', () => {
+  const pf = createPrefilter({ alwaysReadSenders: ['redconcon.com'] });
+  const fwd = msg({
+    from: { name: null, address: 'me@gmail.com' },
+    subject: 'Fwd: Weekly newsletter',
+    bodyText: 'unsubscribe\n---------- Forwarded message ---------\nFrom: PS Team <ps@redconcon.com>\nSubject: x',
+    headers: { 'list-unsubscribe': '<x>' },
+  });
+  assert.deepEqual(pf(fwd), NOT_SKIPPED);
+  // forwarded from someone else: normal rules
+  const other = msg({ ...fwd, bodyText: fwd.bodyText.replace('ps@redconcon.com', 'shop@store.example') });
+  assert.deepEqual(pf(other), { skip: true, reason: 'bulk_header' });
+});

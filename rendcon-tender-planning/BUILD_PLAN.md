@@ -167,6 +167,9 @@ rendcon-tender-planning/
 | `GEMINI_MAX_TOKENS` | `16000` | output limit incl. thinking tokens |
 | `CLAUDE_EFFORT` | `low` | `output_config.effort` |
 | `CLAUDE_MAX_TOKENS` | `8000` | per email |
+| `ALWAYS_READ_SENDERS` | `redconcon.com` | addresses or domains (comma separated) of the Public Sector team; their inbox mail, also when forwarded (original From: in the body), is always sent to the AI; the app's active people always count; only auto-replies are skipped |
+| `MAIL_SEND_ENABLED` | `false` | the app sends no email unless this is `true` (reminders go by push only) |
+| `COMPOSIO_PROVIDER` | `outlook` | `outlook` or `gmail`; picks the default tool slugs, the list/send arguments and the message normaliser |
 | `COMPOSIO_API_KEY` | – (required for mail) | header `x-api-key` |
 | `COMPOSIO_CONNECTED_ACCOUNT_ID` | – (required) | the tenders mailbox connection (`ca_…`) |
 | `COMPOSIO_USER_ID` | empty | optional `user_id` sent with each call |
