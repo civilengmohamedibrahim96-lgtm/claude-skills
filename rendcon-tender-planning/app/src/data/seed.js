@@ -51,6 +51,7 @@ export function seedState(now = Date.now()) {
     sentLog: [],
     mail: { address: 'tenders@redcon.example', subject: 'ورد الينا', hourly: true, lastSync: now - 38 * 60000, runs: [], log: [], reviews: [], processed: [] },
     folders: { root: SHAREPOINT },
+    accessRequests: [{ id: 'ar1', email: 'new.engineer@outside.example', at: now - 2 * 3600 * 1000 }],
     projects: [
       P({
         id: 'p1', title: 'توريد وتركيب أعمال الكهرباء – مبنى الإدارة', client: 'Ministry of Housing', type: 'public', tender: 'tm3',

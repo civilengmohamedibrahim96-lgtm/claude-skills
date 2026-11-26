@@ -33,7 +33,7 @@
  * @typedef {{
  *   mode:'mock'|'supabase', me:User|null, users:User[], tenderTeam:TenderMember[], tags:Tag[],
  *   projects:Project[], reminders:Reminder[], sentLog:SentLogItem[], mail:MailState, folders:{root:string}
- * }} BoardState  // users: active team ordered by `order`; reminders: general ones only (projectId null); sentLog: newest 10; mail.log: newest 30; mail.runs: newest 5; mail.reviews: open only, newest first
+ * }} BoardState  // accessRequests: [{id, email, at}] people who signed up and wait for an admin (admins only, newest first); users: active team ordered by `order`; reminders: general ones only (projectId null); sentLog: newest 10; mail.log: newest 30; mail.runs: newest 5; mail.reviews: open only, newest first
  * @typedef {{table:string, type:'INSERT'|'UPDATE'|'DELETE'|'FIRED', record?:object}} ChangeEvent
  *   // 'FIRED' (mock only): a reminder fired in this browser; record = {title, body, projectId}
  */
@@ -77,6 +77,7 @@ export const DATA_LAYER_METHODS = [
   'addPerson',             // ({name, email, role, hasColumn}) → {ok:true, id}|{ok:false, error:'missing_name'|'invalid_email'|'duplicate_email'}
   'updatePerson',          // (id, patch: subset of {name, email, role, color, prefs}) → void   non-admins: own name/color/prefs only
   'removePerson',          // (id) → void
+  'dismissAccessRequest',  // (id) → void   (admin) approve = addPerson with the request's email
   'reorderPeople',         // (ids:string[]) → void
   'setColumn',             // (userId, on:boolean) → void
   'addTenderMember',       // ({name, ar, type}) → id

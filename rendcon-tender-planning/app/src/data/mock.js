@@ -102,6 +102,7 @@ export function createMockDataLayer({ storage = null, now = () => Date.now(), ti
         reviews: st.mail.reviews.slice().sort((a, b) => b.at - a.at).map((r) => ({ ...r, candidates: r.candidates.map((c) => ({ ...c })), reasons: [...r.reasons] })),
       },
       folders: { root: st.folders.root || '' },
+      accessRequests: m && m.role === 'admin' ? (st.accessRequests || []).slice().sort((a, b) => b.at - a.at).map((r) => ({ ...r })) : [],
     };
   }
   const userOut = (u) => ({
@@ -351,6 +352,7 @@ export function createMockDataLayer({ storage = null, now = () => Date.now(), ti
         order: Math.max(-1, ...st.users.map((x) => x.order)) + 1,
       };
       st.users.push(u);
+      if (em && st.accessRequests) st.accessRequests = st.accessRequests.filter((r) => r.email !== em);
       save(st);
       emit({ table: 'people', type: 'INSERT' });
       return { ok: true, id: u.id };
@@ -374,6 +376,9 @@ export function createMockDataLayer({ storage = null, now = () => Date.now(), ti
         if ('color' in patch) u.color = patch.color;
         if ('prefs' in patch && patch.prefs) u.prefs = { browser: !!patch.prefs.browser, email: !!patch.prefs.email };
       });
+    },
+    async dismissAccessRequest(id) {
+      mutate((st) => { needAdmin(st); st.accessRequests = (st.accessRequests || []).filter((r) => r.id !== id); });
     },
     async removePerson(id) {
       mutate((st) => {

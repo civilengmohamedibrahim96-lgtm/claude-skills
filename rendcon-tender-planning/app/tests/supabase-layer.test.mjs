@@ -153,6 +153,7 @@ function boardTables() {
       created_at: '2026-11-24T09:01:00Z',
       status: 'open',
     }]),
+    access_requests: ok([{ id: 'ar1', email: 'new@outside.example', created_at: '2026-11-26T10:00:00Z' }]),
   };
 }
 
@@ -238,6 +239,7 @@ test('loadBoard maps hand-made rows to the exact BoardState', async () => {
       }],
     },
     folders: { root: 'https://sp.example/root' },
+    accessRequests: [{ id: 'ar1', email: 'new@outside.example', at: t('2026-11-26T10:00:00Z') }],
   });
 });
 

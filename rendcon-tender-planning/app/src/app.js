@@ -1183,7 +1183,7 @@ async function submitPerson(pre) {
   const u = userById(res.id);
   const nm = u ? u.name : name;
   toast(email
-    ? `<b>${esc(nm)}</b> added – they can sign in with ${esc(email.toLowerCase())} ("First time here? Create your password")`
+    ? `<b>${esc(nm)}</b> added – they can sign in with ${esc(email.toLowerCase())} ("New here? Create an account")`
     : `<b>${esc(nm)}</b> added to the planning team`, 'user');
   return true;
 }
@@ -1202,6 +1202,11 @@ function renderTeamSheet() {
   const order = S.users;
   sh.innerHTML = `<div class="sheet-head"><span style="color:var(--accent)">${icon('users')}</span><h2>Team</h2><button class="btn icon" data-x aria-label="Close">${icon('x')}</button></div>
   <div class="sheet-body">
+    ${(S.accessRequests || []).length ? `<div class="team-sec">
+      <div class="sec-h"><div><h3>Waiting for access</h3><small>These people created an account. They see nothing until you let them in.</small></div></div>
+      <div class="members">${S.accessRequests.map((r) => `<div class="member"><div class="b"><b>${esc(r.email)}</b><small>Signed up ${esc(new Date(r.at).toLocaleString())}</small></div>
+        <div class="acts"><button class="btn sm primary" data-approve="${esc(r.id)}">Let in</button><button class="btn ghost sm" data-dismiss="${esc(r.id)}">Dismiss</button></div></div>`).join('')}</div>
+    </div>` : ''}
     <div class="team-sec">
       <div class="sec-h"><div><h3>Planning team</h3><small>${S.users.length} engineer${S.users.length !== 1 ? 's' : ''} · drag or use the arrows to reorder – the board columns follow this order</small></div></div>
       <div class="invite-box">
@@ -1278,10 +1283,30 @@ function renderTeamSheet() {
       reorder(ids);
       return;
     }
+    if (d.approve) approveAccess(d.approve);
+    if (d.dismiss) dismissAccess(d.dismiss);
     if (d.edit) editProfile(d.edit);
     if (d.rm) removeMember(d.rm);
     if (d.ttrm) removeTender(d.ttrm);
   };
+}
+async function approveAccess(id) {
+  const r = (S.accessRequests || []).find((x) => x.id === id);
+  if (!r) return;
+  const res = await act(() => dl.addPerson({ email: r.email, role: 'engineer', hasColumn: false }));
+  if (!res.ok) return;
+  if (res.value && res.value.ok === false) {
+    if (res.value.error !== 'duplicate_email') return toast(`Could not add ${esc(r.email)}`, 'x');
+    await act(() => dl.dismissAccessRequest(id));
+    return toast(`${esc(r.email)} is already on the team`);
+  }
+  toast(`${esc(r.email)} can now use the board. To give them a column, use Add engineer on the board.`, 'check', 5000);
+}
+async function dismissAccess(id) {
+  const r = (S.accessRequests || []).find((x) => x.id === id);
+  if (!r || !confirm(`Dismiss ${r.email}? They keep their login but still see nothing.`)) return;
+  const res = await act(() => dl.dismissAccessRequest(id));
+  if (res.ok) toast(`${esc(r.email)} dismissed`);
 }
 async function removeMember(id) {
   const u = userById(id);

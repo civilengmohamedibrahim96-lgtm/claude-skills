@@ -163,7 +163,7 @@ export function createSupabaseDataLayer({
   }
 
   async function loadBoard() {
-    const [session, people, team, tags, projects, seen, reminders, deliveries, settings, runs, processed, reviews] = await Promise.all([
+    const [session, people, team, tags, projects, seen, reminders, deliveries, settings, runs, processed, reviews, requests] = await Promise.all([
       client.auth.getSession(),
       client.from('people').select('*').eq('active', true).order('board_order'),
       client.from('tender_team').select('*').order('sort').order('name'),
@@ -176,6 +176,7 @@ export function createSupabaseDataLayer({
       client.from('mail_runs').select('*').order('started_at', { ascending: false }).limit(5),
       client.from('processed_messages').select('*, projects(title)').order('processed_at', { ascending: false }).limit(30),
       client.from('review_queue').select('*').eq('status', 'open').order('created_at', { ascending: false }),
+      client.from('access_requests').select('*').order('created_at', { ascending: false }),
     ]);
 
     const email = session?.data?.session?.user?.email ?? '';
@@ -227,6 +228,8 @@ export function createSupabaseDataLayer({
         reviews: (unwrap(reviews) ?? []).map(mapReview),
       },
       folders: { root: (settingsMap.folders ?? {}).rootUrl ?? '' },
+      // only admins can read these (RLS); before this table exists the error is ignored
+      accessRequests: (requests?.error ? [] : requests?.data ?? []).map((r) => ({ id: r.id, email: r.email, at: ms(r.created_at) })),
     };
   }
 
@@ -493,6 +496,10 @@ export function createSupabaseDataLayer({
         row.prefs = prefs;
       }
       if (Object.keys(row).length) unwrap(await client.from('people').update(row).eq('id', id));
+    },
+
+    async dismissAccessRequest(id) {
+      unwrap(await client.from('access_requests').delete().eq('id', id));
     },
 
     async removePerson(id) {
