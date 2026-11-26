@@ -84,29 +84,29 @@ test('bulk headers apply to the inbox only', () => {
   assert.deepEqual(prefilter(msg({ folder: 'sent', headers: { precedence: 'bulk' } })), NOT_SKIPPED);
 });
 
-import { createPrefilter, isPublicSectorSender, parseDomainList } from '../../functions/_shared/prefilter.ts';
+import { createPrefilter, isAlwaysReadSender, parseSenderList } from '../../functions/_shared/prefilter.ts';
 
-test('public-sector senders: gov/mil labels and extra domains', () => {
-  assert.equal(isPublicSectorSender('tenders@moh.gov.sa'), true);
-  assert.equal(isPublicSectorSender('x@etenders.gov.eg'), true);
-  assert.equal(isPublicSectorSender('x@army.mil'), true);
-  assert.equal(isPublicSectorSender('x@gov.uk'), true);
-  assert.equal(isPublicSectorSender('x@governance.com'), false);
-  assert.equal(isPublicSectorSender('x@client.example'), false);
-  assert.equal(isPublicSectorSender('x@proc.nupco.com', ['nupco.com']), true);
-  assert.equal(isPublicSectorSender('x@notnupco.com', ['nupco.com']), false);
-  assert.equal(isPublicSectorSender(null), false);
-  assert.deepEqual(parseDomainList(' @NUPCO.com, .aramco.com;bad  x.org '), ['nupco.com', 'aramco.com', 'x.org']);
+test('always-read senders: domains, subdomains and full addresses', () => {
+  const list = ['redconcon.com', 'boss@partner.example'];
+  assert.equal(isAlwaysReadSender('ali@redconcon.com', list), true);
+  assert.equal(isAlwaysReadSender('ali@mail.redconcon.com', list), true);
+  assert.equal(isAlwaysReadSender('ali@notredconcon.com', list), false);
+  assert.equal(isAlwaysReadSender('boss@partner.example', list), true);
+  assert.equal(isAlwaysReadSender('other@partner.example', list), false);
+  assert.equal(isAlwaysReadSender('x@moh.gov.sa', list), false);
+  assert.equal(isAlwaysReadSender(null, list), false);
+  assert.deepEqual(parseSenderList(undefined), ['redconcon.com']);
+  assert.deepEqual(parseSenderList('  '), ['redconcon.com']);
+  assert.deepEqual(parseSenderList(' @RedconCon.com, Ali@x.org;bad'), ['redconcon.com', 'ali@x.org']);
 });
 
-test('public-sector inbox mail is never skipped except auto-replies', () => {
-  const pf = createPrefilter({ publicSectorDomains: ['nupco.com'] });
-  const gov = (over: Partial<MailMessage>) => msg({ from: { name: null, address: 'no-reply@etenders.gov.eg' }, ...over });
-  assert.deepEqual(pf(gov({ headers: { 'list-unsubscribe': '<x>' } })), NOT_SKIPPED);
-  assert.deepEqual(pf(gov({ subject: 'Newsletter', bodyText: 'unsubscribe' })), NOT_SKIPPED);
-  assert.deepEqual(pf(gov({ isMeetingMessage: true })), NOT_SKIPPED);
-  assert.deepEqual(pf(gov({ subject: 'Out of office' })), { skip: true, reason: 'auto_reply' });
-  assert.deepEqual(pf(msg({ from: { name: null, address: 'news@nupco.com' } })), NOT_SKIPPED);
+test('always-read inbox mail is never skipped except auto-replies', () => {
+  const pf = createPrefilter();
+  const team = (over: Partial<MailMessage>) => msg({ from: { name: null, address: 'no-reply@redconcon.com' }, ...over });
+  assert.deepEqual(pf(team({ headers: { 'list-unsubscribe': '<x>' } })), NOT_SKIPPED);
+  assert.deepEqual(pf(team({ subject: 'Newsletter', bodyText: 'unsubscribe' })), NOT_SKIPPED);
+  assert.deepEqual(pf(team({ isMeetingMessage: true })), NOT_SKIPPED);
+  assert.deepEqual(pf(team({ subject: 'Out of office' })), { skip: true, reason: 'auto_reply' });
   // other senders keep the normal rules
-  assert.deepEqual(pf(msg({ from: { name: null, address: 'no-reply@shop.example' } })), { skip: true, reason: 'system_sender' });
+  assert.deepEqual(pf(msg({ from: { name: null, address: 'no-reply@etenders.gov.eg' } })), { skip: true, reason: 'system_sender' });
 });

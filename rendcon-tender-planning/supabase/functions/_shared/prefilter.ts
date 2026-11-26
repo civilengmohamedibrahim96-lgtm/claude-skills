@@ -27,32 +27,34 @@ const TENDER_MARKERS = [
 const NOT_SKIPPED = (): PrefilterResult => ({ skip: false, reason: null });
 const SKIP = (reason: PrefilterReason): PrefilterResult => ({ skip: true, reason });
 
-// Government and military senders: any domain with a 'gov' or 'mil' label (gov.eg,
-// moh.gov.sa, mod.gov.ae, army.mil, ...). Extra agencies come from PUBLIC_SECTOR_DOMAINS.
-const PUBLIC_SECTOR_LABEL = /(^|\.)(gov|mil)(\.|$)/i;
+// Senders whose inbox mail is always read (sent to the AI), e.g. the company's own
+// Public Sector team. Entries are domains ("redconcon.com", subdomains included) or full
+// addresses ("ali@redconcon.com"). Set by ALWAYS_READ_SENDERS; default: redconcon.com.
+export const DEFAULT_ALWAYS_READ = ['redconcon.com'];
 
-export function parseDomainList(raw: string | undefined): string[] {
-  return String(raw ?? '')
+export function parseSenderList(raw: string | undefined): string[] {
+  if (raw === undefined || raw.trim() === '') return [...DEFAULT_ALWAYS_READ];
+  return raw
     .split(/[\s,;]+/)
     .map((d) => d.trim().toLowerCase().replace(/^@/, '').replace(/^\.+/, ''))
     .filter((d) => d !== '' && d.includes('.'));
 }
 
-export function isPublicSectorSender(address: string | null | undefined, extraDomains: string[] = []): boolean {
-  const domain = String(address ?? '').trim().toLowerCase().split('@')[1] ?? '';
+export function isAlwaysReadSender(address: string | null | undefined, senders: string[]): boolean {
+  const addr = String(address ?? '').trim().toLowerCase();
+  const domain = addr.split('@')[1] ?? '';
   if (!domain) return false;
-  if (PUBLIC_SECTOR_LABEL.test(domain)) return true;
-  return extraDomains.some((d) => domain === d || domain.endsWith(`.${d}`));
+  return senders.some((e) => (e.includes('@') ? addr === e : domain === e || domain.endsWith(`.${e}`)));
 }
 
-export type PrefilterOptions = { publicSectorDomains?: string[] };
+export type PrefilterOptions = { alwaysReadSenders?: string[] };
 
-// Mail from a public-sector sender is always read (sent to the AI); only automatic
-// replies / out-of-office notices from them are still skipped.
+// Mail from an always-read sender skips the bulk/system/newsletter/meeting rules; only
+// automatic replies / out-of-office notices from them are still skipped.
 export function createPrefilter(opts: PrefilterOptions = {}): (m: MailMessage) => PrefilterResult {
-  const extra = opts.publicSectorDomains ?? [];
+  const senders = opts.alwaysReadSenders ?? DEFAULT_ALWAYS_READ;
   return (m) => {
-    if (m.folder === 'inbox' && isPublicSectorSender(m.from?.address, extra)) {
+    if (m.folder === 'inbox' && isAlwaysReadSender(m.from?.address, senders)) {
       const r = prefilter(m);
       return r.skip && r.reason === 'auto_reply' ? r : NOT_SKIPPED();
     }
